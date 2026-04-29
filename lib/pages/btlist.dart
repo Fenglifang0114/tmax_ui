@@ -234,13 +234,13 @@ class BtInfoListWidgetState extends State<BtInfoListWidget> {
     // 根据信号强度选择不同的图标
     String iconPath;
     if (rssi >= -70) {
-      iconPath = isSelected ? wifi4WhiteSvgIcon() : wifi4BlueSvgIcon();
+      iconPath = isSelected ? bt4WhiteSvgIcon() : bt4BlueSvgIcon();
     } else if (rssi >= -85) {
-      iconPath = isSelected ? wifi3WhiteSvgIcon() : wifi3BlueSvgIcon();
+      iconPath = isSelected ? bt3WhiteSvgIcon() : bt3BlueSvgIcon();
     } else if (rssi >= -100) {
-      iconPath = isSelected ? wifi2WhiteSvgIcon() : wifi2BlueSvgIcon();
+      iconPath = isSelected ? bt2WhiteSvgIcon() : bt2BlueSvgIcon();
     } else {
-      iconPath = isSelected ? wifi1WhiteSvgIcon() : wifi1BlueSvgIcon();
+      iconPath = isSelected ? bt1WhiteSvgIcon() : bt1BlueSvgIcon();
     }
 
     return Image.asset(
@@ -363,7 +363,6 @@ class AlternatingGridBtInfoList extends StatefulWidget {
 }
 
 class AlternatingGridBtInfoListState extends State<AlternatingGridBtInfoList> {
-
   @override
   Widget build(BuildContext context) {
     List<BtInfo> sortedDevices = List.from(widget.devices);
@@ -392,8 +391,6 @@ class AlternatingGridBtInfoListState extends State<AlternatingGridBtInfoList> {
       },
     );
   }
-
- 
 
   Widget buildWifiIcon(bool isSelected, int rssi) {
     double iconSize = 14;

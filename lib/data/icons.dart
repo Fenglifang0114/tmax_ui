@@ -123,6 +123,38 @@ String wifi4WhiteSvgIcon() {
   return 'assets/images/wifi4_w.png';
 }
 
+String bt1BlueSvgIcon() {
+  return 'assets/images/bt1_b.png';
+}
+
+String bt1WhiteSvgIcon() {
+  return 'assets/images/bt1_w.png';
+}
+
+String bt2BlueSvgIcon() {
+  return 'assets/images/bt2_b.png';
+}
+
+String bt2WhiteSvgIcon() {
+  return 'assets/images/bt2_w.png';
+}
+
+String bt3BlueSvgIcon() {
+  return 'assets/images/bt3_b.png';
+}
+
+String bt3WhiteSvgIcon() {
+  return 'assets/images/bt3_w.png';
+}
+
+String bt4BlueSvgIcon() {
+  return 'assets/images/bt4_b.png';
+}
+
+String bt4WhiteSvgIcon() {
+  return 'assets/images/bt4_w.png';
+}
+
 String firmwareSvgIcon() {
   return 'assets/images/firmwareUpdate.svg';
 }
