@@ -36,8 +36,7 @@ class MyHomePage extends StatefulWidget {
   MyHomePageState createState() => MyHomePageState();
 }
 
-class MyHomePageState extends State<MyHomePage>
-    with WindowLifecycleMixin {
+class MyHomePageState extends State<MyHomePage> with WindowLifecycleMixin {
   String _selectedNavRoute = '/';
   String lastRouteName = defualtSelectPage; //除了设置外的最后一个路由
 
@@ -53,6 +52,8 @@ class MyHomePageState extends State<MyHomePage>
   dynamic _eventbus7;
   dynamic _eventbus8;
   dynamic _eventbus9;
+  dynamic _eventbus10;
+
   ScrollController scrollController = ScrollController();
   bool isHovering = false; // 用于控制鼠标悬停状态
 
@@ -72,12 +73,12 @@ class MyHomePageState extends State<MyHomePage>
     });
   }
 
-
-
   @override
   void initState() {
     initWindowLifecycle();
     super.initState();
+
+    PublicFunctions.getScaleUnstableZeroTare();
 
     _eventbus1 = eventBus.on<EventDialogData>().listen((event) {
       if (mounted) {
@@ -179,6 +180,17 @@ class MyHomePageState extends State<MyHomePage>
       });
     });
 
+    _eventbus10 = eventBus.on<EventGetUnstableZeroTare>().listen((event) {
+      if (mounted) {
+        setState(() {
+          String s = event.obj;
+          if (s.isNotEmpty && s.contains("true")) {
+            unstableZeroTare = true;
+          }
+        });
+      }
+    });
+
     // 所有初始化完成后设置默认页面
   }
 
@@ -192,6 +204,7 @@ class MyHomePageState extends State<MyHomePage>
     _eventbus7.cancel();
     _eventbus8.cancel();
     _eventbus9.cancel();
+    _eventbus10.cancel();
 
     disposeWindowLifecycle();
 

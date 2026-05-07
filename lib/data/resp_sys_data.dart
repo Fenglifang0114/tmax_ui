@@ -139,6 +139,10 @@ class RespSysMsgType {
 
   static const String respScaleInput = 'resp_scale_input'; // 按键输入
 
+  static const String respGetUnstableZeroTare = 'resp_get_unstable_zero_tare';
+  static const String respUpdateUnstableZeroTare =
+      'resp_update_unstable_zero_tare';
+
   static final Map<String, Function> handlers = {
     RespSysMsgType.respPortsList: handlePortsList,
     RespSysMsgType.respBtList: handleBtList,
@@ -244,6 +248,8 @@ class RespSysMsgType {
     RespSysMsgType.respGetInputPortStatus: handleRespGetInputPortStatus,
     RespSysMsgType.respUpdateInputPort: handleRespUpdateInputPort,
     RespSysMsgType.respScaleInput: handleRespScaleInput,
+    RespSysMsgType.respGetUnstableZeroTare: handleRespGetUnstableZeroTare,
+    RespSysMsgType.respUpdateUnstableZeroTare: handleRespUpdateUnstableZeroTare,
   };
 
   static void handleBtList(dynamic jsonData) {
@@ -510,6 +516,16 @@ class RespSysMsgType {
   static void handleRespScaleInput(dynamic jsonData) {
     String dataString = jsonData['MsgBody'];
     eventBus.fire(EventRespScaleInput(dataString));
+  }
+
+  static void handleRespGetUnstableZeroTare(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventGetUnstableZeroTare(dataString));
+  }
+
+  static void handleRespUpdateUnstableZeroTare(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventUnstableZeroTare(dataString));
   }
 
   static void handleRespOpenOutputPort(dynamic jsonData) {

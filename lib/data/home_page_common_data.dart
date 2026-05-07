@@ -39,6 +39,8 @@ const appScaleListWidth = 234.0; //app里面下拉秤的列表宽度
 String appIconPath = 'assets/images/app.png';
 String logoIconPath = 'assets/images/logo.png';
 
+bool unstableZeroTare = false; // 动态置零
+
 // Duration for home page elements to fade in.
 const Duration entranceAnimationDuration = Duration(milliseconds: 200);
 

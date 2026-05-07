@@ -14,6 +14,7 @@ import 'package:t_max/data/readoutput.dart';
 import 'package:t_max/data/req_add_fma_rec_data.dart';
 import 'package:t_max/data/req_formula_data.dart';
 import 'package:t_max/data/reqweightdata_data.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/eventbus/eventbus.dart';
@@ -206,7 +207,7 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
     stableDurationCounter = 0;
   }
 
-  /// 配方单步称算流转核心逻辑。 
+  /// 配方单步称算流转核心逻辑。
   /// 当前配料（或容器）重量被计算并在设定的误差率容差范围 [errorWgt] 达标后，切换游标推进到对下一步（下一种原料）的处理。
   void nextStep(String isWgtOk) {
     double currentTempWgtValue = currentRawWgt;
@@ -270,7 +271,7 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
     return 0;
   }
 
-/// 初始化容积及百分比 (Percentage) 计算基准。
+  /// 初始化容积及百分比 (Percentage) 计算基准。
   /// 必须根据实际作业中的总预期生产重量 [initTotalWeight] 来实时推算每一种辅料实际需要分配的靶向重量。
   void initTotalWgtUnit() {
     if ((myFmaInfo.header?.formulaMode ?? '') == 'pct') {
@@ -471,7 +472,8 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
             List<FormulaInfoDb> tempFmaData = formulaInfoDbFromJson(dataStr);
 
             for (var formula in tempFmaData) {
-              if ((formula.header?.formulaId ?? '') == (myFmaInfo.header?.formulaId ?? '')) {
+              if ((formula.header?.formulaId ?? '') ==
+                  (myFmaInfo.header?.formulaId ?? '')) {
                 myFmaInfo = formula;
                 //不能清空，要记录下来当前的重量，重新去计算
                 List<FormulaWgtProcessData> oldProcessWgtList =
@@ -657,9 +659,11 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
       return;
     }
     if (btn == 'Tare') {
-      PublicFunctions.performTareWithScaleId(myScale.scaleId);
+      // PublicFunctions.performTareWithScaleId(myScale.scaleId);
+      tareByScaleId(myScale.scaleId);
     } else if (btn == 'Zero') {
-      PublicFunctions.performZeroWithScaleId(myScale.scaleId);
+      // PublicFunctions.performZeroWithScaleId(myScale.scaleId);
+      zeroByScaleId(myScale.scaleId);
     } else if (btn == 'Pause') {
       if (!openIoPortFlag) {
         return;
@@ -811,16 +815,22 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
             continue;
           }
           item.targetWgt = needTotalWgt * item.targetPct! / 100;
-          item.targetWgt = (double.tryParse(item.targetWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.targetWgt =
+              (double.tryParse(item.targetWgt?.toStringAsFixed(3) ?? '') ??
+                  0.0);
           item.errorWgt = needTotalWgt * item.errorPct! / 100;
-          item.errorWgt = (double.tryParse(item.errorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.errorWgt =
+              (double.tryParse(item.errorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
           item.minWgt = item.targetWgt! - item.errorWgt!;
-          item.minWgt = (double.tryParse(item.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.minWgt =
+              (double.tryParse(item.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
           item.maxWgt = item.targetWgt! + item.errorWgt!;
-          item.maxWgt = (double.tryParse(item.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.maxWgt =
+              (double.tryParse(item.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
           item.currentErrorWgt = item.currentWgt! - item.targetWgt!;
-          item.currentErrorWgt =
-              (double.tryParse(item.currentErrorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.currentErrorWgt = (double.tryParse(
+                  item.currentErrorWgt?.toStringAsFixed(3) ?? '') ??
+              0.0);
           item.isOK = checkIsOk(item.currentWgt!, item.minWgt!, item.maxWgt!);
         }
       } else {
@@ -830,14 +840,19 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
             continue;
           }
           item.targetWgt = needTotalWgt * item.targetWgt! / lastNeedTotalWgt;
-          item.targetWgt = (double.tryParse(item.targetWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.targetWgt =
+              (double.tryParse(item.targetWgt?.toStringAsFixed(3) ?? '') ??
+                  0.0);
           item.minWgt = item.targetWgt! - item.errorWgt!;
-          item.minWgt = (double.tryParse(item.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.minWgt =
+              (double.tryParse(item.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
           item.maxWgt = item.targetWgt! + item.errorWgt!;
-          item.maxWgt = (double.tryParse(item.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.maxWgt =
+              (double.tryParse(item.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
           item.currentErrorWgt = item.currentWgt! - item.targetWgt!;
-          item.currentErrorWgt =
-              (double.tryParse(item.currentErrorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          item.currentErrorWgt = (double.tryParse(
+                  item.currentErrorWgt?.toStringAsFixed(3) ?? '') ??
+              0.0);
           item.isOK = checkIsOk(item.currentWgt!, item.minWgt!, item.maxWgt!);
         }
       }
@@ -858,7 +873,9 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
         try {
           currentWgtStrNotifier.value =
               (myReqWeightCountine.msgBody?.weightVal ?? ''); // 更新当前重量
-          currentRawWgt = (double.tryParse(myReqWeightCountine.msgBody?.weightVal ?? '') ?? 0.0);
+          currentRawWgt =
+              (double.tryParse(myReqWeightCountine.msgBody?.weightVal ?? '') ??
+                  0.0);
           currentRawWgt = double.parse(currentRawWgt.toStringAsFixed(3));
           if (!(myReqWeightCountine.msgBody?.isStable ?? false)) {
             stableDurationCounter = 0;
@@ -1938,8 +1955,8 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
   }
 
   String checkIsOk(double currValue, double minValue, double maxValue) {
-    /// 核心误差界定逻辑。 
-  /// 将目前底层上报读数累加上原本的皮重（容器和已装填物），并与 [minWgt] 及 [maxWgt] 比对，从而向 UI 层反馈状态色(`ok`, `low`, `high`)。
+    /// 核心误差界定逻辑。
+    /// 将目前底层上报读数累加上原本的皮重（容器和已装填物），并与 [minWgt] 及 [maxWgt] 比对，从而向 UI 层反馈状态色(`ok`, `low`, `high`)。
     String isWgtOk = '';
     if (currValue >= minValue && currValue <= maxValue) {
       isWgtOk = "ok";
@@ -1952,11 +1969,15 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
   }
 
   String checkValueIsOk() {
-    /// 核心误差界定逻辑。 
-  /// 将目前底层上报读数累加上原本的皮重（容器和已装填物），并与 [minWgt] 及 [maxWgt] 比对，从而向 UI 层反馈状态色(`ok`, `low`, `high`)。
+    /// 核心误差界定逻辑。
+    /// 将目前底层上报读数累加上原本的皮重（容器和已装填物），并与 [minWgt] 及 [maxWgt] 比对，从而向 UI 层反馈状态色(`ok`, `low`, `high`)。
     String isWgtOk = '';
-    double minWgt = (double.tryParse(selectedProcessWgt.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
-    double maxWgt = (double.tryParse(selectedProcessWgt.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+    double minWgt =
+        (double.tryParse(selectedProcessWgt.minWgt?.toStringAsFixed(3) ?? '') ??
+            0.0);
+    double maxWgt =
+        (double.tryParse(selectedProcessWgt.maxWgt?.toStringAsFixed(3) ?? '') ??
+            0.0);
     if (currentRawWgt + selectedProcessWgt.currentWgt! >= minWgt &&
         currentRawWgt + selectedProcessWgt.currentWgt! <= maxWgt) {
       isWgtOk = "ok";
@@ -2456,8 +2477,9 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
                                   )),
                             ),
                             onPressed: () {
-                              PublicFunctions.performZeroWithScaleId(
-                                  myScale.scaleId);
+                              // PublicFunctions.performZeroWithScaleId(
+                              //     myScale.scaleId);
+                              zeroByScaleId(myScale.scaleId);
                             },
                             child: Text(
                               localizedStrings.iBtnZero,
@@ -2480,8 +2502,9 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
                           Expanded(
                               child: RawMaterialButton(
                             onPressed: () {
-                              PublicFunctions.performTareWithScaleId(
-                                  myScale.scaleId);
+                              // PublicFunctions.performTareWithScaleId(
+                              //     myScale.scaleId);
+                              tareByScaleId(myScale.scaleId);
                             },
                             onLongPress: () {
                               showDialog(
@@ -2644,7 +2667,8 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
       selectedProcessWgt.currentWgt = currentRawWgt < 0 ? 0 : currentRawWgt;
       selectedProcessWgt.isOK = okStr;
       if (autoTare) {
-        PublicFunctions.performTareWithScaleId(myScale.scaleId);
+        // PublicFunctions.performTareWithScaleId(myScale.scaleId);
+        tareByScaleId(myScale.scaleId);
       }
       //然后去找下一个原料
       findNextRaw();
@@ -2699,7 +2723,8 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
           //接受修正
           handleReviseWgt(currentTempWgtValue);
           if (autoTare) {
-            PublicFunctions.performTareWithScaleId(myScale.scaleId);
+            // PublicFunctions.performTareWithScaleId(myScale.scaleId);
+            tareByScaleId(myScale.scaleId);
           }
           setState(() {});
         } else {
@@ -2716,8 +2741,9 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
   void performLowRow(double currentTempWgtValue) {
     processWgtList[clickedRow].currentWgt =
         currentTempWgtValue + processWgtList[clickedRow].currentWgt!;
-    processWgtList[clickedRow].currentWgt =
-        (double.tryParse(processWgtList[clickedRow].currentWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+    processWgtList[clickedRow].currentWgt = (double.tryParse(
+            processWgtList[clickedRow].currentWgt?.toStringAsFixed(3) ?? '') ??
+        0.0);
     processWgtList[clickedRow].isOK = 'low';
     processWgtList[clickedRow].currentErrorWgt =
         (processWgtList[clickedRow].currentWgt! -
@@ -2731,7 +2757,8 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
       processWgtList[clickedRow].scaleSn = myScale.scaleSn;
     }
     if (autoTare) {
-      PublicFunctions.performTareWithScaleId(myScale.scaleId);
+      // PublicFunctions.performTareWithScaleId(myScale.scaleId);
+      tareByScaleId(myScale.scaleId);
     }
     // 从当前行的下一行开始向后查找
     int nextIndex = -1;
@@ -2791,14 +2818,18 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
           continue;
         }
         item.targetWgt = needTotalWgt * item.targetWgt! / lastNeedTotalWgt;
-        item.targetWgt = (double.tryParse(item.targetWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+        item.targetWgt =
+            (double.tryParse(item.targetWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
         item.minWgt = item.targetWgt! - item.errorWgt!;
-        item.minWgt = (double.tryParse(item.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+        item.minWgt =
+            (double.tryParse(item.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
         item.maxWgt = item.targetWgt! + item.errorWgt!;
-        item.maxWgt = (double.tryParse(item.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+        item.maxWgt =
+            (double.tryParse(item.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
         item.currentErrorWgt = item.currentWgt! - item.targetWgt!;
         item.currentErrorWgt =
-            (double.tryParse(item.currentErrorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+            (double.tryParse(item.currentErrorWgt?.toStringAsFixed(3) ?? '') ??
+                0.0);
         item.isOK = checkIsOk(item.currentWgt!, item.minWgt!, item.maxWgt!);
       }
     } else {
@@ -2808,16 +2839,21 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
           continue;
         }
         item.targetWgt = needTotalWgt * item.targetPct! / 100;
-        item.targetWgt = (double.tryParse(item.targetWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+        item.targetWgt =
+            (double.tryParse(item.targetWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
         item.errorWgt = needTotalWgt * item.errorPct! / 100;
-        item.errorWgt = (double.tryParse(item.errorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+        item.errorWgt =
+            (double.tryParse(item.errorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
         item.minWgt = item.targetWgt! - item.errorWgt!;
-        item.minWgt = (double.tryParse(item.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+        item.minWgt =
+            (double.tryParse(item.minWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
         item.maxWgt = item.targetWgt! + item.errorWgt!;
-        item.maxWgt = (double.tryParse(item.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+        item.maxWgt =
+            (double.tryParse(item.maxWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
         item.currentErrorWgt = item.currentWgt! - item.targetWgt!;
         item.currentErrorWgt =
-            (double.tryParse(item.currentErrorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+            (double.tryParse(item.currentErrorWgt?.toStringAsFixed(3) ?? '') ??
+                0.0);
         item.isOK = checkIsOk(item.currentWgt!, item.minWgt!, item.maxWgt!);
       }
     }
@@ -2871,7 +2907,8 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
       selectedProcessWgt = nextItem; // 更新选中的原料重量项
       _switchScaleByRawId(selectedProcessWgt.rawId!);
       //如果有容器
-      if (myFmaInfo.header != null && (myFmaInfo.header?.needContainer ?? false)) {
+      if (myFmaInfo.header != null &&
+          (myFmaInfo.header?.needContainer ?? false)) {
         clickedRow = selectedProcessWgt.no!; // 更新点击的行索引
       } else {
         clickedRow = selectedProcessWgt.no! - 1; // 更新点击的行索引
@@ -2953,7 +2990,8 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
       selectedProcessWgt = processWgtList[clickedRow]; // 更新选中的原料重量项
       _switchScaleByRawId(selectedProcessWgt.rawId!);
       //如果有容器
-      if (myFmaInfo.header != null && (myFmaInfo.header?.needContainer ?? false)) {
+      if (myFmaInfo.header != null &&
+          (myFmaInfo.header?.needContainer ?? false)) {
         clickedRow = selectedProcessWgt.no!; // 更新点击的行索引
       } else {
         clickedRow = selectedProcessWgt.no! - 1; // 更新点击的行索引
@@ -2985,8 +3023,9 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
           var targetItem = processWgtList
               .firstWhere((item) => item.no == selectedProcessWgt.no);
           targetItem.currentWgt = tmpCurrWgt + targetItem.currentWgt!;
-          targetItem.currentWgt =
-              (double.tryParse(targetItem.currentWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+          targetItem.currentWgt = (double.tryParse(
+                  targetItem.currentWgt?.toStringAsFixed(3) ?? '') ??
+              0.0);
           if (tmpCurrWgt > 0) {
             targetItem.scaleId = myScale.scaleId;
             targetItem.scaleName = myScale.scaleName;
@@ -3017,20 +3056,23 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
             .firstWhere((item) => item.no == selectedProcessWgt.no);
         targetItem.currentWgt = currentRawWgt + selectedProcessWgt.currentWgt!;
         targetItem.currentWgt =
-            (double.tryParse(targetItem.currentWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+            (double.tryParse(targetItem.currentWgt?.toStringAsFixed(3) ?? '') ??
+                0.0);
         targetItem.isOK = isWgtOk;
         targetItem.currentErrorWgt =
             (targetItem.currentWgt! - selectedProcessWgt.targetWgt!);
-        targetItem.currentErrorWgt =
-            (double.tryParse(targetItem.currentErrorWgt?.toStringAsFixed(3) ?? '') ?? 0.0);
+        targetItem.currentErrorWgt = (double.tryParse(
+                targetItem.currentErrorWgt?.toStringAsFixed(3) ?? '') ??
+            0.0);
         //百分比模式算出百分比
         if ((myFmaInfo.header?.formulaMode ?? '') == 'pct') {
           //计算误差的百分比
           if (needTotalWgt > 0) {
             targetItem.currentErrorPct =
                 (targetItem.currentErrorWgt! / needTotalWgt) * 100;
-            targetItem.currentErrorPct =
-                (double.tryParse(targetItem.currentErrorPct?.toStringAsFixed(3) ?? '') ?? 0.0);
+            targetItem.currentErrorPct = (double.tryParse(
+                    targetItem.currentErrorPct?.toStringAsFixed(3) ?? '') ??
+                0.0);
           }
         }
         if (currentRawWgt > 0) {
@@ -3041,7 +3083,8 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
         }
 
         if (autoTare) {
-          PublicFunctions.performTareWithScaleId(myScale.scaleId);
+          // PublicFunctions.performTareWithScaleId(myScale.scaleId);
+          tareByScaleId(myScale.scaleId);
         }
         handleCloseIoPort();
         //查找下一个

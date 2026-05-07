@@ -55,7 +55,7 @@ class TakeInPageState extends State<TakeInPage> {
 
   PluData? selectedPluData; // 用于存储选中的PluData
 
-  final double scaleWgtWidth = 351;
+  final double scaleWgtWidth = 378;
   late Timer updateTimer; //刷新数据
   // 添加定时器变量
   Timer? _scaleCheckTimer;
@@ -561,7 +561,6 @@ class TakeInPageState extends State<TakeInPage> {
     }
   }
 
-
   void addOrRemoveSelScale(int scaleId) {
     if (mySelScaleIdList.contains(scaleId)) {
       mySelScaleIdList.remove(scaleId);
@@ -627,6 +626,7 @@ class TakeInPageState extends State<TakeInPage> {
                     key: _scaleWidgetKeys[scaleId]!,
                     scaleId: scaleId,
                     scaleName: getScaleName(scaleId),
+                    isS15: getIsS15(scaleId),
                   );
                   // debugPrint('Created new scale widget for scaleId: $scaleId');
                 } else {
@@ -640,6 +640,20 @@ class TakeInPageState extends State<TakeInPage> {
         ],
       ),
     );
+  }
+
+  bool getIsS15(int scaleId) {
+    for (var item in myAllScalesList) {
+      if (item.scaleId == scaleId) {
+        if (item.scaleModel == "S15") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    return false;
   }
 
   showWgtTable(BuildContext context) {

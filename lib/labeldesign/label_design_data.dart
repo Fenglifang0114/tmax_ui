@@ -146,7 +146,7 @@ String getBarcodeContant(String type) {
       content = '1234567';
       break;
     case 'UPC-A':
-      content = "123456";
+      content = "123456789012";
       break;
     case 'UPC-E':
       content = "123456";

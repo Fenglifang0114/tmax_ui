@@ -53,7 +53,7 @@ class CheckWeighersPageState extends State<CheckWeighersPage> {
   List<int> mySelScaleIdList = [];
   List<ScaleRecInfo> allWgtRecList = [];
 
-  final double scaleWgtWidth = 351;
+  final double scaleWgtWidth = 365;
   late TableState _tableState;
 
   bool firstGetRec = true;
@@ -554,6 +554,7 @@ class CheckWeighersPageState extends State<CheckWeighersPage> {
                     key: _scaleWidgetKeys[scaleId]!,
                     scaleId: scaleId,
                     scaleName: getScaleName(scaleId),
+                    isS15: getIsS15(scaleId),
                   );
                   // debugPrint('Created new scale widget for scaleId: $scaleId');
                 } else {
@@ -566,6 +567,20 @@ class CheckWeighersPageState extends State<CheckWeighersPage> {
         ],
       ),
     );
+  }
+
+  bool getIsS15(int scaleId) {
+    for (var item in myAllScalesList) {
+      if (item.scaleId == scaleId) {
+        if (item.scaleModel == "S15") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    return false;
   }
 
   showWgtTable(BuildContext context) {

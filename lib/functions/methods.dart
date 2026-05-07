@@ -12,10 +12,13 @@ import '../data/scalecmd_data.dart';
 
 /// 常规称重模式。
 const String weighingMode = '0';
+
 /// 检重/误差检测模式。
 const String weighingCheckMode = '1';
+
 /// 入库/进料模式。
 const String weighingTakeInMode = '2';
+
 /// 出库/发料模式。
 const String weighingTakeOutMode = '3';
 
@@ -725,6 +728,21 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
+//获取不稳定扣重开关
+  static void getScaleUnstableZeroTare() {
+    myScaleCmd.cmdMode = "get_unstable_zero_tare";
+    myScaleCmd.cmdData = "";
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  //更新不稳定扣重开关
+  static void updateUnstableZeroTare(bool isEnable) {
+    myScaleCmd.cmdMode = "update_unstable_zero_tare";
+    UnstableZeroTare unstableZeroTareData = UnstableZeroTare(enable: isEnable);
+    myScaleCmd.cmdData = unstableZeroTareToJson(unstableZeroTareData);
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
   static void newDeleteAllRecords(int mode) {
     myScaleCmd.cmdMode = "del_wgt_rec";
     ReqDelAllWgtRecs reqData = ReqDelAllWgtRecs(mode: mode);
@@ -977,6 +995,20 @@ class PublicFunctions {
 
   static performTareWithScaleId(int scaleId) {
     myScaleCmd.cmdMode = "tare";
+    myScaleCmd.cmdData = "";
+    sendMsg(scaleId, jsonEncode(myScaleCmd));
+    writelog(jsonEncode(myScaleCmd));
+  }
+
+  static performZeroWithScaleIdUnstable(int scaleId) {
+    myScaleCmd.cmdMode = "zero_unstable";
+    myScaleCmd.cmdData = "";
+    sendMsg(scaleId, jsonEncode(myScaleCmd));
+    writelog(jsonEncode(myScaleCmd));
+  }
+
+  static performTareWithScaleIdUnstable(int scaleId) {
+    myScaleCmd.cmdMode = "tare_unstable";
     myScaleCmd.cmdData = "";
     sendMsg(scaleId, jsonEncode(myScaleCmd));
     writelog(jsonEncode(myScaleCmd));

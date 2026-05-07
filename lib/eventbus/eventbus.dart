@@ -354,6 +354,16 @@ class EventServiceOff {
   EventServiceOff(this.obj);
 }
 
+class EventUnstableZeroTare {
+  dynamic obj;
+  EventUnstableZeroTare(this.obj);
+}
+
+class EventGetUnstableZeroTare {
+  dynamic obj;
+  EventGetUnstableZeroTare(this.obj);
+}
+
 class EventCheckLicenseKey {
   dynamic obj;
   EventCheckLicenseKey(this.obj);

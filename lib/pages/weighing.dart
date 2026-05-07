@@ -219,7 +219,6 @@ class WeightModePageState extends State<WeightModePage> {
     }
   }
 
-
   void addOrRemoveSelScale(int scaleId) {
     if (mySelScaleIdList.contains(scaleId)) {
       mySelScaleIdList.remove(scaleId);
@@ -234,7 +233,6 @@ class WeightModePageState extends State<WeightModePage> {
 
   String getScaleName(int scaleId) {
     String scaleName = "";
-
     for (var item in myAllScalesList) {
       if (item.scaleId == scaleId) {
         scaleName = item.scaleName;
@@ -243,6 +241,20 @@ class WeightModePageState extends State<WeightModePage> {
     }
 
     return scaleName;
+  }
+
+  bool getIsS15(int scaleId) {
+    for (var item in myAllScalesList) {
+      if (item.scaleId == scaleId) {
+        if (item.scaleModel == "S15") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    return false;
   }
 
   Widget firstLayout(context) {
@@ -255,9 +267,12 @@ class WeightModePageState extends State<WeightModePage> {
         itemBuilder: (context, index) {
           final scaleId = mySelScaleIdList[index];
           return ScaleItemWidget(
-              key: ValueKey(scaleId),
-              scaleId: scaleId,
-              scaleName: getScaleName(scaleId));
+            key: ValueKey(scaleId),
+            scaleId: scaleId,
+            scaleName: getScaleName(scaleId),
+            isS15: getIsS15(scaleId),
+            isOpenUnstableTareOrZero: unstableZeroTare, //此处需要修改为从数据库获取
+          );
         },
       ),
     );

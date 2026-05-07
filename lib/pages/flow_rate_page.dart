@@ -9,6 +9,7 @@ import 'package:t_max/data/flow_data_from_db.dart';
 import 'package:t_max/data/flow_rate_data.dart';
 import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/reqweightdata_data.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/eventbus/eventbus.dart';
@@ -167,6 +168,7 @@ class FlowRatePageState extends State<FlowRatePage>
   // 每5秒判断一下isWgtStart是不是false，是false的话，就重新发送请求开启连续发送
   void startCheckWgtStartTimer() {
     checkWgtStartTimer = Timer.periodic(const Duration(seconds: 10), (timer) {
+      if (!mounted) return;
       if (isWgtStart == false) {
         // 重新发送请求开启连续发送
         PublicFunctions.getWeight(selScaleId);
@@ -315,6 +317,7 @@ class FlowRatePageState extends State<FlowRatePage>
                           noChangeDuration = 0;
                           noChangeTimer = Timer.periodic(
                               const Duration(seconds: 1), (timer) {
+                            if (!mounted) return;
                             noChangeDuration += 1;
                             if (noChangeDuration >= 3) {
                               // 3 秒未变化，结束记录
@@ -856,6 +859,7 @@ class FlowRatePageState extends State<FlowRatePage>
 
   //计算速率
   calculateRate() {
+    if (!mounted) return;
     if (!isStart) {
       // 结束了，将数据的值计算出来
       final List<WgtDataInfo> wgtDataList = wgtDataListNotifier.value;
@@ -1107,7 +1111,8 @@ class FlowRatePageState extends State<FlowRatePage>
               ),
               onPressed: isStart
                   ? null
-                  : () => PublicFunctions.performZeroWithScaleId(selScaleId),
+                  : () => zeroByScaleId(
+                      selScaleId), //                     PublicFunctions.performZeroWithScaleId(selScaleId),
               child: showNormalText(
                 localizedStrings.iBtnZero,
                 colorScheme.primary,
@@ -1135,7 +1140,8 @@ class FlowRatePageState extends State<FlowRatePage>
               ),
               onPressed: isStart
                   ? null
-                  : () => PublicFunctions.performTareWithScaleId(selScaleId),
+                  : () => tareByScaleId(
+                      selScaleId), // PublicFunctions.performTareWithScaleId(selScaleId),
               child: showNormalText(
                 localizedStrings.gBtnTare,
                 colorScheme.primary,
@@ -1422,6 +1428,36 @@ class FlowRatePageState extends State<FlowRatePage>
             ),
           ),
           const SizedBox(width: 10),
+
+          if (getIsS15(selScaleId))
+            SizedBox(
+              height: 40,
+              child: IconButton(
+                  icon: Icon(
+                    Icons.cleaning_services_outlined,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  tooltip: localizedStrings.btnForceClearTare,
+                  onPressed: () {
+                    showDialog(
+                      context: context,
+                      barrierDismissible: false,
+                      builder: (BuildContext context) {
+                        return ShowNormalTipDialog(
+                          title: localizedStrings.fTipTitle,
+                          msg: localizedStrings.tipForceClearTare,
+                        );
+                      },
+                    ).then((value) {
+                      if (value == null) {
+                        return;
+                      }
+                      if (value) {
+                        PublicFunctions.forceUntare(selScaleId);
+                      }
+                    });
+                  }),
+            ),
 
           _buildZeroButton(context),
           const SizedBox(width: 10),

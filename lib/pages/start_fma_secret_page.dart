@@ -14,6 +14,7 @@ import 'package:t_max/data/icons.dart';
 import 'package:t_max/data/req_add_fma_rec_data.dart';
 import 'package:t_max/data/req_formula_data.dart';
 import 'package:t_max/data/reqweightdata_data.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/eventbus/eventbus.dart';
@@ -1191,8 +1192,9 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
                           startFormula
                               ? null
                               : () {
-                                  PublicFunctions.performZeroWithScaleId(
-                                      widget.selScaleId);
+                                  // PublicFunctions.performZeroWithScaleId(
+                                  //     widget.selScaleId);
+                                  zeroByScaleId(widget.selScaleId);
                                 }),
                     ),
                   ]),
@@ -1209,8 +1211,9 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
                           startFormula
                               ? null
                               : () {
-                                  PublicFunctions.performTareWithScaleId(
-                                      widget.selScaleId);
+                                  // PublicFunctions.performTareWithScaleId(
+                                  //     widget.selScaleId);
+                                  tareByScaleId(myScale.scaleId);
                                 }),
                     ),
                   ]),
@@ -1262,8 +1265,9 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
                           startFormula
                               ? null
                               : () {
-                                  PublicFunctions.performZeroWithScaleId(
-                                      widget.selScaleId);
+                                  // PublicFunctions.performZeroWithScaleId(
+                                  //     widget.selScaleId);
+                                  zeroByScaleId(widget.selScaleId);
                                 }),
                     ),
                   ]),
@@ -1280,8 +1284,9 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
                           startFormula
                               ? null
                               : () {
-                                  PublicFunctions.performTareWithScaleId(
-                                      widget.selScaleId);
+                                  // PublicFunctions.performTareWithScaleId(
+                                  //     widget.selScaleId);
+                                  tareByScaleId(widget.selScaleId);
                                 }),
                     ),
                   ]),
@@ -2384,7 +2389,8 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
       //如果是第一个原料，直接赋值，这个原料是容器，直接赋值，执行扣重
       selectedProcessWgt.currentWgt = currentRawWgt;
       selectedProcessWgt.isOK = okStr;
-      PublicFunctions.performTareWithScaleId(widget.selScaleId);
+      // PublicFunctions.performTareWithScaleId(widget.selScaleId);
+      tareByScaleId(widget.selScaleId);
       //然后去找下一个原料
       findNextRaw();
       return;
@@ -2439,7 +2445,8 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
         } else if (value == 2) {
           //接受修正
           handleReviseWgt(currentTempWgtValue);
-          PublicFunctions.performTareWithScaleId(widget.selScaleId);
+          // PublicFunctions.performTareWithScaleId(widget.selScaleId);
+          tareByScaleId(widget.selScaleId);
           setState(() {});
         } else {
           return;
@@ -2462,7 +2469,8 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
             processWgtList[clickedRow].targetWgt!);
     processWgtList[clickedRow].currentErrorWgt = double.parse(
         processWgtList[clickedRow].currentErrorWgt!.toStringAsFixed(3));
-    PublicFunctions.performTareWithScaleId(widget.selScaleId);
+    // PublicFunctions.performTareWithScaleId(widget.selScaleId);
+    tareByScaleId(widget.selScaleId);
     // 从当前行的下一行开始向后查找
     int nextIndex = -1;
     for (int i = clickedRow + 1; i < processWgtList.length; i++) {
@@ -2660,7 +2668,8 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
                 double.parse(targetItem.currentErrorPct!.toStringAsFixed(3));
           }
         }
-        PublicFunctions.performTareWithScaleId(widget.selScaleId);
+        // PublicFunctions.performTareWithScaleId(widget.selScaleId);
+        tareByScaleId(widget.selScaleId);
 
         //查找下一个
         findOkNextRaw();

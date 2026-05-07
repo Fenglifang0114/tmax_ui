@@ -7,20 +7,25 @@ import 'package:t_max/data/icons.dart';
 import 'package:t_max/data/language.dart';
 import 'package:t_max/data/received_wgt_value.dart';
 import 'package:t_max/data/reqweightdata_data.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
+import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/eventbus/eventbus.dart';
 import 'package:t_max/functions/methods.dart';
 import 'package:t_max/widget/common_widget.dart';
 
 class ScaleItemWidget extends StatefulWidget {
   final int scaleId;
-
   final String scaleName;
+  final bool isS15;
+  final bool isOpenUnstableTareOrZero;
 
   const ScaleItemWidget({
     super.key,
     required this.scaleId,
     required this.scaleName,
+    required this.isS15,
+    required this.isOpenUnstableTareOrZero,
   });
 
   @override
@@ -118,21 +123,23 @@ class _ScaleItemWidgetState extends State<ScaleItemWidget> {
       innerTimer = Timer(Duration(milliseconds: 2500), () {
         if (!isCnting) {
           isStart = false;
-          setState(() {
-            weightInfo = ReceiveWgtInfo(
-              weightVal: '---------',
-              weightUnit: '----',
-              isStable: false,
-              isZero: false,
-              isNet: false,
-            );
-          });
-          for (var scale in myAllScalesList) {
-            if (scale.scaleId == widget.scaleId && scale.isOnline == true) {
-              setState(() {
-                scale.isOnline = false;
-              });
-              break;
+          if (mounted) {
+            setState(() {
+              weightInfo = ReceiveWgtInfo(
+                weightVal: '---------',
+                weightUnit: '----',
+                isStable: false,
+                isZero: false,
+                isNet: false,
+              );
+            });
+            for (var scale in myAllScalesList) {
+              if (scale.scaleId == widget.scaleId && scale.isOnline == true) {
+                setState(() {
+                  scale.isOnline = false;
+                });
+                break;
+              }
             }
           }
         }
@@ -148,19 +155,52 @@ class _ScaleItemWidgetState extends State<ScaleItemWidget> {
       child: Column(
         children: [
           Container(
-            height: 42,
-            padding: const EdgeInsets.only(
-                left: regularPadding, right: regularPadding),
-            color: Theme.of(context).colorScheme.surface,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              widget.scaleName,
-              style: Theme.of(context).textTheme.bodyMedium!.apply(
-                    color: Theme.of(context).colorScheme.onSurface,
+              height: 42,
+              padding: const EdgeInsets.only(
+                  left: regularPadding, right: regularPadding),
+              color: Theme.of(context).colorScheme.surface,
+              alignment: Alignment.centerLeft,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.scaleName,
+                    style: Theme.of(context).textTheme.bodyMedium!.apply(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
+                  if (widget.isS15)
+                    SizedBox(
+                      height: 40,
+                      child: IconButton(
+                          icon: Icon(
+                            Icons.cleaning_services_outlined,
+                            color: Theme.of(context).colorScheme.primary,
+                          ),
+                          tooltip: localizedStrings.btnForceClearTare,
+                          onPressed: () {
+                            showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext context) {
+                                return ShowNormalTipDialog(
+                                  title: localizedStrings.fTipTitle,
+                                  msg: localizedStrings.tipForceClearTare,
+                                );
+                              },
+                            ).then((value) {
+                              if (value == null) {
+                                return;
+                              }
+                              if (value) {
+                                PublicFunctions.forceUntare(widget.scaleId);
+                              }
+                            });
+                          }),
+                    ),
+                ],
+              )),
           Container(
             height: 1,
             color: Theme.of(context).colorScheme.surfaceContainerLow,
@@ -264,8 +304,7 @@ class _ScaleItemWidgetState extends State<ScaleItemWidget> {
                               localizedStrings.gBtnTare,
                               isStart
                                   ? () {
-                                      PublicFunctions.performTareWithScaleId(
-                                          widget.scaleId);
+                                      tareByScaleId(widget.scaleId);
                                     }
                                   : null,
                               Theme.of(context).colorScheme.onPrimary,
@@ -277,8 +316,7 @@ class _ScaleItemWidgetState extends State<ScaleItemWidget> {
                               localizedStrings.iBtnZero,
                               isStart
                                   ? () {
-                                      PublicFunctions.performZeroWithScaleId(
-                                          widget.scaleId);
+                                      zeroByScaleId(widget.scaleId);
                                     }
                                   : null,
                               Theme.of(context).colorScheme.onPrimary,

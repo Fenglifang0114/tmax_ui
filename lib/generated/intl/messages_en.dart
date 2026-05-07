@@ -1089,6 +1089,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "gTitleSetLanguage": MessageLookupByLibrary.simpleMessage("Set Language"),
     "gTotalFmt": MessageLookupByLibrary.simpleMessage("Total format:"),
+    "gUnstableZeroTare": MessageLookupByLibrary.simpleMessage(
+      "Unstable Zero/Tare",
+    ),
     "go_home": MessageLookupByLibrary.simpleMessage(
       "Confirm to return to hompage?",
     ),

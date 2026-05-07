@@ -826,6 +826,16 @@ class S {
     );
   }
 
+  /// `Unstable Zero/Tare`
+  String get gUnstableZeroTare {
+    return Intl.message(
+      'Unstable Zero/Tare',
+      name: 'gUnstableZeroTare',
+      desc: 'This is a prompt for unstable zero or tare operation.',
+      args: [],
+    );
+  }
+
   /// `Setting`
   String get gBtnSetting {
     return Intl.message(

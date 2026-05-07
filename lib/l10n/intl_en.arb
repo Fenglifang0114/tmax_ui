@@ -308,6 +308,10 @@
     "@iStable": {
         "description": "This is a prompt about stable weight in T-Industry,"
     },
+    "gUnstableZeroTare": "Unstable Zero/Tare",
+    "@gUnstableZeroTare": {
+        "description": "This is a prompt for unstable zero or tare operation."
+    },
     "gBtnSetting": "Setting",
     "@gBtnSetting": {
         "description": "This is a button about setting."

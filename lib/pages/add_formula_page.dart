@@ -10,6 +10,7 @@ import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/icons.dart';
 import 'package:t_max/data/req_formula_data.dart';
 import 'package:t_max/data/reqweightdata_data.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/data/wgt_value_data.dart';
 import 'package:t_max/dialog/add_raw_info_dialog.dart';
@@ -383,7 +384,8 @@ class AddFormulaPageState extends State<AddFormulaPage> {
   //选择类型下拉列表框
   showTypeDropDownButton(String hintText, TextEditingController valueCtl) {
     // 确保当前值在列表中，否则设为 null
-    String? currentValue = formulaTypeCtl.text == "" ? null : formulaTypeCtl.text;
+    String? currentValue =
+        formulaTypeCtl.text == "" ? null : formulaTypeCtl.text;
     if (formulaTypeList.isNotEmpty &&
         currentValue != null &&
         !formulaTypeList.any((item) => item.categoryName == currentValue)) {
@@ -444,7 +446,8 @@ class AddFormulaPageState extends State<AddFormulaPage> {
   //选择原料下拉列表框
   showRawDropDownBtn(String hintText) {
     // 确保当前值在列表中，否则设为 null
-    String? currentValue = rawMaterialCtl.text == "" ? null : rawMaterialCtl.text;
+    String? currentValue =
+        rawMaterialCtl.text == "" ? null : rawMaterialCtl.text;
     if (rawDataList.isNotEmpty &&
         currentValue != null &&
         !rawDataList.any((item) =>
@@ -1386,8 +1389,9 @@ class AddFormulaPageState extends State<AddFormulaPage> {
 
                               wgtCtl.text = currentWgtStrNotifier.value;
                               performAddBtn();
-                              PublicFunctions.performTareWithScaleId(
-                                  selScaleId);
+                              tareByScaleId(selScaleId);
+                              // PublicFunctions.performTareWithScaleId(
+                              //     selScaleId);
                             },
                       colorScheme.onPrimary,
                       colorScheme.primary,
@@ -1446,7 +1450,8 @@ class AddFormulaPageState extends State<AddFormulaPage> {
           showTipInfo(localizedStrings.fDeviceDisconnected, context);
           return;
         }
-        PublicFunctions.performTareWithScaleId(selScaleId);
+        tareByScaleId(selScaleId);
+        // PublicFunctions.performTareWithScaleId(selScaleId);
       },
       icon: getSvgIcon(performTareSvgIcon(), 40, 35, colorScheme.onPrimary),
     );
@@ -1469,7 +1474,8 @@ class AddFormulaPageState extends State<AddFormulaPage> {
           showTipInfo(localizedStrings.fDeviceDisconnected, context);
           return;
         }
-        PublicFunctions.performZeroWithScaleId(selScaleId);
+        // PublicFunctions.performZeroWithScaleId(selScaleId);
+        zeroByScaleId(selScaleId);
       },
       icon: getSvgIcon(performZeroSvgIcon(), 40, 35, colorScheme.onPrimary),
     );

@@ -118,6 +118,7 @@ class LabelDesignPageState extends State<LabelDesignPage> {
   final double topBtnHeight = 120;
   final double leftBtnWidth = 280;
   final double rightBtnWidth = 288;
+  final Set<LogicalKeyboardKey> _pressedKeys = {}; // 用于追踪当前按下的键，防止重复保存状态
 
   TextEditingController printDirectionCtl = TextEditingController(text: '0');
   TextEditingController printerCtl = TextEditingController(text: 'EPM205');
@@ -634,32 +635,48 @@ class LabelDesignPageState extends State<LabelDesignPage> {
     });
   }
 
-  void handleKeyEvent(KeyEvent event) {
+  KeyEventResult handleKeyEvent(FocusNode node, KeyEvent event) {
     if (event is KeyDownEvent) {
-      if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
-        _saveState();
-        moveSelectedElements(const Offset(0, -1));
-      } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
-        _saveState();
-        moveSelectedElements(const Offset(0, 1));
-      } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
-        _saveState();
-        moveSelectedElements(const Offset(-1, 0));
-      } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
-        _saveState();
-        moveSelectedElements(const Offset(1, 0));
+      bool isMovementKey = [
+        LogicalKeyboardKey.arrowUp,
+        LogicalKeyboardKey.arrowDown,
+        LogicalKeyboardKey.arrowLeft,
+        LogicalKeyboardKey.arrowRight
+      ].contains(event.logicalKey);
+
+      if (isMovementKey) {
+        if (!_pressedKeys.contains(event.logicalKey)) {
+          _saveState();
+          _pressedKeys.add(event.logicalKey);
+        }
+        if (event.logicalKey == LogicalKeyboardKey.arrowUp) {
+          moveSelectedElements(const Offset(0, -1));
+        } else if (event.logicalKey == LogicalKeyboardKey.arrowDown) {
+          moveSelectedElements(const Offset(0, 1));
+        } else if (event.logicalKey == LogicalKeyboardKey.arrowLeft) {
+          moveSelectedElements(const Offset(-1, 0));
+        } else if (event.logicalKey == LogicalKeyboardKey.arrowRight) {
+          moveSelectedElements(const Offset(1, 0));
+        }
+        return KeyEventResult.handled;
       } else if (event.logicalKey == LogicalKeyboardKey.delete) {
         _saveState();
         deleteSelectedElements();
+        return KeyEventResult.handled;
       } else if (HardwareKeyboard.instance.isControlPressed &&
           HardwareKeyboard.instance.isShiftPressed &&
           event.logicalKey == LogicalKeyboardKey.keyZ) {
         _redo();
+        return KeyEventResult.handled;
       } else if (HardwareKeyboard.instance.isControlPressed &&
           event.logicalKey == LogicalKeyboardKey.keyZ) {
         _undo();
-      } else {}
+        return KeyEventResult.handled;
+      }
+    } else if (event is KeyUpEvent) {
+      _pressedKeys.remove(event.logicalKey);
     }
+    return KeyEventResult.ignored;
   }
 
   void selectSingleElement(DraggableElement element) {
@@ -1095,27 +1112,13 @@ class LabelDesignPageState extends State<LabelDesignPage> {
 
   Widget _generateExpansionTileWidget(
       tittle, List<String>? names, BuildContext context) {
-    final focusNode = FocusNode(canRequestFocus: false);
-    return Focus(
-      autofocus: false,
-      onKeyEvent: (node, event) {
-        if (event is KeyDownEvent &&
-            event.logicalKey == LogicalKeyboardKey.arrowDown) {
-          focusNode.unfocus();
-          return KeyEventResult.handled;
-        }
-        return KeyEventResult.handled;
-      },
-      child: FocusableActionDetector(
-          focusNode: focusNode,
-          child: ExpansionTile(
-            title: Text(tittle,
-                textAlign: TextAlign.left,
-                style: Theme.of(context).textTheme.bodySmall!.apply(
-                      color: Theme.of(context).colorScheme.primary,
-                    )),
-            children: names!.map((name) => _generateWidget(name)).toList(),
-          )),
+    return ExpansionTile(
+      title: Text(tittle,
+          textAlign: TextAlign.left,
+          style: Theme.of(context).textTheme.bodySmall!.apply(
+                color: Theme.of(context).colorScheme.primary,
+              )),
+      children: names!.map((name) => _generateWidget(name)).toList(),
     );
   }
 
@@ -2959,7 +2962,7 @@ class LabelDesignPageState extends State<LabelDesignPage> {
 
     final verticalScrollController = ScrollController();
     final horizontalScrollController = ScrollController();
-    return KeyboardListener(
+    return Focus(
         focusNode: _focusNode,
         onKeyEvent: handleKeyEvent,
         child: Builder(builder: (scaffoldContext) {

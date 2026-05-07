@@ -44,6 +44,9 @@ class CalibrationPageState extends State<CalibrationPage> {
   TextEditingController unitCtl = TextEditingController(text: "kg");
   TextEditingController gravAccCtl = TextEditingController(text: "9.8"); //重力加速度
 
+  TextEditingController unstableZeroTareCtl =
+      TextEditingController(text: unstableZeroTare ? "True" : "False");
+
   int selScaleId = -1; //选择的秤ID
 
   DateTime customDate = DateTime.now();
@@ -690,9 +693,6 @@ class CalibrationPageState extends State<CalibrationPage> {
                                     child: Column(
                                       children: [
                                         showSetParameterBtn(),
-                                        SizedBox(
-                                          height: largePadding,
-                                        ),
                                         if (isCalibration && selScaleId != -1)
                                           ...showCalibrationPart(),
                                         if (!isCalibration && selScaleId != -1)
@@ -866,11 +866,36 @@ class CalibrationPageState extends State<CalibrationPage> {
           ]),
         ),
       ]),
+      Row(mainAxisAlignment: MainAxisAlignment.center, children: [
+        SizedBox(
+          width: 300,
+          child: Column(children: [
+            showTitle(localizedStrings.gUnstableZeroTare),
+            //   0:off 1:0.5 2:1 3:2 4:3 5:4
+            SizedBox(
+                child: showDropDownButton(
+                    context, '', unstableZeroTareCtl, ['True', 'False'],
+                    (onValue) {
+              setState(() {
+                unstableZeroTareCtl.text = onValue!;
+                unstableZeroTare = (onValue == "True");
+                PublicFunctions.updateUnstableZeroTare(unstableZeroTare);
+              });
+            })),
+          ]),
+        ),
+        SizedBox(
+          width: largePadding * 2,
+        ),
+        SizedBox(
+          width: 300,
+        ),
+      ]),
       SizedBox(
         height: largePadding,
       ),
       Container(
-        height: 96,
+        height: 60,
         width: 400,
         padding: const EdgeInsets.symmetric(horizontal: 20),
         child: Row(

@@ -395,3 +395,26 @@ class ReqExportAllWgtRecs {
         "Translation": translation,
       };
 }
+
+UnstableZeroTare unstableZeroTareFromJson(String str) =>
+    UnstableZeroTare.fromJson(json.decode(str));
+
+String unstableZeroTareToJson(UnstableZeroTare data) =>
+    json.encode(data.toJson());
+
+class UnstableZeroTare {
+  bool? enable;
+
+  UnstableZeroTare({
+    this.enable,
+  });
+
+  factory UnstableZeroTare.fromJson(Map<String, dynamic> json) =>
+      UnstableZeroTare(
+        enable: json["Enable"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "Enable": enable,
+      };
+}

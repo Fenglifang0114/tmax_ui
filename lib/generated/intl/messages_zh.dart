@@ -755,6 +755,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "gTitleSetLanguage": MessageLookupByLibrary.simpleMessage("设置语言"),
     "gTotalFmt": MessageLookupByLibrary.simpleMessage("累加格式:"),
+    "gUnstableZeroTare": MessageLookupByLibrary.simpleMessage("不稳定归零/扣重"),
     "go_home": MessageLookupByLibrary.simpleMessage("确定返回主页?"),
     "hardwareSeal": MessageLookupByLibrary.simpleMessage("硬件校正开关"),
     "iBtnZero": MessageLookupByLibrary.simpleMessage("归零"),

@@ -13,12 +13,14 @@ import 'package:t_max/data/plu_data_source.dart';
 import 'package:t_max/data/received_wgt_value.dart';
 import 'package:t_max/data/record_data.dart';
 import 'package:t_max/data/reqweightdata_data.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/data/settingparam_data.dart';
 
 import 'package:t_max/data/weight_report_data.dart';
 import 'package:t_max/data/weight_rpt.dart';
 import 'package:t_max/data/wgt_rpt_data_source.dart';
+import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/eventbus/eventbus.dart';
 import 'package:t_max/functions/methods.dart';
 import 'package:t_max/widget/plu_select.dart';
@@ -26,11 +28,13 @@ import 'package:t_max/widget/plu_select.dart';
 class ScaleWgtWidget extends StatefulWidget {
   final int scaleId;
   final String scaleName;
+  final bool isS15;
 
   const ScaleWgtWidget({
     super.key,
     required this.scaleId,
     required this.scaleName,
+    required this.isS15,
   });
 
   @override
@@ -310,6 +314,7 @@ class _ScaleWgtWidgetState extends State<ScaleWgtWidget> {
           if (_stableTimer == null) {
             _currentStableDuration = 0;
             _stableTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+              if (!mounted) return;
               _currentStableDuration++;
               if (_currentStableDuration >= _stableSaveTime) {
                 _stableTimer?.cancel();
@@ -372,21 +377,23 @@ class _ScaleWgtWidgetState extends State<ScaleWgtWidget> {
       innerTimer = Timer(Duration(milliseconds: 2500), () {
         if (!isCnting) {
           isStart = false;
-          setState(() {
-            weightInfo = ReceiveWgtInfo(
-              weightVal: '---------',
-              weightUnit: '----',
-              isStable: false,
-              isZero: false,
-              isNet: false,
-            );
-          });
-          for (var scale in myAllScalesList) {
-            if (scale.scaleId == widget.scaleId && scale.isOnline == true) {
-              setState(() {
-                scale.isOnline = false;
-              });
-              break;
+          if (mounted) {
+            setState(() {
+              weightInfo = ReceiveWgtInfo(
+                weightVal: '---------',
+                weightUnit: '----',
+                isStable: false,
+                isZero: false,
+                isNet: false,
+              );
+            });
+            for (var scale in myAllScalesList) {
+              if (scale.scaleId == widget.scaleId && scale.isOnline == true) {
+                setState(() {
+                  scale.isOnline = false;
+                });
+                break;
+              }
             }
           }
         }
@@ -472,6 +479,36 @@ class _ScaleWgtWidgetState extends State<ScaleWgtWidget> {
                           ),
                         ),
                         Spacer(),
+                        if (widget.isS15)
+                          SizedBox(
+                            height: 40,
+                            child: IconButton(
+                                icon: Icon(
+                                  Icons.cleaning_services_outlined,
+                                  color: Theme.of(context).colorScheme.primary,
+                                ),
+                                tooltip: localizedStrings.btnForceClearTare,
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    barrierDismissible: false,
+                                    builder: (BuildContext context) {
+                                      return ShowNormalTipDialog(
+                                        title: localizedStrings.fTipTitle,
+                                        msg: localizedStrings.tipForceClearTare,
+                                      );
+                                    },
+                                  ).then((value) {
+                                    if (value == null) {
+                                      return;
+                                    }
+                                    if (value) {
+                                      PublicFunctions.forceUntare(
+                                          widget.scaleId);
+                                    }
+                                  });
+                                }),
+                          ),
                         SizedBox(
                           width: 140,
                           child: Row(
@@ -482,9 +519,7 @@ class _ScaleWgtWidgetState extends State<ScaleWgtWidget> {
                                   localizedStrings.gBtnTare,
                                   isStart
                                       ? () {
-                                          PublicFunctions
-                                              .performTareWithScaleId(
-                                                  widget.scaleId);
+                                          tareByScaleId(widget.scaleId);
                                         }
                                       : null),
                               SizedBox(
@@ -495,9 +530,7 @@ class _ScaleWgtWidgetState extends State<ScaleWgtWidget> {
                                   localizedStrings.iBtnZero,
                                   isStart
                                       ? () {
-                                          PublicFunctions
-                                              .performZeroWithScaleId(
-                                                  widget.scaleId);
+                                          zeroByScaleId(widget.scaleId);
                                         }
                                       : null),
                               if (mySettingParam.wgtMode == 0)

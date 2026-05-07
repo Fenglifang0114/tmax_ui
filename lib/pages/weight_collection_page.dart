@@ -567,7 +567,6 @@ class WeightDataCollectionPageState extends State<WeightDataCollectionPage> {
     }
   }
 
-
   void addOrRemoveSelScale(int scaleId) {
     if (mySelScaleIdList.contains(scaleId)) {
       mySelScaleIdList.remove(scaleId);
@@ -629,6 +628,7 @@ class WeightDataCollectionPageState extends State<WeightDataCollectionPage> {
                     key: _scaleWidgetKeys[scaleId]!,
                     scaleId: scaleId,
                     scaleName: getScaleName(scaleId),
+                    isS15: getIsS15(scaleId),
                   );
                 } else {}
 
@@ -639,6 +639,20 @@ class WeightDataCollectionPageState extends State<WeightDataCollectionPage> {
         ],
       ),
     );
+  }
+
+  bool getIsS15(int scaleId) {
+    for (var item in myAllScalesList) {
+      if (item.scaleId == scaleId) {
+        if (item.scaleModel == "S15") {
+          return true;
+        } else {
+          return false;
+        }
+      }
+    }
+
+    return false;
   }
 
   showWgtTable(BuildContext context) {
