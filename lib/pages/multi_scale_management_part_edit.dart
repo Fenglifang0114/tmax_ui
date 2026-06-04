@@ -22,7 +22,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
             showItemNameWithStar(context, localizedStrings.gIpAddress, false),
             showInputBox(context, ipCtl, '', (value) {
               setState(() {});
-            }, true),
+            }, scaleModelCtl.text != "S15"),
             showItemNameWithStar(context, localizedStrings.gTipPort, false),
             Container(
               height: inputHeight,
@@ -34,6 +34,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
                 borderRadius: BorderRadius.circular(0), // 设置圆角
               ),
               child: TextField(
+                enabled: scaleModelCtl.text != "S15",
                 controller: portCtl,
                 decoration: InputDecoration(
                   hintStyle: TextStyle(
@@ -61,12 +62,60 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
         SizedBox(
           height: regularPadding,
         ),
-        SizedBox(
-          height: regularPadding,
-        ),
-        SizedBox(
-          height: regularPadding,
-        ),
+        if (scaleModelCtl.text == "S15")
+          buildItemInfo(
+            showItemNameWithStar(context, localizedStrings.gSerialPort, false),
+            showDropDownButton(
+              context,
+              "",
+              comPortCtl,
+              usingComLists,
+              (value) {
+                setState(() {
+                  if (value != null && comLists.contains(value)) {
+                    comPortCtl.text = value;
+                  } else {
+                    comPortCtl.clear();
+                  }
+                  usingComLists = List<String>.from(comLists);
+                });
+              },
+              onTap: () {
+                PublicFunctions.getPortList();
+                if (comLists.isEmpty && comPortCtl.text.isNotEmpty) {
+                  comPortCtl.clear();
+                }
+              },
+            ),
+            showItemNameWithStar(context, localizedStrings.gBaudRate, false),
+            showDropDownButton(
+              context,
+              "",
+              baudRateCtl,
+              baudRateList,
+              (value) {
+                setState(() {
+                  if (value != null) {
+                    baudRateCtl.text = value;
+                  }
+                });
+              },
+            ),
+          ),
+        if (scaleModelCtl.text == "S15")
+          SizedBox(
+            height: regularPadding,
+          ),
+        if (isModifyingSerialPort)
+          Padding(
+            padding: const EdgeInsets.only(bottom: regularPadding),
+            child: Center(
+              child: Text(
+                localizedStrings.gModifyingWait,
+                style: TextStyle(color: Theme.of(context).colorScheme.primary),
+              ),
+            ),
+          ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -74,7 +123,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
                 context,
                 btnHeight,
                 localizedStrings.gBtnConfirm,
-                portCtl.text.isNotEmpty && _isValidIP
+                portCtl.text.isNotEmpty && _isValidIP && !isModifyingSerialPort
                     ? () {
                         editNetScale();
                       }
@@ -83,7 +132,8 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
                 Theme.of(context).colorScheme.primary,
                 Theme.of(context).colorScheme.onPrimary),
             const SizedBox(width: regularPadding),
-            showTextButton(context, btnHeight, localizedStrings.gBtnCancel, () {
+            showTextButton(context, btnHeight, localizedStrings.gBtnCancel, 
+                isModifyingSerialPort ? null : () {
               setState(() {
                 editWifiInfo = false;
               });

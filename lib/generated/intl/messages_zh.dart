@@ -438,6 +438,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "gModelName": MessageLookupByLibrary.simpleMessage("型号"),
     "gModifyBluetoothEmission": MessageLookupByLibrary.simpleMessage("修改信号强度"),
     "gModifyBluetoothName": MessageLookupByLibrary.simpleMessage("修改名字"),
+    "gModifyingWait": MessageLookupByLibrary.simpleMessage("正在修改，请稍等..."),
     "gMsgNoElement": MessageLookupByLibrary.simpleMessage("没有选择元素."),
     "gMsgRefresh": MessageLookupByLibrary.simpleMessage("刷新"),
     "gMsgSerialError": MessageLookupByLibrary.simpleMessage("串口连接已断开，请检查设置."),

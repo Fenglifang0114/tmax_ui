@@ -8984,6 +8984,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Modifying, please wait...`
+  String get gModifyingWait {
+    return Intl.message(
+      'Modifying, please wait...',
+      name: 'gModifyingWait',
+      desc: 'Modifying, please wait',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

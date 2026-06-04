@@ -1455,4 +1455,16 @@ class PublicFunctions {
     myScaleCmd.cmdData = '';
     sendMsg(scaleId, jsonEncode(myScaleCmd));
   }
+
+  static void setSerialPort(int scaleId, String value) {
+    myScaleCmd.cmdMode = "set_serial_port";
+    myScaleCmd.cmdData = value;
+    sendMsg(scaleId, jsonEncode(myScaleCmd));
+  }
+
+  static void getSerialPort(int scaleId) {
+    myScaleCmd.cmdMode = "get_serial_port";
+    myScaleCmd.cmdData = '';
+    sendMsg(scaleId, jsonEncode(myScaleCmd));
+  }
 }

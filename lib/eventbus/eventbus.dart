@@ -1090,3 +1090,13 @@ class EventRespDownAllPlu {
   dynamic obj;
   EventRespDownAllPlu(this.obj);
 }
+
+class EventRevSetSerialPort {
+  dynamic obj;
+  EventRevSetSerialPort(this.obj);
+}
+
+class EventRevGetSerialPort {
+  dynamic obj;
+  EventRevGetSerialPort(this.obj);
+}

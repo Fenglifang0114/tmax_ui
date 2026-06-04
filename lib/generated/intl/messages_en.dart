@@ -632,6 +632,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Modify emission power",
     ),
     "gModifyBluetoothName": MessageLookupByLibrary.simpleMessage("Modify name"),
+    "gModifyingWait": MessageLookupByLibrary.simpleMessage(
+      "Modifying, please wait...",
+    ),
     "gMsgNoElement": MessageLookupByLibrary.simpleMessage(
       "No element selected.",
     ),

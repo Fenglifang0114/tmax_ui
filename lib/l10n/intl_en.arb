@@ -3715,5 +3715,9 @@
     "gMsgUseUtf8": "Please use UTF-8 encoding",
     "@gMsgUseUtf8": {
         "description": "Error message when CSV encoding is unrecognized"
+    },
+    "gModifyingWait": "Modifying, please wait...",
+    "@gModifyingWait": {
+        "description": "Modifying, please wait"
     }
 }

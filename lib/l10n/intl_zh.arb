@@ -3715,5 +3715,9 @@
     "gMsgUseUtf8": "请使用UTF-8 编码",
     "@gMsgUseUtf8": {
         "description": "Error message when CSV encoding is unrecognized"
+    },
+    "gModifyingWait": "正在修改，请稍等...",
+    "@gModifyingWait": {
+        "description": "Modifying, please wait"
     }
 }

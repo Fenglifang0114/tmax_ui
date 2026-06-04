@@ -202,15 +202,61 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                       Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            SizedBox(
-                              width: inputWidth,
-                            ),
-                            SizedBox(
-                              width: inputWidth,
-                            )
+                            scaleModelCtl.text == "S15"
+                                ? SizedBox(
+                                    width: inputWidth,
+                                    child: showItemNameWithStar(context,
+                                        localizedStrings.gSerialPort, false))
+                                : SizedBox(
+                                    width: inputWidth,
+                                  ),
+                            scaleModelCtl.text == "S15"
+                                ? SizedBox(
+                                    width: inputWidth,
+                                    child: showInputBox(
+                                        context, comPortCtl, '', (value) {
+                                      setState(() {});
+                                    }, false))
+                                : SizedBox(
+                                    width: inputWidth,
+                                  )
                           ])
                     ],
                   ),
+                  if (scaleModelCtl.text == "S15")
+                    const SizedBox(
+                      height: regularPadding,
+                    ),
+                  if (scaleModelCtl.text == "S15")
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      children: [
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                  width: inputWidth,
+                                  child: showItemNameWithStar(context,
+                                      localizedStrings.gBaudRate, false)),
+                              SizedBox(
+                                  width: inputWidth,
+                                  child: showInputBox(
+                                      context, baudRateCtl, '', (value) {
+                                    setState(() {});
+                                  }, false))
+                            ]),
+                        Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                width: inputWidth,
+                              ),
+                              SizedBox(
+                                width: inputWidth,
+                              )
+                            ])
+                      ],
+                    ),
                   const SizedBox(
                     height: regularPadding,
                   ),

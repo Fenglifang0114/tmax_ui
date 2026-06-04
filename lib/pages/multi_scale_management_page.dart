@@ -88,6 +88,8 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   dynamic _eventbus8;
   dynamic _eventbus9;
   dynamic _eventbus10;
+  dynamic _eventbus11;
+  bool isModifyingSerialPort = false; // 是否正在修改串口
 
   Timer? checkIsOnlineTimer;
   List<String> comLists = [];
@@ -206,6 +208,9 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
             if (isTesting) {
               showTipInfo(localizedStrings.fSuccessMsg, context);
             }
+            if (myFactoryInfoFromScale.modelName == "S15") {
+              PublicFunctions.getSerialPort(myOnlineInfo.scaleId!);
+            }
           } else {
             setScaleStatus(myOnlineInfo.scaleId!, false);
             if (isTesting) {
@@ -296,6 +301,41 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
           isBtSearching = false;
           isBtSearched = true;
         });
+      }
+    });
+
+    eventBus.on<EventRevGetSerialPort>().listen((event) {
+      if (mounted) {
+        var obj = event.obj;
+        if (obj.msgBody != null && obj.msgBody.toString().isNotEmpty && obj.msgBody.toString() != "fail") {
+          setState(() {
+            String msg = obj.msgBody.toString();
+            List<String> parts = msg.split(',');
+            if (parts.isNotEmpty) {
+              comPortCtl.text = parts[0];
+            }
+            if (parts.length > 1) {
+              baudRateCtl.text = parts[1];
+            }
+          });
+        }
+      }
+    });
+
+    _eventbus11 = eventBus.on<EventRevSetSerialPort>().listen((event) {
+      if (mounted) {
+        var obj = event.obj;
+        if (isModifyingSerialPort) {
+          setState(() {
+            isModifyingSerialPort = false;
+            editWifiInfo = false;
+            if (obj.msgBody != null && obj.msgBody.toString() == "ok") {
+              showTipInfo(localizedStrings.fSuccessMsg, context);
+            } else {
+              showTipInfo(localizedStrings.gTipConnectFail, context);
+            }
+          });
+        }
       }
     });
   }
@@ -474,11 +514,32 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   }
 
   void editNetScale() {
+    if (scaleModelCtl.text == "S15") {
+      String sendStr = comPortCtl.text;
+      if (baudRateCtl.text.isNotEmpty) {
+        sendStr += ",${baudRateCtl.text}";
+      }
+      PublicFunctions.setSerialPort(selScaleId, sendStr);
+      setState(() {
+        isModifyingSerialPort = true;
+      });
+      Future.delayed(const Duration(seconds: 10), () {
+        if (mounted && isModifyingSerialPort) {
+          setState(() {
+            isModifyingSerialPort = false;
+            editWifiInfo = false;
+          });
+        }
+      });
+      return;
+    }
+
     myNetInfo.ip = ipCtl.text;
     myNetInfo.port = int.tryParse(portCtl.text)!;
 
     //查找是否有一样的端口和IP
     for (var scale in myAllScalesList) {
+      if (scale.scaleId == selScaleId) continue;
       if (scale.tMedia == netScaleType) {
         final netConfig = scale.mediaConfig as NetworkMediaConfig;
         if (netConfig.ipAddress == ipCtl.text &&
@@ -493,7 +554,10 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myMediaConf.mediaInfoJson = netInfoStr;
     myMediaConf.type = 1;
     myAddNetScale.scaleId = selScaleId;
-    myAddNetScale.scaleModel = 'TMax';
+    myAddNetScale.scaleModel = scaleModelCtl.text;
+    if (myAddNetScale.scaleModel == null || myAddNetScale.scaleModel!.isEmpty) {
+      myAddNetScale.scaleModel = 'TMax';
+    }
     myAddNetScale.mediaConf = myMediaConf;
     PublicFunctions.sendModifyInfo(jsonEncode(myAddNetScale));
     editWifiInfo = false;
