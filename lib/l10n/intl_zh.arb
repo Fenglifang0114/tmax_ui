@@ -3288,6 +3288,10 @@
     "@addFormulaCategory": {
         "description": "Add formula category"
     },
+    "gModbusStationId": "Modbus 站号",
+    "@gModbusStationId": {
+        "description": "Modbus Station ID"
+    },
     "deleteFormulaCategory": "删除配方类别",
     "@deleteFormulaCategory": {
         "description": "Delete formula category"
@@ -3719,5 +3723,77 @@
     "gModifyingWait": "正在修改，请稍等...",
     "@gModifyingWait": {
         "description": "Modifying, please wait"
+    },
+    "gModbusServiceManagement": "Modbus 服务网关配置",
+    "@gModbusServiceManagement": {
+        "description": "Modbus Service Management"
+    },
+    "gAddModbusService": "新增 Modbus 服务",
+    "@gAddModbusService": {
+        "description": "Add Modbus Service"
+    },
+    "gEditModbusService": "编辑 Modbus 服务",
+    "@gEditModbusService": {
+        "description": "Edit Modbus Service"
+    },
+    "gModbusServiceFormDesc": "配置对应秤设备的 Modbus 通讯参数",
+    "@gModbusServiceFormDesc": {
+        "description": "Configure Modbus communication parameters for the corresponding scale"
+    },
+    "gBindScaleId": "绑定秤站号",
+    "@gBindScaleId": {
+        "description": "Bind Scale Station ID"
+    },
+    "gCommMode": "通讯模式",
+    "@gCommMode": {
+        "description": "Communication Mode"
+    },
+    "gTcpPort": "TCP 端口",
+    "@gTcpPort": {
+        "description": "TCP Port"
+    },
+    "gDataBit": "数据位",
+    "@gDataBit": {
+        "description": "Data Bit"
+    },
+    "gStopBit": "停止位",
+    "@gStopBit": {
+        "description": "Stop Bit"
+    },
+    "gParityBit": "校验位",
+    "@gParityBit": {
+        "description": "Parity Bit"
+    },
+    "gModbusIdMissingTip": "请选择要绑定的秤站号 (Modbus ID)",
+    "@gModbusIdMissingTip": {
+        "description": "Please select the scale station ID to bind"
+    },
+    "gSerialPortMissingTip": "请选择串口号",
+    "@gSerialPortMissingTip": {
+        "description": "Please select serial port"
+    },
+    "gNoModbusService": "暂无创建的 Modbus 服务",
+    "@gNoModbusService": {
+        "description": "No Modbus Service Created"
+    },
+    "gFixed": "固定",
+    "@gFixed": {
+        "description": "Fixed"
+    },
+    "gProtocol": "协议",
+    "@gProtocol": {
+        "description": "Protocol"
+    },
+    "gPortOccupiedTip1": "已被其他 Modbus 服务占用",
+    "@gPortOccupiedTip1": {
+        "description": "Occupied by other Modbus service"
+    },
+    "gConfirmDeleteModbusService": "确定删除该 Modbus 服务吗？",
+    "@gConfirmDeleteModbusService": {
+        "description": "Confirm deleting Modbus service"
+    },
+    "gTipOpenPortFailed": "打开串口失败",
+    "@gTipOpenPortFailed": {
+        "description": "Failed to open serial port"
     }
 }

@@ -158,6 +158,31 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
+  // Modbus Services APIs
+  static void getModbusServices() {
+    myScaleCmd.cmdMode = "get_modbus_services";
+    myScaleCmd.cmdData = "";
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  static void addModbusService(String jsonStr) {
+    myScaleCmd.cmdMode = "add_modbus_service";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  static void editModbusService(String jsonStr) {
+    myScaleCmd.cmdMode = "edit_modbus_service";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  static void delModbusService(int id) {
+    myScaleCmd.cmdMode = "del_modbus_service";
+    myScaleCmd.cmdData = '{"Id": $id}';
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
   static void setScaleSrvStatus(String dataStr) {
     myScaleCmd.cmdMode = "set_scale_srv_val";
     myScaleCmd.cmdData = dataStr;

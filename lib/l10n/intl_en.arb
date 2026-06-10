@@ -3719,5 +3719,81 @@
     "gModifyingWait": "Modifying, please wait...",
     "@gModifyingWait": {
         "description": "Modifying, please wait"
+    },
+    "gModbusServiceManagement": "Modbus Gateway Config",
+    "@gModbusServiceManagement": {
+        "description": "Modbus Service Management"
+    },
+    "gAddModbusService": "Add Modbus Service",
+    "@gAddModbusService": {
+        "description": "Add Modbus Service"
+    },
+    "gEditModbusService": "Edit Modbus Service",
+    "@gEditModbusService": {
+        "description": "Edit Modbus Service"
+    },
+    "gModbusStationId": "Modbus Station ID",
+    "@gModbusStationId": {
+        "description": "Modbus Station ID"
+    },
+    "gModbusServiceFormDesc": "Configure Modbus parameters for the target scale",
+    "@gModbusServiceFormDesc": {
+        "description": "Configure Modbus communication parameters for the corresponding scale"
+    },
+    "gBindScaleId": "Target Scale ID",
+    "@gBindScaleId": {
+        "description": "Bind Scale Station ID"
+    },
+    "gCommMode": "Comm Mode",
+    "@gCommMode": {
+        "description": "Communication Mode"
+    },
+    "gTcpPort": "TCP Port",
+    "@gTcpPort": {
+        "description": "TCP Port"
+    },
+    "gDataBit": "Data Bit",
+    "@gDataBit": {
+        "description": "Data Bit"
+    },
+    "gStopBit": "Stop Bit",
+    "@gStopBit": {
+        "description": "Stop Bit"
+    },
+    "gParityBit": "Parity Bit",
+    "@gParityBit": {
+        "description": "Parity Bit"
+    },
+    "gModbusIdMissingTip": "Please select the scale station ID to bind",
+    "@gModbusIdMissingTip": {
+        "description": "Please select the scale station ID to bind"
+    },
+    "gSerialPortMissingTip": "Please select a serial port",
+    "@gSerialPortMissingTip": {
+        "description": "Please select serial port"
+    },
+    "gNoModbusService": "No Modbus Services Created",
+    "@gNoModbusService": {
+        "description": "No Modbus Service Created"
+    },
+    "gFixed": "Fixed",
+    "@gFixed": {
+        "description": "Fixed"
+    },
+    "gProtocol": "Protocol",
+    "@gProtocol": {
+        "description": "Protocol"
+    },
+    "gPortOccupiedTip1": "is occupied by another Modbus service",
+    "@gPortOccupiedTip1": {
+        "description": "Occupied by other Modbus service"
+    },
+    "gConfirmDeleteModbusService": "Are you sure you want to delete this Modbus service?",
+    "@gConfirmDeleteModbusService": {
+        "description": "Confirm deleting Modbus service"
+    },
+    "gTipOpenPortFailed": "Failed to open serial port",
+    "@gTipOpenPortFailed": {
+        "description": "Failed to open serial port"
     }
 }

@@ -1,11 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:t_max/data/btinfodata.dart';
 import 'package:t_max/data/comscaleinfo_data.dart';
+import 'package:t_max/data/g_data.dart';
 import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/icons.dart';
+import 'package:t_max/data/license_data.dart';
+import 'package:t_max/data/modbus_data.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/data/scalecmd_data.dart';
 import 'package:t_max/data/writelog.dart';
@@ -32,6 +36,7 @@ part 'multi_scale_management_part_list.dart';
 part 'multi_scale_management_part_add.dart';
 part 'multi_scale_management_part_edit.dart';
 part 'multi_scale_management_part_info.dart';
+part 'multi_scale_management_part_modbus.dart';
 
 class MultiScaleManagement extends StatefulWidget {
   const MultiScaleManagement({super.key});
@@ -57,6 +62,23 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
 
   TextEditingController macCtl = TextEditingController(text: '');
   TextEditingController btNameCtl = TextEditingController(text: '');
+  TextEditingController modbusIdCtl = TextEditingController(text: '1');
+
+  // Modbus Gateway Settings
+  String modbusProtocol = "Modbus TCP";
+  TextEditingController modbusTcpPortCtl = TextEditingController(text: "502");
+  TextEditingController modbusComPortCtl = TextEditingController();
+  TextEditingController modbusBaudRateCtl = TextEditingController(text: "9600");
+  TextEditingController modbusDataBitCtl = TextEditingController(text: "8");
+  TextEditingController modbusStopBitCtl = TextEditingController(text: "1");
+  TextEditingController modbusParityCtl = TextEditingController(text: "None");
+  List<String> modbusProtocolList = ["Modbus TCP", "Modbus RTU"];
+  List<ModbusServiceInfo> modbusServicesList = [];
+
+  dynamic _eventbusModbus1;
+  dynamic _eventbusModbus2;
+  dynamic _eventbusModbus3;
+  dynamic _eventbusModbus4;
 
   int selScaleId = -1;
 
@@ -71,6 +93,12 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   bool isDel = false; //是否执行删除
   bool isDC500 = false; //是否是旧的版本的秤
   bool isAddNewScale = false;
+
+  // Modbus UI States
+  bool isAddModbus = false;
+  bool isEditModbus = false;
+  int? currentEditModbusId;
+
   bool editWifiInfo = false; //是否是修改wifi信息
   bool isBtSearching = false; //是否正在搜索蓝牙设备
   bool isBtSearched = false; //是否搜索完蓝牙设备
@@ -131,6 +159,16 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     return tempValid;
   }
 
+  String _getLocalizedError(String errStr) {
+    String lowerErr = errStr.toLowerCase();
+    if (lowerErr.contains("access is denied") || lowerErr.contains("occupied")) {
+      return "${localizedStrings.gTipOpenPortFailed}: ${localizedStrings.gTipPortInUsed} ($errStr)";
+    } else if (lowerErr.contains("open") || lowerErr.contains("failed") || lowerErr.contains("timeout")) {
+      return "${localizedStrings.gTipOpenPortFailed} ($errStr)";
+    }
+    return errStr;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -138,6 +176,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     initEventBus();
     PublicFunctions.getPortList();
     PublicFunctions.getScaleList();
+    PublicFunctions.getModbusServices();
 
     checkPortList();
 
@@ -338,6 +377,52 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
         }
       }
     });
+
+    _eventbusModbus1 = eventBus.on<EventRespGetModbusServices>().listen((event) {
+      if (mounted) {
+        setState(() {
+          try {
+            var dataList = json.decode(event.obj) as List;
+            modbusServicesList = dataList.map((e) => ModbusServiceInfo.fromJson(e)).toList();
+          } catch (e) {
+            modbusServicesList = [];
+          }
+        });
+      }
+    });
+
+    _eventbusModbus2 = eventBus.on<EventRespAddModbusService>().listen((event) {
+      if (mounted) {
+        if (event.obj.toString().contains("ok")) {
+          showTipInfo(localizedStrings.fSuccessMsg, context);
+          PublicFunctions.getModbusServices();
+        } else {
+          showTipInfo(_getLocalizedError(event.obj.toString()), context);
+        }
+      }
+    });
+
+    _eventbusModbus3 = eventBus.on<EventRespEditModbusService>().listen((event) {
+      if (mounted) {
+        if (event.obj.toString().contains("ok")) {
+          showTipInfo(localizedStrings.fSuccessMsg, context);
+          PublicFunctions.getModbusServices();
+        } else {
+          showTipInfo(_getLocalizedError(event.obj.toString()), context);
+        }
+      }
+    });
+
+    _eventbusModbus4 = eventBus.on<EventRespDelModbusService>().listen((event) {
+      if (mounted) {
+        if (event.obj.toString().contains("ok")) {
+          showTipInfo(localizedStrings.fSuccessMsg, context);
+          PublicFunctions.getModbusServices();
+        } else {
+          showTipInfo(_getLocalizedError(event.obj.toString()), context);
+        }
+      }
+    });
   }
 
   void _onPortChanged() {
@@ -396,15 +481,6 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
       if (scaleId == myAllScalesList[i].scaleId) {
         setState(() {
           myAllScalesList[i].isOnline = status;
-          if (selScaleId == scaleId) {
-            scaleModelCtl.text = myAllScalesList[i].scaleModel;
-            snCtl.text = myAllScalesList[i].scaleSn;
-          }
-          if ((scaleModelCtl.text == 'T-Max' || scaleModelCtl.text == 'TMax') &&
-              snCtl.text.length == 10) {
-            scaleModelCtl.text = '';
-            snCtl.text = '';
-          }
         });
       }
     }
@@ -420,6 +496,14 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
 
   @override
   void dispose() {
+    _eventbus9?.cancel();
+    _eventbus10?.cancel();
+    _eventbus11?.cancel();
+    _eventbusModbus1?.cancel();
+    _eventbusModbus2?.cancel();
+    _eventbusModbus3?.cancel();
+    _eventbusModbus4?.cancel();
+    checkIsOnlineTimer?.cancel();
     _eventbus1.cancel();
     _eventbus2.cancel();
     _eventbus3.cancel();
@@ -443,6 +527,13 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     snCtl.dispose();
     macCtl.dispose();
     btNameCtl.dispose();
+    modbusIdCtl.dispose();
+    modbusTcpPortCtl.dispose();
+    modbusComPortCtl.dispose();
+    modbusBaudRateCtl.dispose();
+    modbusDataBitCtl.dispose();
+    modbusStopBitCtl.dispose();
+    modbusParityCtl.dispose();
     checkIsOnlineTimer?.cancel();
     super.dispose();
   }
@@ -453,12 +544,36 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     // final _height = MediaQuery.of(context).size.height;
     tempCurrentPort = myCurrentPort;
 
-    return Scaffold(
-        body: editWifiInfo
-            ? showEditWifiInfo(maxWidth)
-            : isAddScale && addScaleType != ""
-                ? showAddScaleInfo(maxWidth)
-                : showNormalScaleInfo(maxWidth));
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
+        appBar: PreferredSize(
+          preferredSize: Size.fromHeight(kToolbarHeight),
+          child: AppBar(
+            automaticallyImplyLeading: false,
+            bottom: TabBar(
+              labelColor: Theme.of(context).colorScheme.primary,
+              unselectedLabelColor: Theme.of(context).colorScheme.onSurface,
+              tabs: [
+                Tab(text: localizedStrings.menuMultiScaleManagement),
+                Tab(text: localizedStrings.gModbusServiceManagement),
+              ],
+            ),
+          ),
+        ),
+        body: TabBarView(
+          physics: const NeverScrollableScrollPhysics(), // 禁用滑动切换，避免与内部滑动冲突
+          children: [
+            editWifiInfo
+                ? showEditWifiInfo(maxWidth)
+                : isAddScale && addScaleType != ""
+                    ? showAddScaleInfo(maxWidth)
+                    : showNormalScaleInfo(maxWidth),
+            showModbusConfigInfo(maxWidth),
+          ],
+        ),
+      ),
+    );
   }
 
   int getScaleType() {
@@ -487,6 +602,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myModifyScale.scaleId = selScaleId;
     myModifyScale.scaleModel = scaleModel;
     myModifyScale.mediaConf = myMediaConf;
+    myModifyScale.modbusId = int.tryParse(modbusIdCtl.text) ?? 1;
     PublicFunctions.sendModifyInfo(jsonEncode(myModifyScale));
   }
 
@@ -550,6 +666,21 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
       }
     }
 
+    // 校验 Modbus 站号唯一性
+    if (modbusIdCtl.text.isEmpty) {
+      showTipInfo(localizedStrings.gTipEmpty, context);
+      return;
+    }
+    int currentModbusId = int.tryParse(modbusIdCtl.text) ?? 1;
+    for (var scale in myAllScalesList) {
+      if (scale.scaleId == selScaleId) continue;
+      if (scale.modbusId == currentModbusId) {
+        showTipInfo("Modbus 站号 [$currentModbusId] 已被占用", context);
+        return;
+      }
+    }
+
+    myAddNetScale.modbusId = currentModbusId;
     String netInfoStr = jsonEncode(myNetInfo);
     myMediaConf.mediaInfoJson = netInfoStr;
     myMediaConf.type = 1;
@@ -564,6 +695,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   }
 
   void addNetScale() {
+    int currentModbusId = int.tryParse(modbusIdCtl.text) ?? 1;
     myNetInfo.ip = ipCtl.text;
     myNetInfo.port = int.tryParse(portCtl.text)!;
     String netInfoStr = jsonEncode(myNetInfo);
@@ -572,6 +704,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myAddNetScale.scaleId = 10;
     myAddNetScale.scaleModel = 'TMax';
     myAddNetScale.mediaConf = myMediaConf;
+    myAddNetScale.modbusId = currentModbusId;
     PublicFunctions.sendAddScale(jsonEncode(myAddNetScale));
     isAddNewScale = true;
   }
@@ -593,6 +726,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
       addNetScale.scaleModel = 'DC500';
     }
     addNetScale.mediaConf = myMediaConf;
+    addNetScale.modbusId = int.tryParse(modbusIdCtl.text) ?? 1;
     PublicFunctions.sendAddScale(jsonEncode(addNetScale));
     isDC500 = false;
     isAddNewScale = true;
@@ -614,6 +748,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myAddNetScale.scaleId = 10;
     myAddNetScale.scaleModel = 'TMax';
     myAddNetScale.mediaConf = myMediaConf;
+    myAddNetScale.modbusId = int.tryParse(modbusIdCtl.text) ?? 1;
     PublicFunctions.sendAddScale(jsonEncode(myAddNetScale));
     isAddNewScale = true;
   }
@@ -621,6 +756,15 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   bool isValidScaleName(String name) {
     for (Scale tempScale in myAllScalesList) {
       if (tempScale.scaleName == scaleNameCtl.text) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool checkModbusIdUnique(int modbusId, int currentScaleId) {
+    for (var scale in myAllScalesList) {
+      if (scale.scaleId != currentScaleId && scale.modbusId == modbusId) {
         return false;
       }
     }

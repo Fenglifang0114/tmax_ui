@@ -58,6 +58,7 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
               SizedBox(
                 height: smallPadding,
               ),
+
               buildItemInfo(
                   showItemNameWithStar(
                       context, localizedStrings.gSerialPort, false),
@@ -124,6 +125,16 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
               SizedBox(
                 height: regularPadding,
               ),
+              buildItemInfo(
+                  showItemNameWithStar(context, localizedStrings.gModbusStationId, false),
+                  showInputBox(context, modbusIdCtl, '', (value) {
+                    setState(() {});
+                  }, false),
+                  Container(),
+                  Container()),
+              SizedBox(
+                height: regularPadding,
+              ),
               isRename ? showRenameConfirmBtn() : showComPortBtn(),
             ],
           );
@@ -182,6 +193,7 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                   const SizedBox(
                     height: regularPadding,
                   ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
@@ -260,6 +272,13 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                   const SizedBox(
                     height: regularPadding,
                   ),
+                  buildItemInfo(
+                      showItemNameWithStar(context, localizedStrings.gModbusStationId, false),
+                      showInputBox(context, modbusIdCtl, '', (value) {
+                        setState(() {});
+                      }, false),
+                      Container(),
+                      Container()),
                   const SizedBox(
                     height: regularPadding,
                   ),
@@ -321,6 +340,7 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                   const SizedBox(
                     height: regularPadding,
                   ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [

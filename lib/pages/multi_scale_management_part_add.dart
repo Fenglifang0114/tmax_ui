@@ -127,6 +127,14 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
         SizedBox(
           height: regularPadding,
         ),
+        buildItemInfo(
+          showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
+          showInputBox(context, modbusIdCtl, '1~247', (value) {
+            setState(() {});
+          }, true),
+          Container(),
+          Container(),
+        ),
         SizedBox(
           height: regularPadding,
         ),
@@ -152,6 +160,12 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
                             }
                           }
                         }
+                        int mId = int.tryParse(modbusIdCtl.text) ?? 1;
+                        if (!checkModbusIdUnique(mId, -1)) {
+                          showTipInfo("Modbus 站号 [$mId] 已被占用", context);
+                          return;
+                        }
+
                         isAddScale = false;
                         isRename = false;
                         addScaleType = '';
@@ -299,12 +313,32 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
+              SizedBox(width: 10),
+              Container(
+                width: 100,
+                child: showInputBox(context, modbusIdCtl, '1~247', (value) {
+                  setState(() {});
+                }, true),
+              ),
+            ],
+          ),
+          SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
               showTextButton(
                   context,
                   btnHeight,
                   localizedStrings.gBtnConfirm,
                   selectBtInfo.mac != null
                       ? () {
+                          int mId = int.tryParse(modbusIdCtl.text) ?? 1;
+                          if (!checkModbusIdUnique(mId, -1)) {
+                            showTipInfo("Modbus 站号 [$mId] 已被占用", context);
+                            return;
+                          }
+
                           isAddScale = false;
                           isRename = false;
                           addScaleType = '';
@@ -482,11 +516,13 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
         SizedBox(
           height: regularPadding,
         ),
-        SizedBox(
-          height: regularPadding,
-        ),
-        SizedBox(
-          height: regularPadding,
+        buildItemInfo(
+          showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
+          showInputBox(context, modbusIdCtl, '1~247', (value) {
+            setState(() {});
+          }, true),
+          Container(),
+          Container(),
         ),
         SizedBox(
           height: regularPadding,
@@ -500,6 +536,12 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
                 localizedStrings.gBtnConfirm,
                 portCtl.text.isNotEmpty && _isValidIP
                     ? () {
+                        int mId = int.tryParse(modbusIdCtl.text) ?? 1;
+                        if (!checkModbusIdUnique(mId, -1)) {
+                          showTipInfo("Modbus 站号 [$mId] 已被占用", context);
+                          return;
+                        }
+
                         isAddScale = false;
                         isRename = false;
                         addScaleType = '';

@@ -77,6 +77,14 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
                               portCtl.text = "";
                               macCtl.text = "";
                               btNameCtl.text = "";
+                              
+                              // 自动分配下一个可用的 Modbus 站号
+                              int nextModbusId = 1;
+                              List<int> usedIds = myAllScalesList.map((s) => s.modbusId ?? 0).toList();
+                              while (usedIds.contains(nextModbusId)) {
+                                nextModbusId++;
+                              }
+                              modbusIdCtl.text = nextModbusId.toString();
                             });
                           }
                         });
@@ -189,6 +197,7 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
                         scaleNameCtl.text = scale.scaleName;
                         scaleModelCtl.text = scale.scaleModel;
                         snCtl.text = scale.scaleSn;
+                        modbusIdCtl.text = scale.modbusId?.toString() ?? '0';
                         // 判断 scaleModel 是否为 TMax，且 sn 是否为 10 位并以 174 开头
 
                         if (scale.tMedia == comScaleType) {

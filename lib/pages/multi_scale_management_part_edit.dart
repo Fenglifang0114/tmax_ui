@@ -59,9 +59,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
         SizedBox(
           height: regularPadding,
         ),
-        SizedBox(
-          height: regularPadding,
-        ),
+
         if (scaleModelCtl.text == "S15")
           buildItemInfo(
             showItemNameWithStar(context, localizedStrings.gSerialPort, false),
@@ -116,6 +114,17 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
               ),
             ),
           ),
+        buildItemInfo(
+          showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
+          showInputBox(context, modbusIdCtl, '1~247', (value) {
+            setState(() {});
+          }, true),
+          Container(),
+          Container(),
+        ),
+        SizedBox(
+          height: regularPadding,
+        ),
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [

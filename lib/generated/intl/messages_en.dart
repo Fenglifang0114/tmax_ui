@@ -431,6 +431,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "formulaNameInconsistent": MessageLookupByLibrary.simpleMessage(
             "Formula names are inconsistent"),
         "funcName": MessageLookupByLibrary.simpleMessage("Function Module"),
+        "gAddModbusService":
+            MessageLookupByLibrary.simpleMessage("Add Modbus Service"),
         "gAlignment": MessageLookupByLibrary.simpleMessage("Alignment:"),
         "gAppInformation":
             MessageLookupByLibrary.simpleMessage("App Information"),
@@ -449,6 +451,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gBarcodeName": MessageLookupByLibrary.simpleMessage("BarCode Name"),
         "gBarcodeType": MessageLookupByLibrary.simpleMessage("BarCode Type"),
         "gBaudRate": MessageLookupByLibrary.simpleMessage("Baud rate"),
+        "gBindScaleId": MessageLookupByLibrary.simpleMessage("Target Scale ID"),
         "gBluetoothEmissionPower":
             MessageLookupByLibrary.simpleMessage("Emission Power:"),
         "gBtnActivate": MessageLookupByLibrary.simpleMessage("Activate"),
@@ -505,10 +508,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "gBtnTestConnect": MessageLookupByLibrary.simpleMessage("Test Connect"),
         "gBuildInfoTip": MessageLookupByLibrary.simpleMessage(
             "This ID is only to be used by device developers."),
+        "gCommMode": MessageLookupByLibrary.simpleMessage("Comm Mode"),
+        "gConfirmDeleteModbusService": MessageLookupByLibrary.simpleMessage(
+            "Are you sure you want to delete this Modbus service?"),
         "gConfirmFileTip": MessageLookupByLibrary.simpleMessage(
             "Please confirm the file correct."),
         "gConfirmPrnFmtOrderTip": MessageLookupByLibrary.simpleMessage(
             "Please confirm the order of the printing formats."),
+        "gDataBit": MessageLookupByLibrary.simpleMessage("Data Bit"),
         "gDataBits": MessageLookupByLibrary.simpleMessage("Data bits"),
         "gDateSeparator":
             MessageLookupByLibrary.simpleMessage("Date Separator"),
@@ -516,9 +523,12 @@ class MessageLookup extends MessageLookupByLibrary {
         "gEPNormal": MessageLookupByLibrary.simpleMessage("Normal"),
         "gEPStrong": MessageLookupByLibrary.simpleMessage("Strong"),
         "gEPWeak": MessageLookupByLibrary.simpleMessage("Weak"),
+        "gEditModbusService":
+            MessageLookupByLibrary.simpleMessage("Edit Modbus Service"),
         "gExpirationDate":
             MessageLookupByLibrary.simpleMessage("Expiration date"),
         "gFindSsid": MessageLookupByLibrary.simpleMessage("Discover SSID"),
+        "gFixed": MessageLookupByLibrary.simpleMessage("Fixed"),
         "gFontBold": MessageLookupByLibrary.simpleMessage("Bold:"),
         "gFontReverse":
             MessageLookupByLibrary.simpleMessage("Reverse Contrast:"),
@@ -529,6 +539,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "gIpAddress": MessageLookupByLibrary.simpleMessage("IPv4"),
         "gLanguage": MessageLookupByLibrary.simpleMessage("EngLish"),
         "gMaxLength": MessageLookupByLibrary.simpleMessage("Max Length:"),
+        "gModbusIdMissingTip": MessageLookupByLibrary.simpleMessage(
+            "Please select the scale station ID to bind"),
+        "gModbusServiceFormDesc": MessageLookupByLibrary.simpleMessage(
+            "Configure Modbus parameters for the target scale"),
+        "gModbusServiceManagement":
+            MessageLookupByLibrary.simpleMessage("Modbus Gateway Config"),
+        "gModbusStationId":
+            MessageLookupByLibrary.simpleMessage("Modbus Station ID"),
         "gModelName": MessageLookupByLibrary.simpleMessage("Model Name"),
         "gModifyBluetoothEmission":
             MessageLookupByLibrary.simpleMessage("Modify emission power"),
@@ -545,11 +563,14 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Please use UTF-8 encoding"),
         "gNetmask": MessageLookupByLibrary.simpleMessage("Netmask"),
         "gNetwork": MessageLookupByLibrary.simpleMessage("Network"),
+        "gNoModbusService":
+            MessageLookupByLibrary.simpleMessage("No Modbus Services Created"),
         "gOpenJson": MessageLookupByLibrary.simpleMessage("Open Json"),
         "gPageHeight": MessageLookupByLibrary.simpleMessage("Height"),
         "gPageWidth": MessageLookupByLibrary.simpleMessage("Width"),
         "gParameterSettingsTitle":
             MessageLookupByLibrary.simpleMessage("Parameter settings"),
+        "gParityBit": MessageLookupByLibrary.simpleMessage("Parity Bit"),
         "gPassword": MessageLookupByLibrary.simpleMessage("Password"),
         "gPluCategory": MessageLookupByLibrary.simpleMessage("Category"),
         "gPluField": MessageLookupByLibrary.simpleMessage("PLU Field"),
@@ -567,11 +588,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "gPluTaxType": MessageLookupByLibrary.simpleMessage("Tax Type"),
         "gPluUnitWgt": MessageLookupByLibrary.simpleMessage("Unit Weight"),
         "gPluWgtUnit": MessageLookupByLibrary.simpleMessage("Unit"),
+        "gPortOccupiedTip1": MessageLookupByLibrary.simpleMessage(
+            "is occupied by another Modbus service"),
         "gPosition": MessageLookupByLibrary.simpleMessage("Position"),
         "gPrint": MessageLookupByLibrary.simpleMessage("Print"),
         "gPrintDirection": MessageLookupByLibrary.simpleMessage("Direction:"),
         "gPrinter": MessageLookupByLibrary.simpleMessage("Printer Protocol:"),
         "gProgress": MessageLookupByLibrary.simpleMessage("Progress"),
+        "gProtocol": MessageLookupByLibrary.simpleMessage("Protocol"),
         "gQrcode": MessageLookupByLibrary.simpleMessage("QRcode:"),
         "gQrcodeEdit": MessageLookupByLibrary.simpleMessage("Qrcode Edit"),
         "gQrcodeMgr": MessageLookupByLibrary.simpleMessage("QrCode Management"),
@@ -590,7 +614,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "gSelectAll": MessageLookupByLibrary.simpleMessage("select all"),
         "gSerialParity": MessageLookupByLibrary.simpleMessage("Parity"),
         "gSerialPort": MessageLookupByLibrary.simpleMessage("Serial port"),
+        "gSerialPortMissingTip":
+            MessageLookupByLibrary.simpleMessage("Please select a serial port"),
         "gStatus": MessageLookupByLibrary.simpleMessage("Status"),
+        "gStopBit": MessageLookupByLibrary.simpleMessage("Stop Bit"),
         "gStopBits": MessageLookupByLibrary.simpleMessage("Stop bits"),
         "gSubtitleAppsCharge": MessageLookupByLibrary.simpleMessage(
             "Pay per function to activate permanently. To purchase, please click ( ℹ️ ) in the top-right corner to contact the software provider."),
@@ -600,6 +627,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gSystemSetting":
             MessageLookupByLibrary.simpleMessage("System Setting"),
         "gTabOrder": MessageLookupByLibrary.simpleMessage("Layer order:"),
+        "gTcpPort": MessageLookupByLibrary.simpleMessage("TCP Port"),
         "gTextContent": MessageLookupByLibrary.simpleMessage("Text Content:"),
         "gTipActivated": MessageLookupByLibrary.simpleMessage("Activated"),
         "gTipActivationFileError": MessageLookupByLibrary.simpleMessage(
@@ -771,6 +799,8 @@ class MessageLookup extends MessageLookupByLibrary {
             "No devices available. Please add a device first."),
         "gTipOffline": MessageLookupByLibrary.simpleMessage("offline"),
         "gTipOnline": MessageLookupByLibrary.simpleMessage("online"),
+        "gTipOpenPortFailed":
+            MessageLookupByLibrary.simpleMessage("Failed to open serial port"),
         "gTipPerformingOperation":
             MessageLookupByLibrary.simpleMessage("Performing operation..."),
         "gTipPerpetual": MessageLookupByLibrary.simpleMessage("Perpetual"),

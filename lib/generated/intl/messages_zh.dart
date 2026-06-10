@@ -337,6 +337,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "formulaNameInconsistent":
             MessageLookupByLibrary.simpleMessage("配方名不一致"),
         "funcName": MessageLookupByLibrary.simpleMessage("功能模块"),
+        "gAddModbusService":
+            MessageLookupByLibrary.simpleMessage("新增 Modbus 服务"),
         "gAlignment": MessageLookupByLibrary.simpleMessage("对齐方式:"),
         "gAppInformation": MessageLookupByLibrary.simpleMessage("应用信息"),
         "gAttribute": MessageLookupByLibrary.simpleMessage("属性"),
@@ -352,6 +354,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gBarcodeName": MessageLookupByLibrary.simpleMessage("条码名字"),
         "gBarcodeType": MessageLookupByLibrary.simpleMessage("条码类型"),
         "gBaudRate": MessageLookupByLibrary.simpleMessage("波特率"),
+        "gBindScaleId": MessageLookupByLibrary.simpleMessage("绑定秤站号"),
         "gBluetoothEmissionPower": MessageLookupByLibrary.simpleMessage("信号强度"),
         "gBtnActivate": MessageLookupByLibrary.simpleMessage("激活"),
         "gBtnAdd": MessageLookupByLibrary.simpleMessage("新增"),
@@ -400,17 +403,24 @@ class MessageLookup extends MessageLookupByLibrary {
         "gBtnTare": MessageLookupByLibrary.simpleMessage("扣重"),
         "gBtnTestConnect": MessageLookupByLibrary.simpleMessage("测试连接"),
         "gBuildInfoTip": MessageLookupByLibrary.simpleMessage("此ID仅供开发者使用."),
+        "gCommMode": MessageLookupByLibrary.simpleMessage("通讯模式"),
+        "gConfirmDeleteModbusService":
+            MessageLookupByLibrary.simpleMessage("确定删除该 Modbus 服务吗？"),
         "gConfirmFileTip": MessageLookupByLibrary.simpleMessage("请确定文件无误."),
         "gConfirmPrnFmtOrderTip":
             MessageLookupByLibrary.simpleMessage("请确认打印格式的顺序."),
+        "gDataBit": MessageLookupByLibrary.simpleMessage("数据位"),
         "gDataBits": MessageLookupByLibrary.simpleMessage("数据位"),
         "gDateSeparator": MessageLookupByLibrary.simpleMessage("日期分隔符"),
         "gDeviceName": MessageLookupByLibrary.simpleMessage("设备名称"),
         "gEPNormal": MessageLookupByLibrary.simpleMessage("正常"),
         "gEPStrong": MessageLookupByLibrary.simpleMessage("强"),
         "gEPWeak": MessageLookupByLibrary.simpleMessage("弱"),
+        "gEditModbusService":
+            MessageLookupByLibrary.simpleMessage("编辑 Modbus 服务"),
         "gExpirationDate": MessageLookupByLibrary.simpleMessage("到期日期"),
         "gFindSsid": MessageLookupByLibrary.simpleMessage("SSID"),
+        "gFixed": MessageLookupByLibrary.simpleMessage("固定"),
         "gFontBold": MessageLookupByLibrary.simpleMessage("加粗:"),
         "gFontReverse": MessageLookupByLibrary.simpleMessage("字体反显:"),
         "gFontSize": MessageLookupByLibrary.simpleMessage("字体大小:"),
@@ -420,6 +430,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "gIpAddress": MessageLookupByLibrary.simpleMessage("IPv4"),
         "gLanguage": MessageLookupByLibrary.simpleMessage("中文"),
         "gMaxLength": MessageLookupByLibrary.simpleMessage("最大长度:"),
+        "gModbusIdMissingTip":
+            MessageLookupByLibrary.simpleMessage("请选择要绑定的秤站号 (Modbus ID)"),
+        "gModbusServiceFormDesc":
+            MessageLookupByLibrary.simpleMessage("配置对应秤设备的 Modbus 通讯参数"),
+        "gModbusServiceManagement":
+            MessageLookupByLibrary.simpleMessage("Modbus 服务网关配置"),
+        "gModbusStationId": MessageLookupByLibrary.simpleMessage("Modbus 站号"),
         "gModelName": MessageLookupByLibrary.simpleMessage("型号"),
         "gModifyBluetoothEmission":
             MessageLookupByLibrary.simpleMessage("修改信号强度"),
@@ -432,10 +449,13 @@ class MessageLookup extends MessageLookupByLibrary {
         "gMsgUseUtf8": MessageLookupByLibrary.simpleMessage("请使用UTF-8 编码"),
         "gNetmask": MessageLookupByLibrary.simpleMessage("子网掩码"),
         "gNetwork": MessageLookupByLibrary.simpleMessage("网络"),
+        "gNoModbusService":
+            MessageLookupByLibrary.simpleMessage("暂无创建的 Modbus 服务"),
         "gOpenJson": MessageLookupByLibrary.simpleMessage("打开 Json"),
         "gPageHeight": MessageLookupByLibrary.simpleMessage("高度"),
         "gPageWidth": MessageLookupByLibrary.simpleMessage("宽度"),
         "gParameterSettingsTitle": MessageLookupByLibrary.simpleMessage("参数设置"),
+        "gParityBit": MessageLookupByLibrary.simpleMessage("校验位"),
         "gPassword": MessageLookupByLibrary.simpleMessage("密码"),
         "gPluCategory": MessageLookupByLibrary.simpleMessage("类别"),
         "gPluField": MessageLookupByLibrary.simpleMessage("PLU 字段"),
@@ -452,11 +472,14 @@ class MessageLookup extends MessageLookupByLibrary {
         "gPluTaxType": MessageLookupByLibrary.simpleMessage("税类型"),
         "gPluUnitWgt": MessageLookupByLibrary.simpleMessage("单重"),
         "gPluWgtUnit": MessageLookupByLibrary.simpleMessage("单位"),
+        "gPortOccupiedTip1":
+            MessageLookupByLibrary.simpleMessage("已被其他 Modbus 服务占用"),
         "gPosition": MessageLookupByLibrary.simpleMessage("位置"),
         "gPrint": MessageLookupByLibrary.simpleMessage("打印"),
         "gPrintDirection": MessageLookupByLibrary.simpleMessage("方向:"),
         "gPrinter": MessageLookupByLibrary.simpleMessage("打印机协议:"),
         "gProgress": MessageLookupByLibrary.simpleMessage("进度"),
+        "gProtocol": MessageLookupByLibrary.simpleMessage("协议"),
         "gQrcode": MessageLookupByLibrary.simpleMessage("二维码:"),
         "gQrcodeEdit": MessageLookupByLibrary.simpleMessage("二维码编辑"),
         "gQrcodeMgr": MessageLookupByLibrary.simpleMessage("二维码管理"),
@@ -474,7 +497,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "gSelectAll": MessageLookupByLibrary.simpleMessage("全选"),
         "gSerialParity": MessageLookupByLibrary.simpleMessage("校验位"),
         "gSerialPort": MessageLookupByLibrary.simpleMessage("串口"),
+        "gSerialPortMissingTip": MessageLookupByLibrary.simpleMessage("请选择串口号"),
         "gStatus": MessageLookupByLibrary.simpleMessage("状态"),
+        "gStopBit": MessageLookupByLibrary.simpleMessage("停止位"),
         "gStopBits": MessageLookupByLibrary.simpleMessage("停止位"),
         "gSubtitleAppsCharge": MessageLookupByLibrary.simpleMessage(
             "按功能付费以永久激活。如需购买请点击右上角的（ℹ️）联系软件服务商"),
@@ -483,6 +508,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gSystemId": MessageLookupByLibrary.simpleMessage("系统ID"),
         "gSystemSetting": MessageLookupByLibrary.simpleMessage("系统设置"),
         "gTabOrder": MessageLookupByLibrary.simpleMessage("顺序:"),
+        "gTcpPort": MessageLookupByLibrary.simpleMessage("TCP 端口"),
         "gTextContent": MessageLookupByLibrary.simpleMessage("文本内容:"),
         "gTipActivated": MessageLookupByLibrary.simpleMessage("已激活"),
         "gTipActivationFileError":
@@ -614,6 +640,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("没有设备，请先添加设备"),
         "gTipOffline": MessageLookupByLibrary.simpleMessage("断线"),
         "gTipOnline": MessageLookupByLibrary.simpleMessage("在线"),
+        "gTipOpenPortFailed": MessageLookupByLibrary.simpleMessage("打开串口失败"),
         "gTipPerformingOperation":
             MessageLookupByLibrary.simpleMessage("正在进行操作，请稍后..."),
         "gTipPerpetual": MessageLookupByLibrary.simpleMessage("永久"),

@@ -38,7 +38,7 @@ Future<void> main() async {
           TEXT("Error"),
           MB_ICONERROR | MB_OK,
         );
-        exit(0);
+        // exit(0); // Temporarily disabled
       }
 
       // 检查服务是否正在运行
@@ -55,7 +55,7 @@ Future<void> main() async {
             TEXT("Error"),
             MB_ICONERROR | MB_OK,
           );
-          exit(0);
+          // exit(0); // Temporarily disabled
         }
       }
     } catch (e) {
@@ -65,7 +65,7 @@ Future<void> main() async {
         TEXT("Error"),
         MB_ICONERROR | MB_OK,
       );
-      exit(0);
+      // exit(0); // Temporarily disabled
     }
   }
   WidgetsFlutterBinding.ensureInitialized();
@@ -86,7 +86,8 @@ Future<void> main() async {
   if (isPortAvailable) {
     runApp(MyApp(savedLanguage, ipAddress, savedDarkMode == 'true'));
   } else {
-    exit(0);
+    // exit(0); // Temporarily disabled for debugging
+    runApp(MyApp(savedLanguage, ipAddress, savedDarkMode == 'true'));
   }
 }
 

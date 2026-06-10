@@ -9380,6 +9380,197 @@ class S {
       args: [],
     );
   }
+
+  /// `Modbus Gateway Config`
+  String get gModbusServiceManagement {
+    return Intl.message(
+      'Modbus Gateway Config',
+      name: 'gModbusServiceManagement',
+      desc: 'Modbus Service Management',
+      args: [],
+    );
+  }
+
+  /// `Add Modbus Service`
+  String get gAddModbusService {
+    return Intl.message(
+      'Add Modbus Service',
+      name: 'gAddModbusService',
+      desc: 'Add Modbus Service',
+      args: [],
+    );
+  }
+
+  /// `Edit Modbus Service`
+  String get gEditModbusService {
+    return Intl.message(
+      'Edit Modbus Service',
+      name: 'gEditModbusService',
+      desc: 'Edit Modbus Service',
+      args: [],
+    );
+  }
+
+  /// `Modbus Station ID`
+  String get gModbusStationId {
+    return Intl.message(
+      'Modbus Station ID',
+      name: 'gModbusStationId',
+      desc: 'Modbus Station ID',
+      args: [],
+    );
+  }
+
+  /// `Configure Modbus parameters for the target scale`
+  String get gModbusServiceFormDesc {
+    return Intl.message(
+      'Configure Modbus parameters for the target scale',
+      name: 'gModbusServiceFormDesc',
+      desc:
+          'Configure Modbus communication parameters for the corresponding scale',
+      args: [],
+    );
+  }
+
+  /// `Target Scale ID`
+  String get gBindScaleId {
+    return Intl.message(
+      'Target Scale ID',
+      name: 'gBindScaleId',
+      desc: 'Bind Scale Station ID',
+      args: [],
+    );
+  }
+
+  /// `Comm Mode`
+  String get gCommMode {
+    return Intl.message(
+      'Comm Mode',
+      name: 'gCommMode',
+      desc: 'Communication Mode',
+      args: [],
+    );
+  }
+
+  /// `TCP Port`
+  String get gTcpPort {
+    return Intl.message(
+      'TCP Port',
+      name: 'gTcpPort',
+      desc: 'TCP Port',
+      args: [],
+    );
+  }
+
+  /// `Data Bit`
+  String get gDataBit {
+    return Intl.message(
+      'Data Bit',
+      name: 'gDataBit',
+      desc: 'Data Bit',
+      args: [],
+    );
+  }
+
+  /// `Stop Bit`
+  String get gStopBit {
+    return Intl.message(
+      'Stop Bit',
+      name: 'gStopBit',
+      desc: 'Stop Bit',
+      args: [],
+    );
+  }
+
+  /// `Parity Bit`
+  String get gParityBit {
+    return Intl.message(
+      'Parity Bit',
+      name: 'gParityBit',
+      desc: 'Parity Bit',
+      args: [],
+    );
+  }
+
+  /// `Please select the scale station ID to bind`
+  String get gModbusIdMissingTip {
+    return Intl.message(
+      'Please select the scale station ID to bind',
+      name: 'gModbusIdMissingTip',
+      desc: 'Please select the scale station ID to bind',
+      args: [],
+    );
+  }
+
+  /// `Please select a serial port`
+  String get gSerialPortMissingTip {
+    return Intl.message(
+      'Please select a serial port',
+      name: 'gSerialPortMissingTip',
+      desc: 'Please select serial port',
+      args: [],
+    );
+  }
+
+  /// `No Modbus Services Created`
+  String get gNoModbusService {
+    return Intl.message(
+      'No Modbus Services Created',
+      name: 'gNoModbusService',
+      desc: 'No Modbus Service Created',
+      args: [],
+    );
+  }
+
+  /// `Fixed`
+  String get gFixed {
+    return Intl.message(
+      'Fixed',
+      name: 'gFixed',
+      desc: 'Fixed',
+      args: [],
+    );
+  }
+
+  /// `Protocol`
+  String get gProtocol {
+    return Intl.message(
+      'Protocol',
+      name: 'gProtocol',
+      desc: 'Protocol',
+      args: [],
+    );
+  }
+
+  /// `is occupied by another Modbus service`
+  String get gPortOccupiedTip1 {
+    return Intl.message(
+      'is occupied by another Modbus service',
+      name: 'gPortOccupiedTip1',
+      desc: 'Occupied by other Modbus service',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to delete this Modbus service?`
+  String get gConfirmDeleteModbusService {
+    return Intl.message(
+      'Are you sure you want to delete this Modbus service?',
+      name: 'gConfirmDeleteModbusService',
+      desc: 'Confirm deleting Modbus service',
+      args: [],
+    );
+  }
+
+  /// `Failed to open serial port`
+  String get gTipOpenPortFailed {
+    return Intl.message(
+      'Failed to open serial port',
+      name: 'gTipOpenPortFailed',
+      desc: 'Failed to open serial port',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

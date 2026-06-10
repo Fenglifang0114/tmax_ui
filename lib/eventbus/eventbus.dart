@@ -1100,3 +1100,23 @@ class EventRevGetSerialPort {
   dynamic obj;
   EventRevGetSerialPort(this.obj);
 }
+
+class EventRespGetModbusServices {
+  dynamic obj;
+  EventRespGetModbusServices(this.obj);
+}
+
+class EventRespAddModbusService {
+  dynamic obj;
+  EventRespAddModbusService(this.obj);
+}
+
+class EventRespEditModbusService {
+  dynamic obj;
+  EventRespEditModbusService(this.obj);
+}
+
+class EventRespDelModbusService {
+  dynamic obj;
+  EventRespDelModbusService(this.obj);
+}

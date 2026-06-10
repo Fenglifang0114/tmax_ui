@@ -143,6 +143,12 @@ class RespSysMsgType {
   static const String respUpdateUnstableZeroTare =
       'resp_update_unstable_zero_tare';
 
+  // Modbus Services
+  static const String respModbusServices = 'resp_modbus_services';
+  static const String respModbusAdd = 'resp_modbus_add';
+  static const String respModbusEdit = 'resp_modbus_edit';
+  static const String respModbusDel = 'resp_modbus_del';
+
   static final Map<String, Function> handlers = {
     RespSysMsgType.respPortsList: handlePortsList,
     RespSysMsgType.respBtList: handleBtList,
@@ -250,7 +256,31 @@ class RespSysMsgType {
     RespSysMsgType.respScaleInput: handleRespScaleInput,
     RespSysMsgType.respGetUnstableZeroTare: handleRespGetUnstableZeroTare,
     RespSysMsgType.respUpdateUnstableZeroTare: handleRespUpdateUnstableZeroTare,
+    RespSysMsgType.respModbusServices: handleRespModbusServices,
+    RespSysMsgType.respModbusAdd: handleRespModbusAdd,
+    RespSysMsgType.respModbusEdit: handleRespModbusEdit,
+    RespSysMsgType.respModbusDel: handleRespModbusDel,
   };
+
+  static void handleRespModbusServices(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespGetModbusServices(dataString));
+  }
+
+  static void handleRespModbusAdd(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespAddModbusService(dataString));
+  }
+
+  static void handleRespModbusEdit(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespEditModbusService(dataString));
+  }
+
+  static void handleRespModbusDel(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespDelModbusService(dataString));
+  }
 
   static void handleBtList(dynamic jsonData) {
     String dataString;
