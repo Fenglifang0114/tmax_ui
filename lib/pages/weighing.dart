@@ -201,19 +201,24 @@ class WeightModePageState extends State<WeightModePage> {
 
       for (var group in groups.values) {
         if (group.length > 1) {
-          // 冲突：同一个物理设备选择了多种连接方式
-          showTipInfo(localizedStrings.tipSameScale, context);
+          bool hasSerial = group.any((s) => s.tMedia == 0);
+          bool hasNetOrBt = group.any((s) => s.tMedia == 1 || s.tMedia == 2);
 
-          // 优先级：串口(0) > 网口(1) > 蓝牙(2)。排序并保留最高优先级的连接。
-          group.sort((a, b) => a.tMedia.compareTo(b.tMedia));
+          if (hasSerial && hasNetOrBt) {
+            // 冲突：同一个物理设备选择了串口和网络/蓝牙的连接方式
+            showTipInfo(localizedStrings.tipSameScale, context);
 
-          // 移除除第一个（优先级最高）之外的所有连接
-          for (int i = 1; i < group.length; i++) {
-            if (mySelScaleIdList.contains(group[i].scaleId)) {
-              addOrRemoveSelScale(group[i].scaleId);
+            // 优先级：串口(0) > 网口(1) > 蓝牙(2)。排序并保留最高优先级的连接。
+            group.sort((a, b) => a.tMedia.compareTo(b.tMedia));
+
+            // 移除除第一个（优先级最高）之外的所有连接
+            for (int i = 1; i < group.length; i++) {
+              if (mySelScaleIdList.contains(group[i].scaleId)) {
+                addOrRemoveSelScale(group[i].scaleId);
+              }
             }
+            break; // 每个检查周期只显示一次提示
           }
-          break; // 每个检查周期只显示一次提示
         }
       }
     }

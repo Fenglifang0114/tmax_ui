@@ -208,14 +208,19 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
                           baudRateCtl.text = serialConfig.baudRate.toString();
 
                           usingComLists = List<String>.from(comLists);
-                          if (!comLists.contains(comPortCtl.text)) {
-                            comPortCtl.text = '';
+                          if (comPortCtl.text.isNotEmpty && !usingComLists.contains(comPortCtl.text)) {
+                            usingComLists.add(comPortCtl.text);
                           }
                         } else if (scale.tMedia == netScaleType) {
                           final netConfig =
                               scale.mediaConfig as NetworkMediaConfig;
                           ipCtl.text = netConfig.ipAddress;
                           portCtl.text = netConfig.port.toString();
+                          if (scale.scaleModel == "S15") {
+                            comPortCtl.text = '';
+                            baudRateCtl.text = '';
+                            PublicFunctions.getSerialPort(scale.scaleId);
+                          }
                         } else {
                           final bluetoothConfig =
                               scale.mediaConfig as BluetoothMediaConfig;

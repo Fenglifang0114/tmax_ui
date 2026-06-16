@@ -481,9 +481,7 @@ class SelectScalesPageState extends State<SelectScalesPage> {
                   SizedBox(
                       width: 120,
                       child: Text(
-                          scaleNetItems[index].scaleModel! == "TMax"
-                              ? ""
-                              : scaleNetItems[index].scaleSn!,
+                          scaleNetItems[index].scaleSn!,
                           style: TextStyle(
                               color: getResTextColor(
                                   scaleNetItems[index].scaleId!)))),

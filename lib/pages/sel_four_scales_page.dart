@@ -390,9 +390,7 @@ class SltFourScalesPageState extends State<SltFourScalesPage> {
                   SizedBox(
                       width: 150,
                       child: Text(
-                          scaleNetItems[index].scaleModel! == "TMax"
-                              ? ""
-                              : scaleNetItems[index].scaleSn!,
+                          scaleNetItems[index].scaleSn!,
                           style: TextStyle(
                               color: getResTextColor(
                                   scaleNetItems[index].scaleId!)))),

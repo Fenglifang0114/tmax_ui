@@ -472,7 +472,7 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                   context,
                   btnHeight,
                   localizedStrings.gBtnConfirm,
-                  scaleNameCtl.text.isNotEmpty && _isModifyName
+                  scaleNameCtl.text.isNotEmpty && _isModifyName && (getScaleType() != comScaleType || comPortCtl.text.isNotEmpty)
                       ? () {
                           modifyScaleName();
                           isEditing = true;

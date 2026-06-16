@@ -423,6 +423,7 @@ class RespSysMsgType {
       final jsonInfo = json.decode(dataString);
       ScaleIsOnline scaleOnline;
       scaleOnline = ScaleIsOnline.fromJson(jsonInfo);
+      
       for (var scale in myAllScalesList) {
         if (scale.scaleId == scaleOnline.scaleId) {
           // 现在可以正常更新状态
@@ -431,10 +432,33 @@ class RespSysMsgType {
             scale.scaleModel = scaleOnline.modelName!;
             scale.scaleSn = scaleOnline.sn!;
           }
-          eventBus.fire(EventRespScaleOnline(''));
           break;
         }
       }
+
+      for (var scale in myNetScaleList) {
+        if (scale.scaleId == scaleOnline.scaleId) {
+          scale.isOnline = scaleOnline.isOnline!;
+          if (scaleOnline.isOnline!) {
+            scale.scaleModel = scaleOnline.modelName!;
+            scale.scaleSn = scaleOnline.sn!;
+          }
+          break;
+        }
+      }
+
+      for (var scale in myComScaleList) {
+        if (scale.scaleId == scaleOnline.scaleId) {
+          scale.isOnline = scaleOnline.isOnline!;
+          if (scaleOnline.isOnline!) {
+            scale.scaleModel = scaleOnline.modelName!;
+            scale.scaleSn = scaleOnline.sn!;
+          }
+          break;
+        }
+      }
+
+      eventBus.fire(EventRespScaleOnline(''));
     } catch (e) {
       return;
     }

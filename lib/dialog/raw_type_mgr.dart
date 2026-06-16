@@ -485,10 +485,7 @@ class AddRawTypeDialogState extends State<AddRawTypeDialog> {
                               maxLines: 5,
                               minLines: 1,
                               onChanged: (value) {
-                                setState(() {
-                                  // 这里可以添加搜索逻辑
-                                  rawTypeCtl.text = value;
-                                });
+                                setState(() {});
                               },
                             )),
                       ),
@@ -686,10 +683,7 @@ class EditRawTypeDialogState extends State<EditRawTypeDialog> {
                               maxLines: 5,
                               minLines: 1,
                               onChanged: (value) {
-                                setState(() {
-                                  // 这里可以添加搜索逻辑
-                                  rawTypeCtl.text = value;
-                                });
+                                setState(() {});
                               },
                             )),
                       ),

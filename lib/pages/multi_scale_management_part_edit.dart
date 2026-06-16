@@ -132,7 +132,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
                 context,
                 btnHeight,
                 localizedStrings.gBtnConfirm,
-                portCtl.text.isNotEmpty && _isValidIP && !isModifyingSerialPort
+                portCtl.text.isNotEmpty && _isValidIP && !isModifyingSerialPort && (scaleModelCtl.text != 'S15' || comPortCtl.text.isNotEmpty)
                     ? () {
                         editNetScale();
                       }

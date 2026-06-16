@@ -356,6 +356,10 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
             if (parts.length > 1) {
               baudRateCtl.text = parts[1];
             }
+            
+            if (comPortCtl.text.isNotEmpty && !usingComLists.contains(comPortCtl.text)) {
+              usingComLists.add(comPortCtl.text);
+            }
           });
         }
       }

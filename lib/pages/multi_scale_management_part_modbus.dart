@@ -376,7 +376,8 @@ extension MultiScaleManagementModbusExt on MultiScaleManagementState {
                       context,
                       btnHeight,
                       localizedStrings.gBtnConfirm,
-                      () {
+                      (modbusIdCtl.text.isNotEmpty && (modbusProtocol != "Modbus RTU" || modbusComPortCtl.text.isNotEmpty) && (modbusProtocol != "Modbus TCP" || modbusTcpPortCtl.text.isNotEmpty))
+                      ? () {
                         if (modbusIdCtl.text.isEmpty) {
                           showTipInfo(localizedStrings.gModbusIdMissingTip, context);
                           return;
@@ -428,7 +429,8 @@ extension MultiScaleManagementModbusExt on MultiScaleManagementState {
                            isAddModbus = false;
                            isEditModbus = false;
                         });
-                      },
+                      }
+                      : null,
                       Theme.of(context).colorScheme.onPrimary,
                       Theme.of(context).colorScheme.primary,
                       Theme.of(context).colorScheme.onPrimary),
