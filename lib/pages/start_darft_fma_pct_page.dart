@@ -2707,9 +2707,11 @@ class DarftFmaPctWgtPageState extends State<DarftFmaPctWgtPage>
       return;
     }
     //判断当前是否已经稳定
-    if ((myReqWeightCountine.msgBody?.isStable ?? false) == false) {
-      showTipInfo(localizedStrings.fStableOperationHint, context);
-      return;
+    if (autoNextStep == true) {
+      if ((myReqWeightCountine.msgBody?.isStable ?? false) == false) {
+        showTipInfo(localizedStrings.fStableOperationHint, context);
+        return;
+      }
     }
 
     if (selectedProcessWgt.no == 0) {

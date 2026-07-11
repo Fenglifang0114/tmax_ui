@@ -118,6 +118,9 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   dynamic _eventbus10;
   dynamic _eventbus11;
   bool isModifyingSerialPort = false; // 是否正在修改串口
+  
+  bool isAutoScanEnabled = true;
+  dynamic _eventbusAutoScan;
 
   Timer? checkIsOnlineTimer;
   List<String> comLists = [];
@@ -177,6 +180,15 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     PublicFunctions.getPortList();
     PublicFunctions.getScaleList();
     PublicFunctions.getModbusServices();
+    PublicFunctions.getAutoScan();
+
+    _eventbusAutoScan = eventBus.on<EventRespGetAutoScan>().listen((event) {
+      if (mounted) {
+        setState(() {
+          isAutoScanEnabled = event.obj == 'true';
+        });
+      }
+    });
 
     checkPortList();
 
@@ -518,6 +530,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     _eventbus9.cancel();
     _eventbus6.cancel();
     _eventbus10.cancel();
+    _eventbusAutoScan?.cancel();
 
     scaleNameCtl.dispose();
     ipCtl.dispose();

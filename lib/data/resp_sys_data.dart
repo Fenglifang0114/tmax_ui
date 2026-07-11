@@ -148,6 +148,9 @@ class RespSysMsgType {
   static const String respModbusAdd = 'resp_modbus_add';
   static const String respModbusEdit = 'resp_modbus_edit';
   static const String respModbusDel = 'resp_modbus_del';
+  
+  static const String respGetAutoScan = 'resp_get_auto_scan';
+  static const String respSetAutoScan = 'resp_set_auto_scan';
 
   static final Map<String, Function> handlers = {
     RespSysMsgType.respPortsList: handlePortsList,
@@ -260,11 +263,23 @@ class RespSysMsgType {
     RespSysMsgType.respModbusAdd: handleRespModbusAdd,
     RespSysMsgType.respModbusEdit: handleRespModbusEdit,
     RespSysMsgType.respModbusDel: handleRespModbusDel,
+    RespSysMsgType.respGetAutoScan: handleRespGetAutoScan,
+    RespSysMsgType.respSetAutoScan: handleRespSetAutoScan,
   };
 
   static void handleRespModbusServices(dynamic jsonData) {
     String dataString = jsonData['MsgBody'];
     eventBus.fire(EventRespGetModbusServices(dataString));
+  }
+
+  static void handleRespGetAutoScan(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespGetAutoScan(dataString));
+  }
+
+  static void handleRespSetAutoScan(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespSetAutoScan(dataString));
   }
 
   static void handleRespModbusAdd(dynamic jsonData) {

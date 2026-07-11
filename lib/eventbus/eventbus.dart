@@ -906,6 +906,16 @@ class EventRespOpenOutputPort {
   EventRespOpenOutputPort(this.obj);
 }
 
+class EventRespGetAutoScan {
+  dynamic obj;
+  EventRespGetAutoScan(this.obj);
+}
+
+class EventRespSetAutoScan {
+  dynamic obj;
+  EventRespSetAutoScan(this.obj);
+}
+
 class EventRespGetDraftFmaWgtRecList {
   dynamic obj;
   EventRespGetDraftFmaWgtRecList(this.obj);

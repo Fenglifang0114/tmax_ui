@@ -169,8 +169,9 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
             height: smallPadding,
           ),
           myAllScalesList.isEmpty
-              ? showNoDeviceWidget(context)
-              : showAllDevicesWidget()
+              ? Expanded(child: showNoDeviceWidget(context))
+              : showAllDevicesWidget(),
+          showAutoScanSwitch(),
         ],
       ),
     );
@@ -381,4 +382,28 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
     );
   }
 
+  Widget showAutoScanSwitch() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+      color: Theme.of(context).colorScheme.surface,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(localizedStrings.gAutoScanSerialPort, 
+               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                 color: Theme.of(context).colorScheme.onSurface
+               )),
+          Switch(
+            value: isAutoScanEnabled,
+            onChanged: (val) {
+              setState(() {
+                isAutoScanEnabled = val;
+              });
+              PublicFunctions.setAutoScan(val);
+            },
+          )
+        ],
+      ),
+    );
+  }
 }

@@ -2657,9 +2657,12 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
       return;
     }
     //判断当前是否已经稳定
-    if ((myReqWeightCountine.msgBody?.isStable ?? false) == false) {
-      showTipInfo(localizedStrings.fStableOperationHint, context);
-      return;
+    //20260629  判断下一步的时候如果自动下一步是false，就不判断了
+    if (autoNextStep == true) {
+      if ((myReqWeightCountine.msgBody?.isStable ?? false) == false) {
+        showTipInfo(localizedStrings.fStableOperationHint, context);
+        return;
+      }
     }
 
     if (selectedProcessWgt.no == 0) {

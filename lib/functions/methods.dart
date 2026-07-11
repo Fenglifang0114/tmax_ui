@@ -1492,4 +1492,15 @@ class PublicFunctions {
     myScaleCmd.cmdData = '';
     sendMsg(scaleId, jsonEncode(myScaleCmd));
   }
+  static void getAutoScan() {
+    myScaleCmd.cmdMode = "get_auto_scan";
+    myScaleCmd.cmdData = '';
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  static void setAutoScan(bool enable) {
+    myScaleCmd.cmdMode = "set_auto_scan";
+    myScaleCmd.cmdData = enable ? "true" : "false";
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
 }

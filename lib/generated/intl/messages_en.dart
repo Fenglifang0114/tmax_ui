@@ -437,6 +437,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "gAppInformation":
             MessageLookupByLibrary.simpleMessage("App Information"),
         "gAttribute": MessageLookupByLibrary.simpleMessage("Attribute"),
+        "gAutoScanSerialPort":
+            MessageLookupByLibrary.simpleMessage("Auto scan serial port"),
         "gBarCodeAlignment": MessageLookupByLibrary.simpleMessage("Alignment"),
         "gBarCodeContent": MessageLookupByLibrary.simpleMessage("Content"),
         "gBarCodeDataType": MessageLookupByLibrary.simpleMessage("DATA TYPE"),

@@ -342,6 +342,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "gAlignment": MessageLookupByLibrary.simpleMessage("对齐方式:"),
         "gAppInformation": MessageLookupByLibrary.simpleMessage("应用信息"),
         "gAttribute": MessageLookupByLibrary.simpleMessage("属性"),
+        "gAutoScanSerialPort": MessageLookupByLibrary.simpleMessage("自动扫描串口"),
         "gBarCodeAlignment": MessageLookupByLibrary.simpleMessage("对齐方式"),
         "gBarCodeContent": MessageLookupByLibrary.simpleMessage("内容"),
         "gBarCodeDataType": MessageLookupByLibrary.simpleMessage("数据类型"),

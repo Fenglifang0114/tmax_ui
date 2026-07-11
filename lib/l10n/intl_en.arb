@@ -3795,5 +3795,9 @@
     "gTipOpenPortFailed": "Failed to open serial port",
     "@gTipOpenPortFailed": {
         "description": "Failed to open serial port"
+    },
+    "gAutoScanSerialPort": "Auto scan serial port",
+    "@gAutoScanSerialPort": {
+        "description": "Auto scan serial port"
     }
 }

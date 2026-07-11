@@ -9571,6 +9571,16 @@ class S {
       args: [],
     );
   }
+
+  /// `Auto scan serial port`
+  String get gAutoScanSerialPort {
+    return Intl.message(
+      'Auto scan serial port',
+      name: 'gAutoScanSerialPort',
+      desc: 'Auto scan serial port',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
