@@ -8,6 +8,8 @@ abstract class Scale {
   set isOnline(bool value); // 允许设置
   String get scaleModel;
   set scaleModel(String value); // 允许设置
+  String? get innerModel;
+  set innerModel(String? value); // 允许设置
   int get scaleCat;
   String get scaleSn;
   set scaleSn(String value); // 允许设置
@@ -127,6 +129,16 @@ class UnifiedScale implements Scale {
     _scaleModel = value;
   }
 
+  String? _innerModel;
+
+  @override
+  String? get innerModel => _innerModel;
+
+  @override
+  set innerModel(String? value) {
+    _innerModel = value;
+  }
+
   @override
   String get scaleSn => _scaleSn;
 
@@ -184,6 +196,7 @@ class UnifiedScale implements Scale {
   UnifiedScale({
     required bool isOnline, // 修改为接收 isOnline 参数
     required String scaleModel,
+    String? innerModel,
     required this.scaleCat,
     required String scaleSn,
     required this.scaleId,
@@ -197,6 +210,7 @@ class UnifiedScale implements Scale {
   }) {
     _isOnline = isOnline; // 初始化 _isOnline
     _scaleModel = scaleModel;
+    _innerModel = innerModel;
     _scaleSn = scaleSn;
     _scaleName = scaleName;
     _modbusId = modbusId;
@@ -221,6 +235,7 @@ class UnifiedScale implements Scale {
     return UnifiedScale(
       isOnline: json['IsOnline'] as bool,
       scaleModel: json['ScaleModel'] as String,
+      innerModel: json['InnerModel'] as String?,
       scaleCat: json['ScaleCat'] as int,
       scaleSn: json['ScaleSn'] as String,
       scaleId: json['ScaleId'] as int,

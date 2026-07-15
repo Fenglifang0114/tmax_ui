@@ -640,7 +640,7 @@ class RespMsgType {
     if (myFactoryInfoFromScale.modelName != '') {
       for (var tempScale in myAllScalesList) {
         if (tempScale.scaleId == id) {
-          tempScale.scaleModel = myFactoryInfoFromScale.modelName!;
+          tempScale.innerModel = myFactoryInfoFromScale.modelName!;
           tempScale.scaleSn = myFactoryInfoFromScale.scaleSn!;
           tempScale.isOnline = true;
           break;
