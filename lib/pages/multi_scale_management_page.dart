@@ -18,6 +18,8 @@ import 'package:t_max/pages/btlist.dart';
 import 'package:t_max/pages/gif.dart';
 import 'package:t_max/widget/common_widget.dart';
 import 'package:t_max/widget/no_device_widget.dart';
+import 'package:t_max/data/custom_model_info.dart';
+import 'package:t_max/dialog/select_model_name.dart';
 import '../data/cominfoslist_data.dart';
 import '../data/device_data.dart';
 import '../data/downloadresponse.dart';
@@ -181,6 +183,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     PublicFunctions.getScaleList();
     PublicFunctions.getModbusServices();
     PublicFunctions.getAutoScan();
+    modelNameInfoData.getModelName();
 
     _eventbusAutoScan = eventBus.on<EventRespGetAutoScan>().listen((event) {
       if (mounted) {
@@ -208,6 +211,10 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
           if (dataStr.isNotEmpty) {
             if (dataStr.contains('ok')) {
               selScaleId = -1;
+              scaleNameCtl.text = '';
+              scaleModelCtl.text = '';
+              comPortCtl.text = '';
+              baudRateCtl.text = '';
               showTipInfo(localizedStrings.fSuccessMsg, context);
               PublicFunctions.getScaleList();
               return;
@@ -738,7 +745,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myMediaConf.mediaInfoJson = infoString;
     myMediaConf.type = 0;
     addNetScale.scaleId = 10;
-    addNetScale.scaleModel = 'TMax';
+    addNetScale.scaleModel = scaleModelCtl.text.isEmpty ? 'TMax' : scaleModelCtl.text;
     if (isDC500) {
       addNetScale.scaleModel = 'DC500';
     }

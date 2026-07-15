@@ -159,6 +159,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/images/
+    - assets/SCP/
     - assets/template/   
 
 

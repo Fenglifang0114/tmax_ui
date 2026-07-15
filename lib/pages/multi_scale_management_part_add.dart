@@ -49,6 +49,7 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
         SizedBox(
           height: regularPadding,
         ),
+
         buildItemInfo(
             showItemNameWithStar(context, localizedStrings.gSerialPort, false),
             showDropDownButton(
@@ -132,8 +133,63 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
           showInputBox(context, modbusIdCtl, '1~247', (value) {
             setState(() {});
           }, true),
-          Container(),
-          Container(),
+          showItemNameWithStar(context, localizedStrings.gModelName, false),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: inputHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant),
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    scaleModelCtl.text,
+                    style: Theme.of(context).textTheme.bodySmall!.apply(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              SizedBox(width: smallPadding),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  fixedSize: Size(100, inputHeight),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.zero,
+                  ),
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return ModelSelectionScreen(
+                        modelList: modelNameInfoData.modelNameInfoList,
+                        onChanged: (value) {},
+                      );
+                    },
+                  ).then((selectedModel) {
+                    if (selectedModel != null && selectedModel is ModelNameInfo) {
+                      setState(() {
+                        scaleModelCtl.text = selectedModel.customScaleName ?? selectedModel.innerScaleName ?? '';
+                      });
+                    }
+                  });
+                },
+                child: Text(
+                  "Select",
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                ),
+              ),
+            ],
+          ),
         ),
         SizedBox(
           height: regularPadding,

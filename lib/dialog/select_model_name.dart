@@ -343,10 +343,10 @@ class ModelSelectionScreenState extends State<ModelSelectionScreen> {
 }
 
 String getImagePath(String protocolName) {
-  if (protocolName == '' || protocolName != 'SCP-01') {
-    return 'assets/images/SCP-01.png';
+  if (protocolName == '') {
+    return 'assets/SCP/SCP-01.jpg';
   }
-  return 'assets/images/$protocolName.png';
+  return 'assets/SCP/$protocolName.jpg';
 }
 
 Future<bool> doesAssetExist(String assetPath) async {

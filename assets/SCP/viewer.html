@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SCP Protocol Viewer</title>
+    <style>
+        body { font-family: sans-serif; }
+        .protocol { margin-bottom: 50px; border-bottom: 2px solid #ccc; padding-bottom: 20px; }
+        img { max-width: 100%; height: auto; display: block; margin-top: 10px; }
+    </style>
+</head>
+<body>
+    <h1>SCP Protocols</h1>
+    <script>
+        for (let i = 1; i <= 21; i++) {
+            let num = i < 10 ? '0' + i : i;
+            let div = document.createElement('div');
+            div.className = 'protocol';
+            div.innerHTML = '<h2>SCP-' + num + '</h2><img src="SCP-' + num + '.jpg" alt="SCP-' + num + '">';
+            document.body.appendChild(div);
+        }
+    </script>
+</body>
+</html>

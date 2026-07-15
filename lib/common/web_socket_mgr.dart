@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:web_socket_channel/io.dart';
 import '../data/resp_type_data.dart';
@@ -168,7 +169,9 @@ class _ScaleConnection {
       await _disconnect();
 
       // 建立新连接
-      _channel = IOWebSocketChannel.connect(Uri.parse(url));
+      final ws = await WebSocket.connect(url).timeout(const Duration(seconds: 5));
+      ws.pingInterval = const Duration(seconds: 15);
+      _channel = IOWebSocketChannel(ws);
 
       // 设置监听器
       _channel!.stream.listen(
@@ -287,14 +290,7 @@ class _ScaleConnection {
   }
 
   void _sendHeartbeat() {
-    if (!_isConnected) return;
-
-    Map<String, dynamic> heartbeat = {
-      "code": 9999,
-      "msg": "heartbeat",
-      "timestamp": DateTime.now().millisecondsSinceEpoch
-    };
-    sendMessage(json.encode(heartbeat));
+    // 已经启用了底层 websocket pingInterval，不再发送会引起后端解析异常的应用层心跳 JSON
   }
 
   Future<void> _disconnect() async {

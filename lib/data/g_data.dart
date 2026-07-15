@@ -1,5 +1,6 @@
 //全局数据
 import 'package:t_max/data/sys_user_from_db.dart';
+import 'package:t_max/data/custom_model_info.dart';
 
 SysUserDetailFromDb mySysUser = SysUserDetailFromDb(); //登录的系统用户信息
 
@@ -10,3 +11,5 @@ final adminRoleId = 2;
 final operatorRoleId = 3;
 
 bool firstLogin = true;
+
+ModelNameInfoList modelNameInfoData = ModelNameInfoList([]);

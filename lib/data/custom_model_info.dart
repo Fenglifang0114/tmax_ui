@@ -1,6 +1,7 @@
 // 自定义机种信息
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/services.dart';
 
@@ -100,15 +101,92 @@ class ModelNameInfoList {
   ModelNameInfoList(this.modelNameInfoList);
 
   Future<String> getModelStrFromJson() async {
-    // 先验证文件是否存在 'assets/template/custom_model_name.json'
     try {
-      String modelNameData =
-          await rootBundle.loadString('assets/template/custom_model_name.json');
-      return modelNameData;
+      // 1. 获取 exe 所在同级目录
+      String exePath = Platform.resolvedExecutable;
+      String dirPath = File(exePath).parent.path;
+      File jsonFile = File('$dirPath${Platform.pathSeparator}custom_model_name.json');
+
+      // 2. 如果存在，直接读取并返回
+      if (jsonFile.existsSync()) {
+        return await jsonFile.readAsString();
+      }
+
+      // 3. 如果不存在，从 assets 读取 CSV 解析
+      String csvData = await rootBundle.loadString('assets/template/scp.csv');
+      String generatedJson = _parseCsvToJson(csvData);
+
+      // 4. 将生成的 JSON 写入到 exe 同级目录
+      await jsonFile.writeAsString(generatedJson);
+
+      return generatedJson;
     } catch (e) {
+      print("getModelStrFromJson error: $e");
       return "";
     }
   }
+
+  String _parseCsvToJson(String csvData) {
+    List<String> lines = csvData.split('\n');
+    Map<String, Map<String, dynamic>> modelMap = {};
+
+    // 跳过表头，按行解析
+    for (int i = 1; i < lines.length; i++) {
+      if (lines[i].trim().isEmpty) continue;
+
+      List<String> columns = lines[i].split(',');
+      if (columns.length >= 3) {
+        String customer = columns[0].trim();
+        String inner = columns[1].trim();
+        String scpStr = columns[2].trim();
+
+        String mapKey = '${customer}_$inner';
+
+        // 简单大类推断
+        String category = "Weighing Scale";
+        if (customer.contains("C")) {
+          category = "Counting Scale";
+        } else if (customer.contains("P")) {
+          category = "Pricing Scale";
+        }
+
+        if (!modelMap.containsKey(mapKey)) {
+          modelMap[mapKey] = {
+            "Category": category,
+            "CustomScaleName": customer,
+            "InnerScaleName": inner,
+            "SubModel": [],
+            "Remark": ""
+          };
+        }
+
+        // 分割协议 (SCP-01/SCP-02)
+        List<String> protocols = scpStr
+            .split('/')
+            .map((e) => e.trim())
+            .where((e) => e.isNotEmpty)
+            .toList();
+
+        // 将协议去重追加到 SubModel
+        List currentSubModels = modelMap[mapKey]!["SubModel"];
+        for (var p in protocols) {
+          bool exists = currentSubModels
+              .any((element) => element["ProtocolName"] == p);
+          if (!exists) {
+            currentSubModels.add({
+              "ModelName": "",
+              "ProtocolName": p
+            });
+          }
+        }
+      }
+    }
+
+    // 转换为 List 并输出 JSON 字符串，带有缩进以提高可读性
+    List<Map<String, dynamic>> resultList = modelMap.values.toList();
+    return JsonEncoder.withIndent('  ').convert(resultList);
+  }
+
 
   getModelName() async {
     String modelStr = "";

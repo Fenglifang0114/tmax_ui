@@ -77,6 +77,10 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
                               portCtl.text = "";
                               macCtl.text = "";
                               btNameCtl.text = "";
+                              comPortCtl.text = "";
+                              scaleModelCtl.text = "";
+                              scaleNameCtl.text = "";
+                              baudRateCtl.text = "";
                               
                               // 自动分配下一个可用的 Modbus 站号
                               int nextModbusId = 1;

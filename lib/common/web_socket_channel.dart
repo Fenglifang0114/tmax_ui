@@ -66,6 +66,7 @@ class WebSocketManager {
       // 建立新连接并等待建立完成
       final ws =
           await WebSocket.connect(_url).timeout(const Duration(seconds: 5));
+      ws.pingInterval = const Duration(seconds: 15); // 使用底层协议的Ping保持连接
       _channel = IOWebSocketChannel(ws);
 
       // 监听连接
@@ -219,18 +220,7 @@ class WebSocketManager {
 
   // 发送心跳包
   void _sendHeartbeat() {
-    if (!_isConnected) return;
-
-    try {
-      Map<String, dynamic> heartbeat = {
-        "code": 9999,
-        "msg": "heartbeat",
-        "timestamp": DateTime.now().millisecondsSinceEpoch
-      };
-      sendMessage(json.encode(heartbeat));
-    } catch (e) {
-      _log('send heartbeat failed: $e');
-    }
+    // 已经启用了底层 websocket pingInterval，不再发送会引起后端解析异常的应用层心跳 JSON
   }
 
   /// 断线后的智能重连策略处理器。
