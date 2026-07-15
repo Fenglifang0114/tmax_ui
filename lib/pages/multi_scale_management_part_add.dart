@@ -184,8 +184,6 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
             setState(() {});
           }, true) : Container(),
         ),
-
-        ),
         SizedBox(
           height: regularPadding,
         ),
