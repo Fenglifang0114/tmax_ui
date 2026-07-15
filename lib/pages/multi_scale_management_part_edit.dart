@@ -116,13 +116,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
           ),
         buildItemInfo(
           showItemNameWithStar(context, "Protocol", false),
-          showDropDownButton(context, '', protocolNameCtl, protocolList, (value) {
-            setState(() {
-              if (protocolList.contains(value)) {
-                protocolNameCtl.text = value!;
-              }
-            });
-          }),
+          showInputBox(context, protocolNameCtl, '', (value) {}, false),
           protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, true) : Container(),
           protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '1~247', (value) {
             setState(() {});

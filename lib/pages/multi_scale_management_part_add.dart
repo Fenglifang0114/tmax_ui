@@ -111,23 +111,7 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
               }
             });
           }),
-          showItemNameWithStar(context, "Protocol", false),
-          showDropDownButton(context, '', protocolNameCtl, protocolList, (value) {
-            setState(() {
-              if (protocolList.contains(value)) {
-                protocolNameCtl.text = value!;
-              }
-            });
-          }),
-        ),
-        SizedBox(
-          height: regularPadding,
-        ),
         buildItemInfo(
-          protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, true) : Container(),
-          protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '1~247', (value) {
-            setState(() {});
-          }, true) : Container(),
           showItemNameWithStar(context, localizedStrings.gModelName, false),
           Row(
             children: [
@@ -156,7 +140,7 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
                   backgroundColor: Theme.of(context).colorScheme.primary,
                   fixedSize: Size(100, inputHeight),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.zero,
+                    borderRadius: BorderRadius.circular(0),
                   ),
                 ),
                 onPressed: () {
@@ -166,12 +150,16 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
                       return ModelSelectionScreen(
                         modelList: modelNameInfoData.modelNameInfoList,
                         onChanged: (value) {},
+                        onlyScpX: false,
                       );
                     },
-                  ).then((selectedModel) {
-                    if (selectedModel != null && selectedModel is ModelNameInfo) {
+                  ).then((result) {
+                    if (result != null && result is Map) {
+                      final selectedModel = result['model'] as ModelNameInfo;
+                      final protocol = result['protocol'] as String;
                       setState(() {
                         scaleModelCtl.text = selectedModel.customScaleName ?? selectedModel.innerScaleName ?? '';
+                        protocolNameCtl.text = protocol;
                       });
                     }
                   });
@@ -185,6 +173,12 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
               ),
             ],
           ),
+          protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, true) : Container(),
+          protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '1~247', (value) {
+            setState(() {});
+          }, true) : Container(),
+        ),
+
         ),
         SizedBox(
           height: regularPadding,
@@ -364,17 +358,44 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              showItemNameWithStar(context, "Protocol", false),
+              showItemNameWithStar(context, localizedStrings.gModelName, false),
               SizedBox(width: 10),
               Container(
-                width: 100,
-                child: showDropDownButton(context, '', protocolNameCtl, protocolList, (value) {
-                  setState(() {
-                    if (protocolList.contains(value)) {
-                      protocolNameCtl.text = value!;
-                    }
-                  });
-                }),
+                width: 120,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        scaleModelCtl.text,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.search),
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return ModelSelectionScreen(
+                              modelList: modelNameInfoData.modelNameInfoList,
+                              onChanged: (value) {},
+                              onlyScpX: true,
+                            );
+                          },
+                        ).then((result) {
+                          if (result != null && result is Map) {
+                            final selectedModel = result['model'] as ModelNameInfo;
+                            final protocol = result['protocol'] as String;
+                            setState(() {
+                              scaleModelCtl.text = selectedModel.customScaleName ?? selectedModel.innerScaleName ?? '';
+                              protocolNameCtl.text = protocol;
+                            });
+                          }
+                        });
+                      },
+                    ),
+                  ],
+                ),
               ),
               if (protocolNameCtl.text == 'SCP-X') ...[
                 SizedBox(width: 20),
@@ -583,14 +604,67 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
           height: regularPadding,
         ),
         buildItemInfo(
-          showItemNameWithStar(context, "Protocol", false),
-          showDropDownButton(context, '', protocolNameCtl, protocolList, (value) {
-            setState(() {
-              if (protocolList.contains(value)) {
-                protocolNameCtl.text = value!;
-              }
-            });
-          }),
+          showItemNameWithStar(context, localizedStrings.gModelName, false),
+          Row(
+            children: [
+              Expanded(
+                child: Container(
+                  height: inputHeight,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: Theme.of(context).colorScheme.outlineVariant),
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    scaleModelCtl.text,
+                    style: Theme.of(context).textTheme.bodySmall!.apply(
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+              SizedBox(width: smallPadding),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Theme.of(context).colorScheme.primary,
+                  fixedSize: Size(100, inputHeight),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(0),
+                  ),
+                ),
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return ModelSelectionScreen(
+                        modelList: modelNameInfoData.modelNameInfoList,
+                        onChanged: (value) {},
+                        onlyScpX: true,
+                      );
+                    },
+                  ).then((result) {
+                    if (result != null && result is Map) {
+                      final selectedModel = result['model'] as ModelNameInfo;
+                      final protocol = result['protocol'] as String;
+                      setState(() {
+                        scaleModelCtl.text = selectedModel.customScaleName ?? selectedModel.innerScaleName ?? '';
+                        protocolNameCtl.text = protocol;
+                      });
+                    }
+                  });
+                },
+                child: Text(
+                  "Select",
+                  style: Theme.of(context).textTheme.bodyMedium!.copyWith(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ),
+                ),
+              ),
+            ],
+          ),
           protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, true) : Container(),
           protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '1~247', (value) {
             setState(() {});

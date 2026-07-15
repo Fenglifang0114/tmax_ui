@@ -8,8 +8,9 @@ import 'package:t_max/widget/dialog_head_style.dart';
 class ModelSelectionScreen extends StatefulWidget {
   final List<ModelNameInfo> modelList;
   final ValueChanged onChanged;
+  final bool onlyScpX;
   const ModelSelectionScreen(
-      {super.key, required this.modelList, required this.onChanged});
+      {super.key, required this.modelList, required this.onChanged, this.onlyScpX = false});
   @override
   ModelSelectionScreenState createState() => ModelSelectionScreenState();
 }
@@ -34,9 +35,18 @@ class ModelSelectionScreenState extends State<ModelSelectionScreen> {
       final innerName = model.innerScaleName ?? '';
       final category = model.category ?? '';
 
-      return customName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+      bool matchesSearch = customName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           innerName.toLowerCase().contains(_searchQuery.toLowerCase()) ||
           category.toLowerCase().contains(_searchQuery.toLowerCase());
+      
+      if (!matchesSearch) return false;
+
+      if (widget.onlyScpX) {
+        if (model.subModel == null || model.subModel!.isEmpty) return false;
+        bool hasScpx = model.subModel!.any((sub) => sub.protocolName == 'SCP-X');
+        return hasScpx;
+      }
+      return true;
     }).toList();
     // 分组
     for (var model in filteredList) {
@@ -53,9 +63,20 @@ class ModelSelectionScreenState extends State<ModelSelectionScreen> {
     setState(() {
       _selModel = model;
       if (model.subModel != null && model.subModel!.isNotEmpty) {
-        _selProtocal = model.subModel![0].protocolName ?? '';
+        if (widget.onlyScpX) {
+          int idx = model.subModel!.indexWhere((sub) => sub.protocolName == 'SCP-X');
+          if (idx != -1) {
+            _selProtocal = model.subModel![idx].protocolName ?? '';
+            widget.onChanged(idx);
+          } else {
+            _selProtocal = model.subModel![0].protocolName ?? '';
+            widget.onChanged(0);
+          }
+        } else {
+          _selProtocal = model.subModel![0].protocolName ?? '';
+          widget.onChanged(0);
+        }
       }
-      widget.onChanged(0);
     });
   }
 
@@ -230,7 +251,10 @@ class ModelSelectionScreenState extends State<ModelSelectionScreen> {
                         ),
                       ),
                       onPressed: () {
-                        Navigator.pop(context, _selModel);
+                        Navigator.pop(context, {
+                          'model': _selModel,
+                          'protocol': _selProtocal,
+                        });
                       },
                       child: Text(
                         localizedStrings.gBtnConfirm,
@@ -343,6 +367,9 @@ class ModelSelectionScreenState extends State<ModelSelectionScreen> {
 }
 
 String getImagePath(String protocolName) {
+  if (protocolName == 'SCP-X' || protocolName == 'None') {
+    return '';
+  }
   if (protocolName == '') {
     return 'assets/SCP/SCP-01.jpg';
   }
@@ -371,6 +398,9 @@ class AdvancedImageWithZoom extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (imagePath.isEmpty) {
+      return Container();
+    }
     return Padding(
       padding: const EdgeInsets.symmetric(
         horizontal: regularPadding,
