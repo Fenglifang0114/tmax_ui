@@ -111,28 +111,23 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
               }
             });
           }),
-          showItemNameWithStar(context, localizedStrings.commonApp, false),
-          Container(
-            width: inputWidth,
-            alignment: Alignment.centerLeft,
-            child: Checkbox(
-              value: isDC500,
-              onChanged: (bool? newValue) {
-                setState(() {
-                  isDC500 = newValue ?? false;
-                });
-              },
-            ),
-          ),
+          showItemNameWithStar(context, "Protocol", false),
+          showDropDownButton(context, '', protocolNameCtl, protocolList, (value) {
+            setState(() {
+              if (protocolList.contains(value)) {
+                protocolNameCtl.text = value!;
+              }
+            });
+          }),
         ),
         SizedBox(
           height: regularPadding,
         ),
         buildItemInfo(
-          showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
-          showInputBox(context, modbusIdCtl, '1~247', (value) {
+          protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, true) : Container(),
+          protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '1~247', (value) {
             setState(() {});
-          }, true),
+          }, true) : Container(),
           showItemNameWithStar(context, localizedStrings.gModelName, false),
           Row(
             children: [
@@ -369,14 +364,29 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
+              showItemNameWithStar(context, "Protocol", false),
               SizedBox(width: 10),
               Container(
                 width: 100,
-                child: showInputBox(context, modbusIdCtl, '1~247', (value) {
-                  setState(() {});
-                }, true),
+                child: showDropDownButton(context, '', protocolNameCtl, protocolList, (value) {
+                  setState(() {
+                    if (protocolList.contains(value)) {
+                      protocolNameCtl.text = value!;
+                    }
+                  });
+                }),
               ),
+              if (protocolNameCtl.text == 'SCP-X') ...[
+                SizedBox(width: 20),
+                showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
+                SizedBox(width: 10),
+                Container(
+                  width: 100,
+                  child: showInputBox(context, modbusIdCtl, '1~247', (value) {
+                    setState(() {});
+                  }, true),
+                ),
+              ],
             ],
           ),
           SizedBox(height: 20),
@@ -573,12 +583,18 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
           height: regularPadding,
         ),
         buildItemInfo(
-          showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
-          showInputBox(context, modbusIdCtl, '1~247', (value) {
+          showItemNameWithStar(context, "Protocol", false),
+          showDropDownButton(context, '', protocolNameCtl, protocolList, (value) {
+            setState(() {
+              if (protocolList.contains(value)) {
+                protocolNameCtl.text = value!;
+              }
+            });
+          }),
+          protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, true) : Container(),
+          protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '1~247', (value) {
             setState(() {});
-          }, true),
-          Container(),
-          Container(),
+          }, true) : Container(),
         ),
         SizedBox(
           height: regularPadding,

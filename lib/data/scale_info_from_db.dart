@@ -19,6 +19,8 @@ abstract class Scale {
   bool get sendService;
   int? get modbusId;
   set modbusId(int? value);
+  String? get protocolName;
+  set protocolName(String? value);
 
   // 媒体配置接口
   MediaConfig get mediaConfig;
@@ -166,6 +168,16 @@ class UnifiedScale implements Scale {
     _modbusId = value;
   }
 
+  String? _protocolName;
+
+  @override
+  String? get protocolName => _protocolName;
+
+  @override
+  set protocolName(String? value) {
+    _protocolName = value;
+  }
+
   @override
   final MediaConfig mediaConfig;
 
@@ -181,12 +193,14 @@ class UnifiedScale implements Scale {
     required this.sendService,
     required this.mediaConfig,
     int? modbusId,
+    String? protocolName,
   }) {
     _isOnline = isOnline; // 初始化 _isOnline
     _scaleModel = scaleModel;
     _scaleSn = scaleSn;
     _scaleName = scaleName;
     _modbusId = modbusId;
+    _protocolName = protocolName;
   }
 
   factory UnifiedScale.fromJson(Map<String, dynamic> json) {
@@ -216,6 +230,7 @@ class UnifiedScale implements Scale {
       sendService: json['SendService'] as bool,
       mediaConfig: config,
       modbusId: json['ModbusId'] as int?,
+      protocolName: json['ProtocolName'] as String?,
     );
   }
 }

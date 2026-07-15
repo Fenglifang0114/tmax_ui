@@ -126,12 +126,10 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                 height: regularPadding,
               ),
               buildItemInfo(
-                  showItemNameWithStar(context, localizedStrings.gModbusStationId, false),
-                  showInputBox(context, modbusIdCtl, '', (value) {
-                    setState(() {});
-                  }, false),
-                  Container(),
-                  Container()),
+                  showItemNameWithStar(context, "Protocol", false),
+                  showInputBox(context, protocolNameCtl, '', (value) {}, false),
+                  protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, false) : Container(),
+                  protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '', (value) {}, false) : Container()),
               SizedBox(
                 height: regularPadding,
               ),
@@ -273,12 +271,10 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                     height: regularPadding,
                   ),
                   buildItemInfo(
-                      showItemNameWithStar(context, localizedStrings.gModbusStationId, false),
-                      showInputBox(context, modbusIdCtl, '', (value) {
-                        setState(() {});
-                      }, false),
-                      Container(),
-                      Container()),
+                      showItemNameWithStar(context, "Protocol", false),
+                      showInputBox(context, protocolNameCtl, '', (value) {}, false),
+                      protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, false) : Container(),
+                      protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '', (value) {}, false) : Container()),
                   const SizedBox(
                     height: regularPadding,
                   ),
@@ -373,6 +369,11 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                   const SizedBox(
                     height: regularPadding,
                   ),
+                  buildItemInfo(
+                      showItemNameWithStar(context, "Protocol", false),
+                      showInputBox(context, protocolNameCtl, '', (value) {}, false),
+                      protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, false) : Container(),
+                      protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '', (value) {}, false) : Container()),
                   const SizedBox(
                     height: regularPadding,
                   ),

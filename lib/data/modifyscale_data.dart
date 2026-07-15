@@ -3,14 +3,16 @@ class AddNetScale {
   String? scaleModel;
   MediaConf? mediaConf;
   int? modbusId;
+  String? protocolName;
 
-  AddNetScale({this.scaleId, this.scaleModel, this.mediaConf, this.modbusId});
+  AddNetScale({this.scaleId, this.scaleModel, this.mediaConf, this.modbusId, this.protocolName});
 
   AddNetScale.fromJson(Map<String, dynamic> json) {
     scaleId = json['ScaleId'];
     scaleModel = json['ScaleModel'];
     mediaConf = json['MediaConf'];
     modbusId = json['ModbusId'];
+    protocolName = json['ProtocolName'];
   }
 
   Map<String, dynamic> toJson() {
@@ -19,6 +21,7 @@ class AddNetScale {
     data['ScaleModel'] = scaleModel;
     data['MediaConf'] = mediaConf;
     data['ModbusId'] = modbusId;
+    data['ProtocolName'] = protocolName;
     return data;
   }
 }
@@ -53,9 +56,10 @@ class ModifyNetScale {
   String? scaleName;
   MediaConf? mediaConf;
   int? modbusId;
+  String? protocolName;
 
   ModifyNetScale(
-      {this.scaleId, this.scaleModel, this.scaleName, this.mediaConf, this.modbusId});
+      {this.scaleId, this.scaleModel, this.scaleName, this.mediaConf, this.modbusId, this.protocolName});
 
   ModifyNetScale.fromJson(Map<String, dynamic> json) {
     scaleId = json['ScaleId'];
@@ -63,6 +67,7 @@ class ModifyNetScale {
     scaleName = json['ScaleName'];
     mediaConf = json['MediaConf'];
     modbusId = json['ModbusId'];
+    protocolName = json['ProtocolName'];
   }
 
   Map<String, dynamic> toJson() {
@@ -72,6 +77,7 @@ class ModifyNetScale {
     data['ScaleName'] = scaleName;
     data['MediaConf'] = mediaConf;
     data['ModbusId'] = modbusId;
+    data['ProtocolName'] = protocolName;
     return data;
   }
 }

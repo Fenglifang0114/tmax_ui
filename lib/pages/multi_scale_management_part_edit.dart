@@ -115,12 +115,18 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
             ),
           ),
         buildItemInfo(
-          showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
-          showInputBox(context, modbusIdCtl, '1~247', (value) {
+          showItemNameWithStar(context, "Protocol", false),
+          showDropDownButton(context, '', protocolNameCtl, protocolList, (value) {
+            setState(() {
+              if (protocolList.contains(value)) {
+                protocolNameCtl.text = value!;
+              }
+            });
+          }),
+          protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, true) : Container(),
+          protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '1~247', (value) {
             setState(() {});
-          }, true),
-          Container(),
-          Container(),
+          }, true) : Container(),
         ),
         SizedBox(
           height: regularPadding,

@@ -203,6 +203,7 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
                         scaleModelCtl.text = scale.scaleModel;
                         snCtl.text = scale.scaleSn;
                         modbusIdCtl.text = scale.modbusId?.toString() ?? '0';
+                        protocolNameCtl.text = scale.protocolName ?? 'SCP-X';
                         // 判断 scaleModel 是否为 TMax，且 sn 是否为 10 位并以 174 开头
 
                         if (scale.tMedia == comScaleType) {

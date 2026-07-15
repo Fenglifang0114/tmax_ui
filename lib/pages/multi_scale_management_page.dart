@@ -61,6 +61,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   TextEditingController comPortCtl = TextEditingController(text: '');
   TextEditingController baudRateCtl = TextEditingController(text: '115200');
   TextEditingController protocolCtl = TextEditingController(text: 'None');
+  TextEditingController protocolNameCtl = TextEditingController(text: 'SCP-X');
 
   TextEditingController macCtl = TextEditingController(text: '');
   TextEditingController btNameCtl = TextEditingController(text: '');
@@ -143,6 +144,13 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   List<String> stopBitsList = ['1']; //, '1.5', '2'
   List<String> checkBitsList = ['None']; //, 'Odd', 'Even'
   //'Xon/Xoff', 'None', 'Rts/Cts', 'Dsr/Dtr'
+  
+  List<String> protocolList = [
+    'SCP-X', 'SCP-01', 'SCP-02', 'SCP-03', 'SCP-04', 'SCP-05', 'SCP-06', 
+    'SCP-07', 'SCP-08', 'SCP-09', 'SCP-10', 'SCP-11', 'SCP-12', 'SCP-13', 
+    'SCP-14', 'SCP-15', 'SCP-16', 'SCP-17', 'SCP-18', 'SCP-19', 'SCP-20', 
+    'SCP-21', 'SCP-22', 'Standard/DC500'
+  ];
   String dialogtype = "com";
   String serialPortConnect = " ";
   bool isComSetting = false;
@@ -545,6 +553,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     comPortCtl.dispose();
     baudRateCtl.dispose();
     protocolCtl.dispose();
+    protocolNameCtl.dispose();
     dataBitCtl.dispose();
     stopBitCtl.dispose();
     scaleModelCtl.dispose();
@@ -627,6 +636,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myModifyScale.scaleModel = scaleModel;
     myModifyScale.mediaConf = myMediaConf;
     myModifyScale.modbusId = int.tryParse(modbusIdCtl.text) ?? 1;
+    myModifyScale.protocolName = protocolNameCtl.text;
     PublicFunctions.sendModifyInfo(jsonEncode(myModifyScale));
   }
 
@@ -713,6 +723,10 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     if (myAddNetScale.scaleModel == null || myAddNetScale.scaleModel!.isEmpty) {
       myAddNetScale.scaleModel = 'TMax';
     }
+    myAddNetScale.protocolName = protocolNameCtl.text;
+    if (myAddNetScale.protocolName != 'SCP-X') {
+      myAddNetScale.modbusId = 0;
+    }
     myAddNetScale.mediaConf = myMediaConf;
     PublicFunctions.sendModifyInfo(jsonEncode(myAddNetScale));
     editWifiInfo = false;
@@ -728,7 +742,11 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myAddNetScale.scaleId = 10;
     myAddNetScale.scaleModel = 'TMax';
     myAddNetScale.mediaConf = myMediaConf;
+    myAddNetScale.protocolName = protocolNameCtl.text;
     myAddNetScale.modbusId = currentModbusId;
+    if (myAddNetScale.protocolName != 'SCP-X') {
+      myAddNetScale.modbusId = 0;
+    }
     PublicFunctions.sendAddScale(jsonEncode(myAddNetScale));
     isAddNewScale = true;
   }
@@ -750,7 +768,11 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
       addNetScale.scaleModel = 'DC500';
     }
     addNetScale.mediaConf = myMediaConf;
+    addNetScale.protocolName = protocolNameCtl.text;
     addNetScale.modbusId = int.tryParse(modbusIdCtl.text) ?? 1;
+    if (addNetScale.protocolName != 'SCP-X') {
+      addNetScale.modbusId = 0;
+    }
     PublicFunctions.sendAddScale(jsonEncode(addNetScale));
     isDC500 = false;
     isAddNewScale = true;
@@ -772,7 +794,11 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myAddNetScale.scaleId = 10;
     myAddNetScale.scaleModel = 'TMax';
     myAddNetScale.mediaConf = myMediaConf;
+    myAddNetScale.protocolName = protocolNameCtl.text;
     myAddNetScale.modbusId = int.tryParse(modbusIdCtl.text) ?? 1;
+    if (myAddNetScale.protocolName != 'SCP-X') {
+      myAddNetScale.modbusId = 0;
+    }
     PublicFunctions.sendAddScale(jsonEncode(myAddNetScale));
     isAddNewScale = true;
   }
