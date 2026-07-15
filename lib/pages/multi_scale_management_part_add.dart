@@ -111,13 +111,6 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
               }
             });
           }),
-          Container(),
-          Container(),
-        ),
-        SizedBox(
-          height: regularPadding,
-        ),
-        buildItemInfo(
           showItemNameWithStar(context, localizedStrings.gModelName, false),
           Row(
             children: [
@@ -179,11 +172,18 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
               ),
             ],
           ),
-          protocolNameCtl.text == 'SCP-X' ? showItemNameWithStar(context, localizedStrings.gModbusStationId, true) : Container(),
-          protocolNameCtl.text == 'SCP-X' ? showInputBox(context, modbusIdCtl, '1~247', (value) {
-            setState(() {});
-          }, true) : Container(),
         ),
+        if (protocolNameCtl.text == 'SCP-X') ...[
+          SizedBox(height: regularPadding),
+          buildItemInfo(
+            showItemNameWithStar(context, localizedStrings.gModbusStationId, true),
+            showInputBox(context, modbusIdCtl, '1~247', (value) {
+              setState(() {});
+            }, true),
+            Container(),
+            Container(),
+          ),
+        ],
         SizedBox(
           height: regularPadding,
         ),

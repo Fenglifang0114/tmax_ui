@@ -121,7 +121,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   dynamic _eventbus10;
   dynamic _eventbus11;
   bool isModifyingSerialPort = false; // 是否正在修改串口
-  
+
   bool isAutoScanEnabled = true;
   dynamic _eventbusAutoScan;
 
@@ -131,12 +131,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
 
   List<String> baudRateList = [
     '115200',
-    '57600',
-    '38400',
-    '19200',
-    '14400',
     '9600',
-    '4800',
   ];
   List<String> scaleModelList = ['TMax'];
   String scaleModel = myModifyScale.scaleModel.toString();
@@ -144,13 +139,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   List<String> stopBitsList = ['1']; //, '1.5', '2'
   List<String> checkBitsList = ['None']; //, 'Odd', 'Even'
   //'Xon/Xoff', 'None', 'Rts/Cts', 'Dsr/Dtr'
-  
-  List<String> protocolList = [
-    'SCP-X', 'SCP-01', 'SCP-02', 'SCP-03', 'SCP-04', 'SCP-05', 'SCP-06', 
-    'SCP-07', 'SCP-08', 'SCP-09', 'SCP-10', 'SCP-11', 'SCP-12', 'SCP-13', 
-    'SCP-14', 'SCP-15', 'SCP-16', 'SCP-17', 'SCP-18', 'SCP-19', 'SCP-20', 
-    'SCP-21', 'SCP-22', 'Standard/DC500'
-  ];
+
   String dialogtype = "com";
   String serialPortConnect = " ";
   bool isComSetting = false;
@@ -174,9 +163,12 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
 
   String _getLocalizedError(String errStr) {
     String lowerErr = errStr.toLowerCase();
-    if (lowerErr.contains("access is denied") || lowerErr.contains("occupied")) {
+    if (lowerErr.contains("access is denied") ||
+        lowerErr.contains("occupied")) {
       return "${localizedStrings.gTipOpenPortFailed}: ${localizedStrings.gTipPortInUsed} ($errStr)";
-    } else if (lowerErr.contains("open") || lowerErr.contains("failed") || lowerErr.contains("timeout")) {
+    } else if (lowerErr.contains("open") ||
+        lowerErr.contains("failed") ||
+        lowerErr.contains("timeout")) {
       return "${localizedStrings.gTipOpenPortFailed} ($errStr)";
     }
     return errStr;
@@ -373,7 +365,9 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     eventBus.on<EventRevGetSerialPort>().listen((event) {
       if (mounted) {
         var obj = event.obj;
-        if (obj.msgBody != null && obj.msgBody.toString().isNotEmpty && obj.msgBody.toString() != "fail") {
+        if (obj.msgBody != null &&
+            obj.msgBody.toString().isNotEmpty &&
+            obj.msgBody.toString() != "fail") {
           setState(() {
             String msg = obj.msgBody.toString();
             List<String> parts = msg.split(',');
@@ -383,8 +377,9 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
             if (parts.length > 1) {
               baudRateCtl.text = parts[1];
             }
-            
-            if (comPortCtl.text.isNotEmpty && !usingComLists.contains(comPortCtl.text)) {
+
+            if (comPortCtl.text.isNotEmpty &&
+                !usingComLists.contains(comPortCtl.text)) {
               usingComLists.add(comPortCtl.text);
             }
           });
@@ -409,12 +404,14 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
       }
     });
 
-    _eventbusModbus1 = eventBus.on<EventRespGetModbusServices>().listen((event) {
+    _eventbusModbus1 =
+        eventBus.on<EventRespGetModbusServices>().listen((event) {
       if (mounted) {
         setState(() {
           try {
             var dataList = json.decode(event.obj) as List;
-            modbusServicesList = dataList.map((e) => ModbusServiceInfo.fromJson(e)).toList();
+            modbusServicesList =
+                dataList.map((e) => ModbusServiceInfo.fromJson(e)).toList();
           } catch (e) {
             modbusServicesList = [];
           }
@@ -433,7 +430,8 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
       }
     });
 
-    _eventbusModbus3 = eventBus.on<EventRespEditModbusService>().listen((event) {
+    _eventbusModbus3 =
+        eventBus.on<EventRespEditModbusService>().listen((event) {
       if (mounted) {
         if (event.obj.toString().contains("ok")) {
           showTipInfo(localizedStrings.fSuccessMsg, context);
@@ -763,7 +761,8 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myMediaConf.mediaInfoJson = infoString;
     myMediaConf.type = 0;
     addNetScale.scaleId = 10;
-    addNetScale.scaleModel = scaleModelCtl.text.isEmpty ? 'TMax' : scaleModelCtl.text;
+    addNetScale.scaleModel =
+        scaleModelCtl.text.isEmpty ? 'TMax' : scaleModelCtl.text;
     if (isDC500) {
       addNetScale.scaleModel = 'DC500';
     }
