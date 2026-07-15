@@ -111,6 +111,12 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
               }
             });
           }),
+          Container(),
+          Container(),
+        ),
+        SizedBox(
+          height: regularPadding,
+        ),
         buildItemInfo(
           showItemNameWithStar(context, localizedStrings.gModelName, false),
           Row(
