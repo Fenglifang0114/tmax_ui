@@ -80,7 +80,7 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
                               comPortCtl.text = "";
                               scaleModelCtl.text = "";
                               scaleNameCtl.text = "";
-                              baudRateCtl.text = "";
+                              baudRateCtl.text = "115200";
                               
                               // 自动分配下一个可用的 Modbus 站号
                               int nextModbusId = 1;
@@ -175,7 +175,7 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
           myAllScalesList.isEmpty
               ? Expanded(child: showNoDeviceWidget(context))
               : showAllDevicesWidget(),
-          showAutoScanSwitch(),
+          // showAutoScanSwitch(),
         ],
       ),
     );

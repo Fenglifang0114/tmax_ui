@@ -194,7 +194,7 @@ extension MultiScaleManagementAddExt on MultiScaleManagementState {
                 context,
                 btnHeight,
                 localizedStrings.gBtnConfirm,
-                comPortCtl.text.isNotEmpty
+                comPortCtl.text.isNotEmpty && scaleModelCtl.text.isNotEmpty
                     ? () {
                         for (var scale in myAllScalesList) {
                           if (scale.tMedia == comScaleType) {
