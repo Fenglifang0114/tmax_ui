@@ -3808,7 +3808,7 @@
     "@printSettings": {
         "description": ""
     },
-    "printPreview": "Print Preview",
+    "printPreview": "Preview",
     "@printPreview": {
         "description": ""
     }

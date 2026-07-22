@@ -1,5 +1,6 @@
 import '../common/web_socket_mgr.dart';
 import 'comscaleinfo_data.dart';
+import 'scale_info_from_db.dart';
 
 final manager = WebSocketScaleManager();
 List<int> webChannelList = [];
@@ -37,18 +38,45 @@ class DefScaleInfo {
         myDefScaleInfo.defScaleModel = "";
         myDefScaleInfo.defScaleSn = "";
       }
-    } else {
-      myDefScaleInfo.defScaleId = scaleId;
-      var tempscale = NetScaleListMgr.findScaleInfo(myNetScaleList, scaleId);
-      myDefScaleInfo.defScaleModel = tempscale.scaleModel!;
-      myDefScaleInfo.defScaleSn = tempscale.scaleSn!;
-      myDefScaleInfo.defScalePort = tempscale.port!.toString();
-      myDefScaleInfo.defScaleIp = tempscale.ip;
-      myDefScaleInfo.defScaleName = tempscale.scaleName;
-      if (myDefScaleInfo.defScaleModel == "TMax") {
-        myDefScaleInfo.defScaleModel = "";
-        myDefScaleInfo.defScaleSn = "";
+      return;
+    }
+
+    // 先在 myAllScalesList 中查找
+    for (var scale in myAllScalesList) {
+      if (scale.scaleId == scaleId) {
+        myDefScaleInfo.defScaleId = scaleId;
+        myDefScaleInfo.defScaleModel = scale.scaleModel;
+        myDefScaleInfo.defScaleSn = scale.scaleSn;
+        myDefScaleInfo.defScaleName = scale.scaleName;
+        if (scale.mediaConfig is NetworkMediaConfig) {
+          var netConfig = scale.mediaConfig as NetworkMediaConfig;
+          myDefScaleInfo.defScaleIp = netConfig.ipAddress;
+          myDefScaleInfo.defScalePort = netConfig.port.toString();
+        } else if (scale.mediaConfig is SerialMediaConfig) {
+          var serialConfig = scale.mediaConfig as SerialMediaConfig;
+          myDefScaleInfo.defScalePort = serialConfig.devPath;
+          myDefScaleInfo.defScaleBaud = serialConfig.baudRate.toString();
+        }
+        if (myDefScaleInfo.defScaleModel == "TMax") {
+          myDefScaleInfo.defScaleModel = "";
+          myDefScaleInfo.defScaleSn = "";
+        }
+        return;
       }
+    }
+
+    // 备用：从 myNetScaleList 查找（带空安全保护）
+    myDefScaleInfo.defScaleId = scaleId;
+    var tempscale = NetScaleListMgr.findScaleInfo(myNetScaleList, scaleId);
+    myDefScaleInfo.defScaleModel = tempscale.scaleModel ?? "";
+    myDefScaleInfo.defScaleSn = tempscale.scaleSn ?? "";
+    myDefScaleInfo.defScalePort =
+        tempscale.port != null ? tempscale.port.toString() : "";
+    myDefScaleInfo.defScaleIp = tempscale.ip ?? "";
+    myDefScaleInfo.defScaleName = tempscale.scaleName ?? "";
+    if (myDefScaleInfo.defScaleModel == "TMax") {
+      myDefScaleInfo.defScaleModel = "";
+      myDefScaleInfo.defScaleSn = "";
     }
   }
 
@@ -65,18 +93,43 @@ class DefScaleInfo {
         tempScaleInfo.defScaleModel = "";
         tempScaleInfo.defScaleSn = "";
       }
-    } else {
-      tempScaleInfo.defScaleId = scaleId;
-      var tempscale = NetScaleListMgr.findScaleInfo(myNetScaleList, scaleId);
-      tempScaleInfo.defScaleModel = tempscale.scaleModel!;
-      tempScaleInfo.defScaleSn = tempscale.scaleSn!;
-      tempScaleInfo.defScalePort = tempscale.port!.toString();
-      tempScaleInfo.defScaleIp = tempscale.ip;
-      tempScaleInfo.defScaleName = tempscale.scaleName;
-      if (tempScaleInfo.defScaleModel == "TMax") {
-        tempScaleInfo.defScaleModel = "";
-        tempScaleInfo.defScaleSn = "";
+      return tempScaleInfo;
+    }
+
+    for (var scale in myAllScalesList) {
+      if (scale.scaleId == scaleId) {
+        tempScaleInfo.defScaleId = scaleId;
+        tempScaleInfo.defScaleModel = scale.scaleModel;
+        tempScaleInfo.defScaleSn = scale.scaleSn;
+        tempScaleInfo.defScaleName = scale.scaleName;
+        if (scale.mediaConfig is NetworkMediaConfig) {
+          var netConfig = scale.mediaConfig as NetworkMediaConfig;
+          tempScaleInfo.defScaleIp = netConfig.ipAddress;
+          tempScaleInfo.defScalePort = netConfig.port.toString();
+        } else if (scale.mediaConfig is SerialMediaConfig) {
+          var serialConfig = scale.mediaConfig as SerialMediaConfig;
+          tempScaleInfo.defScalePort = serialConfig.devPath;
+          tempScaleInfo.defScaleBaud = serialConfig.baudRate.toString();
+        }
+        if (tempScaleInfo.defScaleModel == "TMax") {
+          tempScaleInfo.defScaleModel = "";
+          tempScaleInfo.defScaleSn = "";
+        }
+        return tempScaleInfo;
       }
+    }
+
+    tempScaleInfo.defScaleId = scaleId;
+    var tempscale = NetScaleListMgr.findScaleInfo(myNetScaleList, scaleId);
+    tempScaleInfo.defScaleModel = tempscale.scaleModel ?? "";
+    tempScaleInfo.defScaleSn = tempscale.scaleSn ?? "";
+    tempScaleInfo.defScalePort =
+        tempscale.port != null ? tempscale.port.toString() : "";
+    tempScaleInfo.defScaleIp = tempscale.ip ?? "";
+    tempScaleInfo.defScaleName = tempscale.scaleName ?? "";
+    if (tempScaleInfo.defScaleModel == "TMax") {
+      tempScaleInfo.defScaleModel = "";
+      tempScaleInfo.defScaleSn = "";
     }
     return tempScaleInfo;
   }
