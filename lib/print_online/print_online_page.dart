@@ -1,4 +1,4 @@
-﻿import 'dart:async';
+import 'dart:async';
 
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -232,6 +232,120 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     });
     _startScaleAliveTimer();
     _startDataStreamChecker();
+  }
+
+  String _getEvaluatedBarcodeData(
+    DraggableElement element, {
+    String? snapshotGross,
+    String? snapshotUnit,
+  }) {
+    String gross = snapshotGross ?? (_currentWeight?.weightVal ?? "0.000");
+    String unit = snapshotUnit ?? (_currentWeight?.weightUnit ?? "kg");
+
+    if (element.varcontent != null && element.varcontent!.isNotEmpty) {
+      StringBuffer sb = StringBuffer();
+      for (var item in element.varcontent!) {
+        String itemType = "";
+        String itemContent = "";
+        String itemDefaultVal = "";
+
+        try {
+          if (item is Map) {
+            itemType = (item["type"] ?? "").toString();
+            itemContent = (item["content"] ?? "").toString();
+            itemDefaultVal = (item["defaultvalue"] ?? item["defaultValue"] ?? "").toString();
+          } else {
+            itemType = (item.type ?? "").toString();
+            itemContent = (item.content ?? "").toString();
+            try { itemDefaultVal = (item.defaultvalue ?? "").toString(); } catch (_) {
+              try { itemDefaultVal = (item.defaultValue ?? "").toString(); } catch (_) {}
+            }
+          }
+        } catch (_) {}
+
+        if (itemType == "TEXT") {
+          sb.write(itemContent);
+        } else if (itemType.isNotEmpty) {
+          sb.write(_getVarValue(itemType, gross: gross, unit: unit, defaultVal: itemDefaultVal));
+        }
+      }
+      String result = sb.toString();
+      if (result.isNotEmpty) {
+        return _sanitizeBarcodeData(result, element.barcodeType);
+      }
+    }
+
+    String raw = element.content ?? "";
+    if (raw.isEmpty || raw == "Barcode" || raw == "image") {
+      return _getFallbackBarcodeData(element.barcodeType);
+    }
+    String evaluated = _replaceVarPlaceholders(raw, gross: gross, unit: unit);
+    return _sanitizeBarcodeData(evaluated, element.barcodeType);
+  }
+
+  String _replaceVarPlaceholders(String raw, {required String gross, required String unit}) {
+    String res = raw;
+    res = res.replaceAll("{Gross}", gross);
+    res = res.replaceAll("{Net}", gross);
+    res = res.replaceAll("{WeightUnit}", unit);
+    res = res.replaceAll("{Tare}", "0.000");
+    res = res.replaceAll("{DATE}", DateFormat("dd/MM/yyyy").format(DateTime.now()));
+    res = res.replaceAll("{TIME}", DateFormat("HH:mm:ss").format(DateTime.now()));
+    res = res.replaceAll("{NO.}", "1");
+    res = res.replaceAll("{PCS}", "1");
+    return res;
+  }
+
+  String _getVarValue(
+    String varName, {
+    required String gross,
+    required String unit,
+    String? defaultVal,
+  }) {
+    String upperName = varName.toUpperCase();
+    if (upperName == "GROSS" || upperName == "NET" || upperName == "DATA") {
+      return gross;
+    } else if (upperName == "TARE") {
+      return "0.000";
+    } else if (upperName == "WEIGHTUNIT" || upperName == "U.WU") {
+      return unit;
+    } else if (upperName == "DATE") {
+      return DateFormat("dd/MM/yyyy").format(DateTime.now());
+    } else if (upperName == "TIME") {
+      return DateFormat("HH:mm:ss").format(DateTime.now());
+    } else if (upperName == "NO." || upperName == "PCS") {
+      return "1";
+    }
+    return defaultVal?.isNotEmpty == true ? defaultVal! : varName;
+  }
+
+  String _sanitizeBarcodeData(String input, String? type) {
+    if (type == "EAN13") {
+      String digits = input.replaceAll(RegExp(r"\D"), "");
+      if (digits.length < 12) digits = digits.padRight(12, "0");
+      return digits.substring(0, 12);
+    } else if (type == "EAN8") {
+      String digits = input.replaceAll(RegExp(r"\D"), "");
+      if (digits.length < 7) digits = digits.padRight(7, "0");
+      return digits.substring(0, 7);
+    } else if (type == "UPC-A") {
+      String digits = input.replaceAll(RegExp(r"\D"), "");
+      if (digits.length < 11) digits = digits.padRight(11, "0");
+      return digits.substring(0, 11);
+    } else if (type == "UPC-E") {
+      String digits = input.replaceAll(RegExp(r"\D"), "");
+      if (digits.length < 6) digits = digits.padRight(6, "0");
+      return digits.substring(0, 6);
+    }
+    return input.isEmpty ? "123456789" : input;
+  }
+
+  String _getFallbackBarcodeData(String? type) {
+    if (type == "EAN13") return "012345678910";
+    if (type == "EAN8") return "1234567";
+    if (type == "UPC-A") return "123456789012";
+    if (type == "UPC-E") return "123456";
+    return "123456789";
   }
 
   bool _needSendRegWeight(int? scaleId) {
@@ -1350,7 +1464,11 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         ]);
       } else if (targetElements[i].type.name == 'barcode') {
         String tempContent = '';
-        if (targetElements[i].style == 0) {
+        if (exportElements != null &&
+            targetElements[i].content != null &&
+            targetElements[i].content!.isNotEmpty) {
+          tempContent = 'TEXT,${targetElements[i].content}';
+        } else if (targetElements[i].style == 0) {
           tempContent = _barcodeContent(targetElements[i].varcontent!);
         } else {
           tempContent = _barcodeContent1(targetElements[i].varcontent!);
@@ -1392,7 +1510,11 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         ]);
       } else if (targetElements[i].type.name == 'qrcode') {
         String tempContent = '';
-        if (targetElements[i].style == 0) {
+        if (exportElements != null &&
+            targetElements[i].content != null &&
+            targetElements[i].content!.isNotEmpty) {
+          tempContent = 'TEXT,${targetElements[i].content}';
+        } else if (targetElements[i].style == 0) {
           tempContent = _barcodeContent(targetElements[i].varcontent!);
         } else {
           tempContent = _barcodeContent1(targetElements[i].varcontent!);
@@ -2903,7 +3025,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                         child = RotatedBox(
                           quarterTurns: quarterTurns,
                           child: BarcodeWidget(
-                            barcode: getBarcodeType(element.barcodeType!),
+                            barcode: getBarcodeType(element.barcodeType ?? "Code128"),
                             data: getBarcodeContant(element.barcodeType!),
                             drawText: (element.hralignment == 'Bottom')
                                 ? true
@@ -2930,7 +3052,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                       case ElementType.qrcode:
                         child = BarcodeWidget(
                           barcode: Barcode.qrCode(),
-                          data: element.content!,
+                          data: element.content != null && element.content!.isNotEmpty ? element.content! : "Qrcode",
                           // width: element.size.width,
                           // height: element.size.height,
                         );
@@ -3133,6 +3255,11 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
   }
 
   void _showPrintPreview() {
+    String currentGross = _currentWeight?.weightVal ?? "0.000";
+    String currentUnit = _currentWeight?.weightUnit ?? "kg";
+    String currentDate = DateFormat("dd/MM/yyyy").format(DateTime.now());
+    String currentTime = DateFormat("HH:mm:ss").format(DateTime.now());
+
     List<DraggableElement> previewElements =
         elements.map((e) => e.copy()).toList();
     for (var element in previewElements) {
@@ -3140,22 +3267,27 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         String varName = element.varName!.toUpperCase();
         String val = element.varName!;
         if (varName == "GROSS" || varName == "NET") {
-          val = _currentWeight?.weightVal ?? '0.000';
+          val = currentGross;
         } else if (varName == "TARE") {
-          val = '0.000';
+          val = "0.000";
         } else if (varName == "WEIGHTUNIT") {
-          val = _currentWeight?.weightUnit ?? 'kg';
+          val = currentUnit;
         } else if (varName == "DATE") {
-          val = DateFormat('dd/MM/yyyy').format(DateTime.now());
+          val = currentDate;
         } else if (varName == "TIME") {
-          val = DateFormat('HH:mm:ss').format(DateTime.now());
-        } else if (varName == "NO.") {
-          val = "1";
-        } else if (varName == "PCS") {
+          val = currentTime;
+        } else if (varName == "NO." || varName == "PCS") {
           val = "1";
         }
         element.type = ElementType.text;
         element.content = val;
+      } else if (element.type == ElementType.barcode ||
+          element.type == ElementType.qrcode) {
+        element.content = _getEvaluatedBarcodeData(
+          element,
+          snapshotGross: currentGross,
+          snapshotUnit: currentUnit,
+        );
       }
     }
 
@@ -3182,24 +3314,83 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                 Widget child;
                 int quarterTurns = (element.rotation! / 90).round();
 
-                String displayContent = element.content ?? 'Text';
+                switch (element.type) {
+                  case ElementType.barcode:
+                    child = RotatedBox(
+                      quarterTurns: quarterTurns,
+                      child: BarcodeWidget(
+                        barcode:
+                            getBarcodeType(element.barcodeType ?? "Code128"),
+                        data: element.content ?? "",
+                        drawText:
+                            (element.hralignment == "Bottom") ? true : false,
+                        width: [90, 270].contains(element.rotation)
+                            ? element.size.height < 0
+                                ? 20
+                                : element.size.height
+                            : element.size.width < 0
+                                ? 20
+                                : element.size.width,
+                        height: [90, 270].contains(element.rotation)
+                            ? element.size.width < 0
+                                ? 20
+                                : element.size.width
+                            : element.size.height < 0
+                                ? 20
+                                : element.size.height,
+                      ),
+                    );
+                    break;
 
-                child = RotatedBox(
-                  quarterTurns: quarterTurns,
-                  child: SizedBox(
-                      width: element.size.width,
-                      height: element.size.height,
-                      child: Text(displayContent,
-                          softWrap: true,
-                          style: TextStyle(
-                              fontFamily: "simsunb",
-                              fontSize:
-                                  double.parse(element.fontSize.toString()),
-                              color: Colors.black,
-                              fontWeight: (element.fontBold == 'true')
-                                  ? FontWeight.bold
-                                  : FontWeight.normal))),
-                );
+                  case ElementType.qrcode:
+                    child = BarcodeWidget(
+                      barcode: Barcode.qrCode(),
+                      data: element.content ?? "",
+                    );
+                    break;
+
+                  case ElementType.img:
+                    child = RotatedBox(
+                        quarterTurns: quarterTurns,
+                        child: Image.file(
+                          File(element.content == "image"
+                              ? "assets/images/grey_circle.png"
+                              : element.content!),
+                          fit: BoxFit.fill,
+                        ));
+                    break;
+
+                  case ElementType.line:
+                    child = RotatedBox(
+                      quarterTurns: quarterTurns,
+                      child: Container(
+                        width: element.size.width + 2,
+                        height: element.size.height + 2,
+                        color: Colors.black,
+                      ),
+                    );
+                    break;
+
+                  default:
+                    String displayContent = element.content ?? "";
+                    child = RotatedBox(
+                      quarterTurns: quarterTurns,
+                      child: SizedBox(
+                          width: element.size.width,
+                          height: element.size.height,
+                          child: Text(displayContent,
+                              softWrap: true,
+                              style: TextStyle(
+                                  fontFamily: "simsunb",
+                                  fontSize: double.parse(
+                                      element.fontSize.toString()),
+                                  color: Colors.black,
+                                  fontWeight: (element.fontBold == "true")
+                                      ? FontWeight.bold
+                                      : FontWeight.normal))),
+                    );
+                    break;
+                }
 
                 return Positioned(
                   left: element.position.dx,
