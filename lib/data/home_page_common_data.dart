@@ -76,6 +76,7 @@ Set<int> freeConfigMenuIds = {
   MenuId.downReciptPage,
   MenuId.downloadLabelPage,
   MenuId.wiredSettingPage,
+  MenuId.printOnlinePage,
 };
 
 //付费的Config菜单Id
@@ -146,4 +147,5 @@ class MenuId {
   static const int appConfigPage = 23;
   static const int wiredSettingPage = 24;
   static const int sealManagmentPage = 25;
+  static const int printOnlinePage = 26;
 }

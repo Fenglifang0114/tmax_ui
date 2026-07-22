@@ -1262,6 +1262,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "pleaseWait":
             MessageLookupByLibrary.simpleMessage("Please wait 2 seconds..."),
         "pretare": MessageLookupByLibrary.simpleMessage("Pretare:"),
+        "printOnline": MessageLookupByLibrary.simpleMessage("Print Online"),
+        "printPreview": MessageLookupByLibrary.simpleMessage("Print Preview"),
         "printSettings": MessageLookupByLibrary.simpleMessage("Print Settings"),
         "rRefreshListBtn": MessageLookupByLibrary.simpleMessage("Refresh List"),
         "rTipFooter": MessageLookupByLibrary.simpleMessage("Footer"),

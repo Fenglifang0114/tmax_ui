@@ -8863,7 +8863,7 @@ class S {
     return Intl.message(
       'Print Settings',
       name: 'printSettings',
-      desc: 'Print Settings',
+      desc: '',
       args: [],
     );
   }
@@ -9578,6 +9578,26 @@ class S {
       'Auto scan serial port',
       name: 'gAutoScanSerialPort',
       desc: 'Auto scan serial port',
+      args: [],
+    );
+  }
+
+  /// `Print Online`
+  String get printOnline {
+    return Intl.message(
+      'Print Online',
+      name: 'printOnline',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Print Preview`
+  String get printPreview {
+    return Intl.message(
+      'Print Preview',
+      name: 'printPreview',
+      desc: '',
       args: [],
     );
   }

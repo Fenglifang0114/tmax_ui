@@ -1007,6 +1007,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("新建账号前,请先设置超级管理员"),
         "pleaseWait": MessageLookupByLibrary.simpleMessage("请等待2秒..."),
         "pretare": MessageLookupByLibrary.simpleMessage("预扣重:"),
+        "printOnline": MessageLookupByLibrary.simpleMessage("在线打印"),
+        "printPreview": MessageLookupByLibrary.simpleMessage("打印预览"),
         "printSettings": MessageLookupByLibrary.simpleMessage("打印设置"),
         "rRefreshListBtn": MessageLookupByLibrary.simpleMessage("刷新列表"),
         "rTipFooter": MessageLookupByLibrary.simpleMessage("页脚"),

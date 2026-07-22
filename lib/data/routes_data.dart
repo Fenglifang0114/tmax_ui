@@ -23,6 +23,7 @@ import 'package:t_max/pages/lable_down_prn_fmt_page.dart';
 import 'package:t_max/pages/multi_scale_management_page.dart';
 import 'package:t_max/pages/plu_edit_page.dart';
 import 'package:t_max/pages/receipt_design_page.dart';
+import 'package:t_max/print_online/print_online_page.dart';
 import 'package:t_max/pages/retail_report_page.dart';
 import 'package:t_max/pages/set_system_time.dart';
 import 'package:t_max/pages/sys_log_page.dart';
@@ -111,6 +112,13 @@ List<RouteData> getAllConfigMenus() {
       routeName: "/updateFirmware",
       subtitle: localizedStrings.subTitleFirmwareUpdate,
       iconPath: firmwareSvgIcon(),
+    ),
+    RouteData(
+      id: MenuId.printOnlinePage,
+      title: localizedStrings.printOnline,
+      routeName: "/printOnline",
+      subtitle: localizedStrings.printOnline,
+      iconPath: labelDesignSvgIcon(), // Reusing label design icon or similar
     ),
     RouteData(
       id: MenuId.labelDesignPage,
@@ -506,6 +514,12 @@ Widget buildPageContent(dynamic Function(String) navigateContent,
       onNavigate: navigateContent,
       lastRouteName: lastRouteName,
     );
+  } else if (pageId == MenuId.printOnlinePage) {
+    return PrintOnlinePage(
+      type: formAppSetting ? "app" : "config",
+      onNavigate: navigateContent,
+      lastRouteName: lastRouteName,
+    );
   } else if (pageId == MenuId.serialOutputDesignPage) {
     return CustomSerialProtocol();
   } else if (pageId == MenuId.basicDataCollectionPage) {
@@ -633,6 +647,7 @@ List<RouteDataGroup> getHierarchicalConfigMenus() {
         originalMenus.firstWhereOrNull((m) => m.id == MenuId.wifiSettingPage),
         originalMenus.firstWhereOrNull((m) => m.id == MenuId.wiredSettingPage),
         originalMenus.firstWhereOrNull((m) => m.id == MenuId.btSettingPage),
+        originalMenus.firstWhereOrNull((m) => m.id == MenuId.printOnlinePage),
         originalMenus
             .firstWhereOrNull((m) => m.id == MenuId.updateFirmwarePage),
         if (hasS15)
