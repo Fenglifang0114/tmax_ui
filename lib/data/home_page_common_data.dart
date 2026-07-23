@@ -76,7 +76,6 @@ Set<int> freeConfigMenuIds = {
   MenuId.downReciptPage,
   MenuId.downloadLabelPage,
   MenuId.wiredSettingPage,
-  MenuId.printOnlinePage,
 };
 
 //付费的Config菜单Id
