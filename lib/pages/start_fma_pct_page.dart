@@ -1046,7 +1046,7 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
   bool getCanSaveFlag() {
     bool hasRawWeight = false;
     for (var wgtRec in processWgtList) {
-      if (wgtRec.no != 0 && wgtRec.currentWgt! > 0) {
+      if (wgtRec.no != 0 && wgtRec.currentWgt != null && wgtRec.currentWgt! > 0) {
         hasRawWeight = true;
         break;
       }
@@ -1143,9 +1143,41 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
     saveFmaRec(isAllOK);
   }
 
+  void handleFinishClick() {
+    // 至少要有一条称重数据才能点 Finish
+    if (!getCanSaveFlag()) {
+      bool isZh = Localizations.localeOf(context).languageCode == 'zh';
+      showTipInfo(isZh ? "请至少完成一项原料称重才能完成配方！" : "Please complete at least one ingredient weighing to finish the recipe!", context);
+      return;
+    }
+
+    if (!checkAllOK()) {
+      bool isZh = Localizations.localeOf(context).languageCode == 'zh';
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ShowDeleteTipDialog(
+            title: localizedStrings.fTipTitle,
+            msg: isZh ? "当前配方未完全称完或不合格，确定要完成吗？" : "The formula is incomplete or unqualified. Are you sure you want to finish?",
+          );
+        },
+      ).then((value) {
+        if (value == true) {
+          performFinishBtn();
+        }
+      });
+    } else {
+      performFinishBtn();
+    }
+  }
+
 //完成称重
   void performFinishBtn() {
     stopAllWgt();
+    if (!checkAllOK()) {
+      saveFmaRec(false);
+    }
     Navigator.pop(context);
   }
 
@@ -1269,6 +1301,40 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
                   colorScheme.onPrimary,
                   colorScheme.primary,
                   colorScheme.onPrimary),
+            ),
+          if (!checkAllOK()) SizedBox(width: regularPadding),
+          if (!checkAllOK())
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: showTextButton(
+                  context,
+                  btnHeight,
+                  localizedStrings.fNextStepBtn,
+                  isEnableNext
+                      ? () {
+                          handleNexBtn();
+                        }
+                      : null,
+                  colorScheme.onPrimary,
+                  colorScheme.primary,
+                  colorScheme.onPrimary),
+            ),
+          if (!checkAllOK()) SizedBox(width: regularPadding),
+          if (!checkAllOK())
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: showTextButton(
+                  context,
+                  btnHeight,
+                  localizedStrings.finishBtn,
+                  !isFinish
+                      ? () {
+                          handleFinishClick();
+                        }
+                      : null,
+                  colorScheme.onPrimary,
+                  colorScheme.onTertiaryFixedVariant,
+                  colorScheme.onTertiaryFixedVariant),
             ),
           if (!checkAllOK()) SizedBox(width: regularPadding),
           if (!checkAllOK())
@@ -2493,7 +2559,7 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
                         ]),
                       )),
                   SizedBox(
-                    height: 5,
+                    height: 10,
                   ),
                   Expanded(
                       flex: 1,
@@ -2552,41 +2618,6 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
                           )),
                         ]),
                       )),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Expanded(
-                      flex: 1,
-                      child: SizedBox(
-                        child: Row(children: [
-                          Expanded(
-                              child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: colorScheme.onPrimary,
-                              backgroundColor: colorScheme.primary,
-                              fixedSize: const Size(double.infinity, 48),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero, // 可以根据需要调整圆角
-                              ),
-                            ),
-                            onPressed: isEnableNext
-                                ? () {
-                                    handleNexBtn();
-                                  }
-                                : null,
-                            child: Text(
-                              localizedStrings.fNextStepBtn,
-                              style: textTheme.bodySmall!.apply(
-                                color: colorScheme.onPrimary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          )),
-                        ]),
-                      )),
-                  SizedBox(
-                    height: 2,
-                  )
                 ]))),
           ]),
         )),
