@@ -1888,6 +1888,14 @@
     "@fCurrentMaterialWeightInvalidMsg": {
         "description": "Error message when current raw material weight is invalid"
     },
+    "fAtLeastOneWeighingTip": "请至少完成一项原料称重！",
+    "@fAtLeastOneWeighingTip": {
+        "description": "Tip showing that at least one weighing is required"
+    },
+    "fUnqualifiedConfirmFinishTip": "当前配方未完全称完或不合格，确定要完成吗？",
+    "@fUnqualifiedConfirmFinishTip": {
+        "description": "Confirmation message when user wants to finish an unqualified formula"
+    },
     "fStableOperationHint": "稳定后，才能操作！",
     "@fStableOperationHint": {
         "description": "Hint to wait for stability before operation"

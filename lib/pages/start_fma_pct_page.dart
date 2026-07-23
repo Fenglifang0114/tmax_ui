@@ -1146,20 +1146,18 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
   void handleFinishClick() {
     // 至少要有一条称重数据才能点 Finish
     if (!getCanSaveFlag()) {
-      bool isZh = Localizations.localeOf(context).languageCode == 'zh';
-      showTipInfo(isZh ? "请至少完成一项原料称重才能完成配方！" : "Please complete at least one ingredient weighing to finish the recipe!", context);
+      showTipInfo(localizedStrings.fAtLeastOneWeighingTip, context);
       return;
     }
 
     if (!checkAllOK()) {
-      bool isZh = Localizations.localeOf(context).languageCode == 'zh';
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
           return ShowNormalTipDialog(
             title: localizedStrings.fTipTitle,
-            msg: isZh ? "当前配方未完全称完或不合格，确定要完成吗？" : "The formula is incomplete or unqualified. Are you sure you want to finish?",
+            msg: localizedStrings.fUnqualifiedConfirmFinishTip,
           );
         },
       ).then((value) {
