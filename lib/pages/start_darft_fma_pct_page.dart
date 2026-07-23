@@ -1100,7 +1100,7 @@ class DarftFmaPctWgtPageState extends State<DarftFmaPctWgtPage>
   bool getCanSaveFlag() {
     bool hasRawWeight = false;
     for (var wgtRec in processWgtList) {
-      if (wgtRec.no != 0 && wgtRec.currentWgt! > 0) {
+      if (wgtRec.no != 0 && wgtRec.currentWgt != null && wgtRec.currentWgt! > 0) {
         hasRawWeight = true;
         break;
       }
@@ -1112,7 +1112,7 @@ class DarftFmaPctWgtPageState extends State<DarftFmaPctWgtPage>
     //先判断出了容器之外有没有原料重量，如果没有原料重量，就不需要暂存
     bool hasRawWeight = false;
     for (var wgtRec in processWgtList) {
-      if (wgtRec.no != 0 && wgtRec.currentWgt! > 0) {
+      if (wgtRec.no != 0 && wgtRec.currentWgt != null && wgtRec.currentWgt! > 0) {
         hasRawWeight = true;
         break;
       }
@@ -1189,9 +1189,39 @@ class DarftFmaPctWgtPageState extends State<DarftFmaPctWgtPage>
     }
   }
 
+  void handleFinishClick() {
+    // 至少要有一条称重数据才能点 Finish
+    if (!getCanSaveFlag()) {
+      showTipInfo(localizedStrings.fAtLeastOneWeighingTip, context);
+      return;
+    }
+
+    if (!checkAllOK()) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return ShowNormalTipDialog(
+            title: localizedStrings.fTipTitle,
+            msg: localizedStrings.fUnqualifiedConfirmFinishTip,
+          );
+        },
+      ).then((value) {
+        if (value == true) {
+          performFinishBtn();
+        }
+      });
+    } else {
+      performFinishBtn();
+    }
+  }
+
   //完成称重
   void performFinishBtn() {
     stopAllWgt();
+    if (!checkAllOK()) {
+      saveFmaRec(false);
+    }
     Navigator.pop(context);
   }
 
@@ -1268,6 +1298,40 @@ class DarftFmaPctWgtPageState extends State<DarftFmaPctWgtPage>
                   colorScheme.onPrimary,
                   colorScheme.primary,
                   colorScheme.onPrimary),
+            ),
+          if (!checkAllOK()) SizedBox(width: regularPadding),
+          if (!checkAllOK())
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: showTextButton(
+                  context,
+                  btnHeight,
+                  localizedStrings.fNextStepBtn,
+                  isEnableNext
+                      ? () {
+                          handleNexBtn();
+                        }
+                      : null,
+                  colorScheme.onPrimary,
+                  colorScheme.primary,
+                  colorScheme.onPrimary),
+            ),
+          if (!checkAllOK()) SizedBox(width: regularPadding),
+          if (!checkAllOK())
+            ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: maxWidth),
+              child: showTextButton(
+                  context,
+                  btnHeight,
+                  localizedStrings.finishBtn,
+                  isEnableNext
+                      ? () {
+                          handleFinishClick();
+                        }
+                      : null,
+                  colorScheme.onPrimary,
+                  colorScheme.onTertiaryFixedVariant,
+                  colorScheme.onTertiaryFixedVariant),
             ),
           if (!checkAllOK()) SizedBox(width: regularPadding),
           if (!checkAllOK())
@@ -2560,7 +2624,7 @@ class DarftFmaPctWgtPageState extends State<DarftFmaPctWgtPage>
                         ]),
                       )),
                   SizedBox(
-                    height: 5,
+                    height: 10,
                   ),
                   Expanded(
                       flex: 1,
@@ -2623,42 +2687,6 @@ class DarftFmaPctWgtPageState extends State<DarftFmaPctWgtPage>
                           ),
                         ]),
                       )),
-                  SizedBox(
-                    height: 5,
-                  ),
-                  Expanded(
-                      flex: 1,
-                      child: SizedBox(
-                        child: Row(children: [
-                          Expanded(
-                              child: ElevatedButton(
-                            style: ElevatedButton.styleFrom(
-                              foregroundColor: colorScheme.onPrimary,
-                              backgroundColor: colorScheme.primary,
-                              fixedSize: const Size(double.infinity, 48),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.zero, // 可以根据需要调整圆角
-                              ),
-                            ),
-                            onPressed: isEnableNext
-                                ? () {
-                                    handleNexBtn();
-                                  }
-                                : null,
-                            child: Text(
-                              //下一步  修改了此处
-                              localizedStrings.fNextStepBtn,
-                              style: getTextStyle(
-                                color: colorScheme.onPrimary,
-                              ),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          )),
-                        ]),
-                      )),
-                  SizedBox(
-                    height: 2,
-                  )
                 ]))),
           ]),
         )),
