@@ -1,4 +1,4 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:intl/intl.dart';
 import 'dart:convert';
@@ -69,7 +69,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
   final TextEditingController _textController = TextEditingController();
   final TextEditingController _textWidthController = TextEditingController();
   final TextEditingController _textHeightController = TextEditingController();
-  // 闂傚倸鍊风粈渚€骞栭锕€纾归柣鐔煎亰閻斿棙鎱ㄥ璇蹭壕閻犱警鍨堕弻娑㈠箛闂堟稒鐏嶉梺绋款儍閸旀垿寮婚弴鐔虹闁割煈鍠掗崑鎾澄旈崨顔兼疄婵°倧绲介崯顖炴偂濞戙垺鐓曢柡鍥ュ妼娴滄粓鏌嶉柨瀣棃闁哄本娲熷畷鍫曞Ω閵夈儲鎳欐俊銈囧Х閸嬬偟鏁悢濡撳洦娼忛妸褏顔曢梺绯曞墲閸旀洟鎮橀鍡欑＜鐎光偓閸曨亝鍠氶梺绯曟櫅鐎氭澘鐣峰Ο娆炬Ь缂備讲鍋撻柍褜鍓熷缁樻媴閸︻厽鑿囬梺鍛婃煥閻ジ鍩€椤掍礁鍤柛姗€绠栧顐︻敋閳ь剙鐣锋總绋垮嵆闁绘劖顔栧Σ鎾⒑閼姐倕鞋婵炲拑缍佸畷鏇㈠Χ婢跺浠?
+  // 画布及元素属性处理
   final TextEditingController _positionXController = TextEditingController();
   final TextEditingController _positionYController = TextEditingController();
   final TextEditingController _elementWidthController = TextEditingController();
@@ -104,13 +104,13 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
   bool _isReceivingWeight = false;
   bool _hasNewWeightData = false;
 
-  // 闂傚倸鍊风粈渚€骞栭锕€纾归柣鐔煎亰閻斿棙鎱ㄥ璇蹭壕閻犱警鍨堕弻娑㈠箛闂堟稒鐏嶉梺鍝勬媼閸撴岸骞堥妸銉建闁糕剝顨呯粻娲⒑鐠団€崇仭闁荤喆鍎靛﹢渚€姊洪幐搴ｇ畵婵☆偅鐩幆灞炬償椤兛绨婚梺鍝勫€圭€笛呯矚閸ф鐓忛柛銉ｅ妼婵秶鈧鍠楅幐鎶藉箖閵忋倕浼犻柛鏇ㄥ幒缁?
+  // 画布及元素属性处理
   List<List<DraggableElement>> undoStack = [];
   List<List<DraggableElement>> redoStack = [];
   int maxUndoSteps =
-      100; // 闂傚倸鍊风粈渚€骞栭锔藉亱闁告劦鍠栫壕濠氭煙閻愵剙澧柣鏂挎閺屾盯顢曢姀鈽嗘闁诲孩鍑归崢楣冨焵椤掑倹鏆╅柡浣筋嚙椤繘鎮滃Ο璇插妳闂佽鍎抽崢鏍ㄧ珶閺囩喓绡€婵炲牆鐏濋弸鐔虹磼閸濆嫭鍋ョ€规洘娲熷濠氬Ψ閵夛箒绶?
+      100; // 画布及元素属性处理
 
-  //闂傚倸鍊烽懗鍓佸垝椤栨粍鏆滄い蹇撴噸缁诲棝鏌涢妷顔煎缁?
+  // 画布及元素属性处理
 
   final FocusNode textWidthFocusNode = FocusNode();
   final FocusNode textHeightFocusNode = FocusNode();
@@ -137,7 +137,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
   final double leftBtnWidth = 280;
   final double rightBtnWidth = 288;
   final Set<LogicalKeyboardKey> _pressedKeys =
-      {}; // 闂傚倸鍊烽悞锕€顪冮崹顕呯劷闁秆勵殔缁€澶愭倵閿濆骸澧插┑顔挎珪閵囧嫰骞掑鍥у婵炲瓨鍤庨崐婵嬪蓟濞戞瑧绡€闁告洦鍋呴悘鍫ユ⒑閹肩偛鈧洟顢栭崶顒€绠熼柟闂寸劍閸嬪鏌涢銈呮瀻缁炬澘绉电换婵嬪煕閳ь剟宕ㄩ娑欑€版俊銈囧Х閸嬬偤宕濋弽褜鍤楅柛鏇ㄥ墮缁剁偟鈧厜鍋撻柍褜鍓熼獮澶愵敋閳ь剙顫忛崫鍕懷囧炊瑜嶉‖鍫ユ煟鎼淬垻鐓柛妤€鍟块锝夘敃閿旂粯鏅ｉ梺闈涚箚閸撴繂鈻嶉弽顓熷€甸柛蹇擃槸娴滈箖姊洪崨濠冨闁稿海鍏橀崺锟犲磼濞戞ê浼庢繝鐢靛█濞佳呪偓姘煎墴閹﹢寮婚妷锔惧幈闂佹寧绻傞幊蹇涘疮閻愮鍋撻崹顐ｇ凡閻庢凹鍓熼、妯荤附缁嬭法顦板銈嗘尵婵參宕澶嬧拺閻犲洦褰冮銏㈢磼鐎ｎ偄娴柍銉畵瀹曞爼濡搁敃鈧鍧楁⒑瑜版帗锛熺紒鈧担铏逛笉?
+      {}; // 画布及元素属性处理
 
   TextEditingController printDirectionCtl = TextEditingController(text: '0');
   TextEditingController printerCtl = TextEditingController(text: 'EPM205');
@@ -253,12 +253,17 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
           if (item is Map) {
             itemType = (item["type"] ?? "").toString();
             itemContent = (item["content"] ?? "").toString();
-            itemDefaultVal = (item["defaultvalue"] ?? item["defaultValue"] ?? "").toString();
+            itemDefaultVal =
+                (item["defaultvalue"] ?? item["defaultValue"] ?? "").toString();
           } else {
             itemType = (item.type ?? "").toString();
             itemContent = (item.content ?? "").toString();
-            try { itemDefaultVal = (item.defaultvalue ?? "").toString(); } catch (_) {
-              try { itemDefaultVal = (item.defaultValue ?? "").toString(); } catch (_) {}
+            try {
+              itemDefaultVal = (item.defaultvalue ?? "").toString();
+            } catch (_) {
+              try {
+                itemDefaultVal = (item.defaultValue ?? "").toString();
+              } catch (_) {}
             }
           }
         } catch (_) {}
@@ -266,7 +271,8 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         if (itemType == "TEXT") {
           sb.write(itemContent);
         } else if (itemType.isNotEmpty) {
-          sb.write(_getVarValue(itemType, gross: gross, unit: unit, defaultVal: itemDefaultVal));
+          sb.write(_getVarValue(itemType,
+              gross: gross, unit: unit, defaultVal: itemDefaultVal));
         }
       }
       String result = sb.toString();
@@ -283,14 +289,17 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     return _sanitizeBarcodeData(evaluated, element.barcodeType);
   }
 
-  String _replaceVarPlaceholders(String raw, {required String gross, required String unit}) {
+  String _replaceVarPlaceholders(String raw,
+      {required String gross, required String unit}) {
     String res = raw;
     res = res.replaceAll("{Gross}", gross);
     res = res.replaceAll("{Net}", gross);
     res = res.replaceAll("{WeightUnit}", unit);
     res = res.replaceAll("{Tare}", "0.000");
-    res = res.replaceAll("{DATE}", DateFormat("dd/MM/yyyy").format(DateTime.now()));
-    res = res.replaceAll("{TIME}", DateFormat("HH:mm:ss").format(DateTime.now()));
+    res = res.replaceAll(
+        "{DATE}", DateFormat("dd/MM/yyyy").format(DateTime.now()));
+    res =
+        res.replaceAll("{TIME}", DateFormat("HH:mm:ss").format(DateTime.now()));
     res = res.replaceAll("{NO.}", "1");
     res = res.replaceAll("{PCS}", "1");
     return res;
@@ -425,7 +434,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
 
   void openTemplateJson() async {
     final ByteData bytes = await rootBundle.load('assets/template/label.json');
-    // 闂?ByteData 闂傚倸鍊烽懗鍫曞磿閻㈢鐤炬繛鎴欏灪閸嬨倝鏌曟繛褍瀚▓浼存煟鎼淬垻鈯曢拑鍗炩攽椤旂晫鐭嬮柕鍥у楠炴帒顓奸崶鑸敌滈梺鐟板悑濞兼瑩鏁冮妶澶婄叀?JSON 闂傚倷娴囬褏鈧稈鏅濈划娆撳箳濡炲皷鍋撻崘顔奸唶闁靛鍠楅弲鐐寸箾鏉堝墽鍒版繝鈧柆宥呯厺?
+    // 从 assets 资源文件载入 JSON 标签模板
     final jsonString = bytes.buffer.asUint8List();
     final jsonData = utf8.decode(jsonString);
 
@@ -433,41 +442,41 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     readTextInfoListFromStr(jsonData);
   }
 
-  // 闂傚倷娴囬褍霉閻戝鈧焦绻濋崑鑺ョ洴瀹曠喖顢樺☉妯瑰缂佺虎鍘奸幊蹇涙偟椤忓懐绠鹃柣鎾虫捣缁犵粯顨ラ悙杈捐€跨€规洘锕㈤獮鎾诲箳閹惧湱鍙戞繝鐢靛Х椤ｄ粙宕滃┑瀣ㄢ偓鍐川椤撳洦绋戦埥澶愬閻樻妲烽柣搴＄畭閸庨亶藝娴兼潙纾归柣鎴ｅГ閻撶喖鏌ｉ弬鎸庡暈缂佹儼灏欑槐鎾愁吋閸曨厾鐛㈤梺鍝勬湰閻╊垰顕ｆ禒瀣╃憸宥夊焻閻熼偊娓婚柕鍫濈箺閸氬倿鏌￠崨顖氣枅妤?
+  // 画布及元素属性处理
   void _onTextWidthFocusChange() {
     if (!textWidthFocusNode.hasFocus) {
-      // 闂傚倷娴囬褏鎹㈤幇顔藉床闁归偊鍎靛☉妯锋闁靛繒濮烽ˇ顕€鎮楅獮鍨姎妞わ缚鍗冲畷鎰槹鎼达絾锛忓銈嗘尵閸嬬偤宕抽搹鍦＜濞撴艾娲ら弸銈囩磼鏉堛劌绗氱€垫澘瀚幆鏃堫敊閸忕⒈鍞查梻鍌欒兌绾爼寮插☉銏犲珘妞ゆ帒鍊婚惌娆忣熆閼搁潧濮堥柛銈嗗浮閺屾洟宕煎┑鍥ф濡炪値鍓欓ˇ闈涱潖閾忓湱纾兼俊顖氭惈椤骸顪冮妶鍐ㄧ仼闁挎洏鍎茬粚杈ㄧ節閸ヨ埖鏅ｉ梺闈涚箚閳ь剚鏋奸崑?
+      // 画布及元素属性处理
       _focusNode.requestFocus();
     }
   }
 
-  // 濠电姴鐥夐弶搴撳亾閺囥垹纾圭憸鐗堝笚閺咁亪姊虹拠鍙夋崳妞ゃ垹锕ら埢宥夊即閻戝棛鍔烽棅顐㈡处缁嬫垹绮绘繝姘厱闁归偊鍘肩徊缁樻叏鐟欏嫬绲婚柍瑙勫灴閸╁嫰宕橀悙顒傛殽婵犵妲呴崑鍛存儎椤栨氨鏆︽繝闈涙－閸氬顭跨捄渚剰闁逞屽墰閸忔﹢寮婚敐澶嬪亜闁告稑锕﹂崙锛勭磽閸屾氨小缂佽埖宀稿璇测槈閵忕姴鍞ㄩ梺闈浤涢崘锝呮倕濠碉紕鍋戦崐褔鎳欒ぐ鎺戠柧闁绘顕х粻?
+  // 画布及元素属性处理
   void _onTextHeightFocusChange() {
     if (!textHeightFocusNode.hasFocus) {
-      // 闂傚倷娴囬褏鎹㈤幇顔藉床闁归偊鍎靛☉妯锋闁靛繒濮烽ˇ顕€鎮楅獮鍨姎妞わ缚鍗冲畷鎰槹鎼达絾锛忓銈嗘尵閸嬬偤宕抽搹鍦＜濞撴艾娲ら弸銈囩磼鏉堛劌绗氱€垫澘瀚幆鏃堫敊閸忕⒈鍞查梻鍌欒兌绾爼寮插☉銏犲珘妞ゆ帒鍊婚惌娆忣熆閼搁潧濮堥柛銈嗗浮閺屾洟宕煎┑鍥ф濡炪値鍓欓ˇ闈涱潖閾忓湱纾兼俊顖氭惈椤骸顪冮妶鍐ㄧ仼闁挎洏鍎茬粚杈ㄧ節閸ヨ埖鏅ｉ梺闈涚箚閳ь剚鏋奸崑?
+      // 画布及元素属性处理
       _focusNode.requestFocus();
     }
   }
 
-  // 闂傚倸鍊风粈渚€骞栭锕€纾圭紒瀣紩濞差亝鏅濋柍褜鍓熼弫鍐閵堝棗浜遍梺鍓插亞閸犳挾绮旈崼鏇熲拺閻熸瑥瀚崝銈夋煕閻旈浠㈡い鏇秮閹煎綊顢曢敍鍕暰婵犲痉鏉库偓鎰板磻閹剧繝绻嗘い鎰剁悼濞插鈧娲樼换鍌烆敇閸忕厧绶為悗锝庝簴閸嬫捇鎮滈懞銉у幗闂佺粯鏌ㄩ幉锛勬閼碱剛纾界€广儱瀚粣鏃堟煛鐏炲墽娲寸€殿喕绮欐俊姝岊槻闁愁亞鎳撻—鍐Χ韫囨艾鎮呴梺鍝勬噽婵炩偓妤?
+  // 画布及元素属性处理
   void _onTextContentFocusChange() {
     if (!textContentFocusNode.hasFocus) {
-      // 闂傚倷娴囬褏鎹㈤幇顔藉床闁归偊鍎靛☉妯锋闁靛繒濮烽ˇ顕€鎮楅獮鍨姎妞わ缚鍗冲畷鎰槹鎼达絾锛忓銈嗘尵閸嬬偤宕抽搹鍦＜濞撴艾娲ら弸銈囩磼鏉堛劌绗氱€垫澘瀚幆鏃堫敊閸忕⒈鍞查梻鍌欒兌绾爼寮插☉銏犲珘妞ゆ帒鍊婚惌娆忣熆閼搁潧濮堥柛銈嗗浮閺屾洟宕煎┑鍥ф濡炪値鍓欓ˇ闈涱潖閾忓湱纾兼俊顖氭惈椤骸顪冮妶鍐ㄧ仼闁挎洏鍎茬粚杈ㄧ節閸ヨ埖鏅ｉ梺闈涚箚閳ь剚鏋奸崑?
+      // 画布及元素属性处理
       _focusNode.requestFocus();
     }
   }
 
-  // 闂傚倸鍊风粈渚€骞栭锔藉亱闁告劦鍠栫壕濠氭煙閻愵剙澧柣鏂挎閺屾盯顢曢姀鈽嗘濠电偠顕滅粻鎴ｎ暰闂佸湱澧楀妯肩不瑜版帒绾ч柛顐ｇ箓閳锋棃鏌ｉ敐鍛紞缂佽鲸甯楅敍鎰攽閸℃鐫勯柣搴ゎ潐濞叉﹢銆冩繝鍐х箚闁绘垼濮ら弲婊呯磽娴ｈ偂鎴﹀汲閻樼粯鈷掑ù锝堟鐢盯鎮介锝勭凹濞ｅ洤锕畷鍫曨敆閳ь剛澹曟繝姘叆婵犻潧妫Σ鎼佹煟椤撶噥娈曞ǎ鍥э躬椤㈡稑顫濋鐔峰壍婵＄偑鍊栧▔锕傚礃閸撗冩暩闂佽崵濮撮幖顐﹀箹椤愶富鏁傛い鎰堕檮閻?
+  // 画布及元素属性处理
   void _onMaxLenthFocusChange() {
     if (!maxLenthFocusNode.hasFocus) {
-      // 闂傚倷娴囬褏鎹㈤幇顔藉床闁归偊鍎靛☉妯锋闁靛繒濮烽ˇ顕€鎮楅獮鍨姎妞わ缚鍗冲畷鎰槹鎼达絾锛忓銈嗘尵閸嬬偤宕抽搹鍦＜濞撴艾娲ら弸銈囩磼鏉堛劌绗氱€垫澘瀚幆鏃堫敊閸忕⒈鍞查梻鍌欒兌绾爼寮插☉銏犲珘妞ゆ帒鍊婚惌娆忣熆閼搁潧濮堥柛銈嗗浮閺屾洟宕煎┑鍥ф濡炪値鍓欓ˇ闈涱潖閾忓湱纾兼俊顖氭惈椤骸顪冮妶鍐ㄧ仼闁挎洏鍎茬粚杈ㄧ節閸ヨ埖鏅ｉ梺闈涚箚閳ь剚鏋奸崑?
+      // 画布及元素属性处理
       _focusNode.requestFocus();
     }
   }
 
-  // 闂傚倸鍊风粈渚€骞栭锕€纾归柣鐔煎亰閻斿棙鎱ㄥ璇蹭壕閻犱警鍨堕弻娑㈠箛闂堟稒鐏嶉梺鍝勬媼閸撴岸骞堥妸銉建闁糕剝銇炵花鐣岀磽娴ｅ搫小缂侇喗鐟╅獮鍐ㄎ旈埀顒勫煡婢跺ň鏋嶆い鎾楀倻鏁栫紓浣戒含閸嬬喖鍩€椤掑﹦绉甸柛鐘崇墱缁牓宕奸埗鈺佷壕妤犵偛鐏濋崝姘箾鐏炲倸鈧鎮疯濮婄粯鎷呯粵瀣異闂佺绻戠粙鎾跺垝閸喓鐟归柍褜鍓欓悾鐑藉传閸曨厽娈曢梺鍛婃处閸嬪棝顢欓幒妤佲拺闂傚牊绋撴晶鏇熴亜閿斿灝宓嗙€殿噮鍋勯～婊堝焵椤掑嫬钃?
+  // 画布及元素属性处理
   void _saveState() {
-    // 婵犵數濮烽弫鎼佸磿閹寸姷绀婇柍褜鍓欓—鍐级閹寸偞鍠愰梺閫炲苯澧柤瑙勫劤閿曘垽鏌嗗鍛唵闂佽崵鍠愭竟瀣绩娴犲鐓曢柍鈺佸暟閹冲懎顫㈤崶顒佲拻濞达絽鎲￠崯鐐烘煙缁嬫寧鎲哥紒顔芥楠炴﹢顢欓悡搴′憾闂備浇顫夊畷姗€宕洪弽顓ㄧ稏闁哄洢鍨洪悡鐔镐繆椤栨繍鍤欑紒鎻掝煼閺岋綀绠涢弮鍌涘櫚闂?
+    // 画布及元素属性处理
     final currentState = elements.map((e) => e.copy()).toList();
 
     undoStack.add(currentState);
@@ -479,7 +488,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     }
   }
 
-  // 闂傚倸鍊风粈渚€骞栭锕€纾归柣鐔煎亰閻斿棙鎱ㄥ璇蹭壕閻犱警鍨堕弻娑㈠箛闂堟稒鐏嶉梺鍝勬媼閸撴岸骞堥妸銉建闁糕剝顨呯粻娲煟鎼达絾鏆╅柡浣筋嚙椤繘鎮滃Ο璇插妳闂佽鍎抽崢鏍ㄧ珶閺囥垺鈷掑ù锝囧劋閸も偓闂佽绻戠换鍕垝閺傝法鏆﹂柛銉㈡櫇椤?
+  // 画布及元素属性处理
   void _undo() {
     if (undoStack.isNotEmpty) {
       final previousState = undoStack.removeLast();
@@ -490,7 +499,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     }
   }
 
-  // 闂傚倸鍊风粈渚€骞栭锕€纾归柣鐔煎亰閻斿棙鎱ㄥ璇蹭壕閻犱警鍨堕弻娑㈠箛闂堟稒鐏嶉梺鍝勬媼閸撴岸骞堥妸銉庣喖骞愭惔锝冣偓鎰攽閻愬弶鍣烽柛銊ょ矙瀵鈽夊锝呬壕闁挎繂楠告禍鐐淬亜閿濆棛鍙€闁哄瞼鍠愮缓浠嬪川婵犲啯娈搁梻?
+  // 画布及元素属性处理
   void _redo() {
     if (redoStack.isNotEmpty) {
       final nextState = redoStack.removeLast();
@@ -501,7 +510,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     }
   }
 
-  //闂傚倸鍊搁崐鐑芥倿閿曚降浜归柛鎰典簽閻捇鏌ｉ姀銏╃劸闁藉啰鍠庨埞鎴︽偐閸欏鎮欑紓浣插亾濠㈣埖鍔栭悡鐔镐繆椤栨粌甯堕柛鏂款儑缁辨帗鎷呭畡鏉跨ギ闂佸搫澶囬崜婵嗩嚗閸曨偀妲堟慨妯诲敾缁辩敻姊绘担铏瑰笡闁绘顨堥崚鎺楀箻閹颁礁娈ㄥ銈嗗姧闂勫嫰宕戠€ｎ喗鐓曟い鎰剁悼缁犳﹢鏌?
+  // 画布及元素属性处理
   barcodeDataReload() {
     loadData();
   }
@@ -514,9 +523,9 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
   Future<Map<String, dynamic>?> loadData() async {
     try {
       final file = await _localFile;
-      // 濠电姷鏁搁崑娑㈩敋椤撶喐鍙忛悗鐢电《閸嬫挸鈽夐幒鎾寸彋閻庢鍠楅幃鍌氱暦濮椻偓閸╋繝宕橀悙顒傘偒闂傚倷绀侀幖顐︽偋閸涱垰绶ゅ┑鐘宠壘閸屻劍銇勯幒鎴濐仾闁稿缍侀弻娑㈠Ψ椤旂粯鍠氶梺鎼炲€栭悷褔骞夐幖浣哥骇闁圭楠哥粣娑㈡⒑闁偛鑻晶顖滅磼鐎ｎ偄娴柕鍡楀暣瀹曞ジ濡烽鑺ユ珗濠电偠鎻徊钘夛耿闁秴鐓?
+      // 画布及元素属性处理
       String contents = await file.readAsString();
-      // 闂傚倷娴囬褏鎹㈤幇顔藉床闁归偊鍎靛☉妯滄棃宕ㄩ闂存闁荤喐绮岀换鎺楀礆閹烘鏁囬柕蹇婂墲濞呭棝姊洪崗鐓庡闁搞劎鍘х叅妞ゆ帒瀚悡鐔兼煟閺傛寧鎲搁柟铏礈缁辨帡骞撻幒鎾充淮闂佽鍠撻崕閬嶁€﹂妸鈺佺妞ゆ挻绋掗悘鍐磽閸屾瑨顔夐柛鎾寸箞楠炴鎮剁€涖劑姊婚崒娆愮グ婵℃ぜ鍔戦幊妤呮嚋閸偅鐝峰┑掳鍊愰崑鎾绘煟?
+      // 画布及元素属性处理
       if (contents.isNotEmpty) {
         pasterBarcodeList(contents);
       }
@@ -578,7 +587,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       _textController.clear();
       _textWidthController.clear();
       _textHeightController.clear();
-      // 婵犵數濮烽弫鎼佸磻閻愬搫绠伴柟闂寸缁犵娀鏌熼悧鍫熺凡闁绘挻锕㈤弻鈥愁吋鎼粹€崇缂備胶濮寸壕顓㈠箟閸濄儰娌悷娆欑稻閻庡姊洪棃娑㈢崪缂佽鲸娲熼崺鐐差吋婢跺鍘撻梺瀹犳〃缁€渚€寮抽弴鐘电＜?
+      // 画布及元素属性处理
       _positionXController.clear();
       _positionYController.clear();
       _elementWidthController.clear();
@@ -590,7 +599,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     if (isSelecting) {
       setState(() {
         selectionEnd = position;
-        // 闂傚倷娴囧畷鍨叏瀹曞洦顐介柕鍫濇处椤洟鏌￠崶銉ョ仾闁稿鏅涢埞鎴︽偐瀹曞浂鏆￠梺缁樺笩椤曆団€︾捄銊﹀磯濞撴凹鍨伴崜鏉款渻閵堝懐绠為柛搴″级缁岃鲸绻濋崑鑺ユ閸┾偓妞ゆ巻鍋撻摶鐐翠繆閵堝懏鍣归柤绋跨秺閺岀喓绱掗姀鐘崇亶闂佺楠哥粔褰掑蓟濞戙垹鍗抽柕濞垮劙缁ㄥ鏌ｉ姀鈺佺仭妞ゃ劌鐗忓Σ?
+        // 画布及元素属性处理
         selectedElements = elements.where((element) {
           double left = element.position.dx;
           double top = element.position.dy;
@@ -662,14 +671,14 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       DraggableElement movingElement, Offset newPosition) {
     for (DraggableElement otherElement in elements) {
       if (!selectedElements.contains(otherElement)) {
-        // 濠电姷顣槐鏇㈠磻閹达箑纾归柡鍥ュ灪閸嬪鈹戦崒婊庣劸缁炬儳娼￠幃妤呮偨閻㈢偣鈧﹪鏌涚€ｎ偅宕屾俊顐㈠暙閳藉顫濆В娆嶅妿缁?
+        // 计算元素间对齐辅助线
         if ((newPosition.dy).round() == otherElement.position.dy.round()) {
           alignmentLines.add(AlignmentLine(
             start: Offset(0, newPosition.dy),
             end: Offset(canvasSize.width, newPosition.dy),
           ));
         }
-        // 闂傚倷绀佸﹢閬嶅储瑜旈幃娲Ω閵夊啯妞介幃銏ゆ偂鎼达綇绱甸梺璇叉捣閺佸摜娑甸崼鏇炵；闁瑰墽绮ˉ鍫熺箾閹寸偞鐨戝Δ鏃傜磽?
+        // 画布及元素属性处理
         if ((newPosition.dy + movingElement.size.height).round() ==
             (otherElement.position.dy + otherElement.size.height).round()) {
           alignmentLines.add(AlignmentLine(
@@ -678,14 +687,14 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                 canvasSize.width, newPosition.dy + movingElement.size.height),
           ));
         }
-        // 闂備浇顕ф鍝ョ礊婵犲偆鐒介柤濮愬€楃壕鑺ユ叏濡寧纭鹃柣銈夌畺閺屾盯骞橀懠棰濆敼闂佺顑嗛幑鍥涢崘銊㈡婵ɑ鐦烽妸褏纾?
+        // 画布及元素属性处理
         if ((newPosition.dx).round() == otherElement.position.dx.round()) {
           alignmentLines.add(AlignmentLine(
             start: Offset(newPosition.dx, 0),
             end: Offset(newPosition.dx, canvasSize.height),
           ));
         }
-        // 闂傚倸鍊风粈渚€骞夐敓鐘冲仭闁靛鏅涢崒銊╂煛瀹ュ骸骞栭柣銈夌畺閺屾盯骞橀懠棰濆敼闂佺顑嗛幑鍥涢崘銊㈡婵ɑ鐦烽妸褏纾?
+        // 画布及元素属性处理
         if ((newPosition.dx + movingElement.size.width).round() ==
             (otherElement.position.dx + otherElement.size.width).round()) {
           alignmentLines.add(AlignmentLine(
@@ -694,7 +703,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                 newPosition.dx + movingElement.size.width, canvasSize.height),
           ));
         }
-        // 缂傚倸鍊搁崐椋庣矆娓氣偓钘濋柟鍓佺摂閺佸鎲告惔銊ョ疄闁靛ň鏅涢悡娑㈡煕濞戝崬骞樻い鏂匡躬閹嘲顭ㄩ崘顓烆伃闂佸疇顕ч柊锝嗘叏閳ь剟鏌曢崼婵囶棞闁告搩鍙冨娲川婵犲啫顦╅梺绋款儏鐎氼喚鍒掗崼鐔稿闁硅偐鍋愰崑鎾诲箳閹搭厽鍍甸梺閫炲苯澧寸€规洖宕埢搴ㄥ箣濠靛宕曟繝鐢靛Х椤ｄ粙宕滃┑瀣ㄢ偓鍐川椤撳洦鐩顕€宕掑鍛殽闁诲骸鍘滈崑鎾绘煕閺囥劌浜炴い蟻鍥ㄢ拺闁告繂瀚晶銏ゆ煛娴ｈ鍊愰柡灞熷洤纾奸柣鎰嚟閸樼敻鏌ｉ悩顔煎妞わ富鍨跺畷鎰亹閹烘繃鏅濇繛瀵稿Т椤戝棝鎮￠悢鍏肩厪濠电偛鐏濋崝姘亜韫囧﹥娅呴柍钘夘樀瀵剛鎹勯妸褜鍞圭紓鍌欑劍椤ㄥ牓宕伴弴鈶哄洭宕滄担铏癸紲闂佸搫鍟崐鎼佸几鎼搭潿浜滈柍杞伴檷閸嬨垻鈧娲栧畷顒冪亙婵犵數濮撮崐褰掝敊韫囨挴鏀?
+        // 画布及元素属性处理
         if ((newPosition.dx + movingElement.size.width).round() ==
             otherElement.position.dx.round()) {
           alignmentLines.add(AlignmentLine(
@@ -703,7 +712,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                 newPosition.dx + movingElement.size.width, canvasSize.height),
           ));
         }
-        // 缂傚倸鍊搁崐椋庣矆娓氣偓钘濋柟鍓佺摂閺佸鎲告惔銊ョ疄闁靛ň鏅涢悡娑㈡煕濞戝崬骞樻い鏂匡躬閹嘲顭ㄩ崘顓烆伃闂佸疇顕ч柊锝嗘叏閳ь剟鏌曢崼婵囶棞闁告搩鍙冨娲川婵犲啫顦╅梺绋款儏閸婅崵鍒掓繝姘兼晬婵ǜ鍎崑鎾诲箳閹搭厽鍍甸梺閫炲苯澧寸€规洖宕埢搴ㄥ箣濠靛宕曟繝鐢靛Х椤ｄ粙宕滃┑瀣ㄢ偓鍐川椤撳洦鐩顕€宕掑鍛殽闁诲骸鍘滈崑鎾绘煕閺囥劌浜炴い蟻鍥ㄢ拺闁告繂瀚晶銏ゆ煛娴ｈ鍊愰柡灞熷洤纾奸柣鎰嚟閸樼敻鏌ｉ悩顔煎妞わ富鍨跺畷鎰亹閹烘繃鏅濇繛瀵稿Т椤戝棝鎮￠悢鍏肩厪濠电偛鐏濋崝姘亜韫囧﹥娅囬柟鍙夋倐瀵爼骞愭惔鈩冩畼缂傚倷鐒﹂〃鍫ュ窗閺団懞鍥礈娴ｈ櫣锛滈梺鍝勫暙閸婃悂寮告惔顫簻闁宠桨闄嶉崑銏⑩偓瑙勬礀瀹曨剝鐏冩繝鐢靛Т閸婂綊顢欒箛鎾斀?
+        // 画布及元素属性处理
         if ((newPosition.dx).round() ==
             (otherElement.position.dx + otherElement.size.width).round()) {
           alignmentLines.add(AlignmentLine(
@@ -711,7 +720,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
             end: Offset(newPosition.dx, canvasSize.height),
           ));
         }
-        // 缂傚倸鍊搁崐椋庣矆娓氣偓钘濋柟鍓佺摂閺佸鎲告惔銊ョ疄闁靛ň鏅涢悡娑㈡煕濞戝崬骞樻い鏂匡躬閹嘲顭ㄩ崘顓烆伃闂佸疇顕ч柊锝嗘叏閳ь剟鏌曢崼婵囶棞闁告搩鍙冨娲川婵犲啫顦╂繛瀛樼矌閸嬨倝骞冮悜钘夌疀闁哄娉曟鍥⒑閸撴彃浜剧紓宥呮椤洭骞囬婊€绨婚梺闈涚箳婵參宕曢幇顔剧＜閻庯綆浜跺Σ褰掓煙椤栨稒顥堥柛銊╃畺瀹曟﹢鎳犻鍌滃€冲┑鐘垫暩閸嬫盯顢氶鐔稿弿闁汇垹鎲￠崑瀣繆閵堝懎鏆為柡鍡樼矒閺屻倝宕妷锔芥瘎濡炪倐鏅濋崗姗€寮诲☉銏犵闁肩⒈鍓欐俊浠嬫⒑娴兼瑧鍒扮€规洦鍓熼崺銉﹀緞閹邦剛顔掗梺褰掝暒缁€渚€宕滈悽鐢电＝濞达綀顫夐埛鎺楁煕閻樻煡鍙勯柕鍡楁噺缁虹晫绮欓崹顔库偓鍨攽鎺抽崐鏇㈡晝閵堝應鏋旈柛娑橈攻閸?
+        // 画布及元素属性处理
         if ((newPosition.dy).round() ==
             (otherElement.position.dy + otherElement.size.height).round()) {
           alignmentLines.add(AlignmentLine(
@@ -719,7 +728,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
             end: Offset(canvasSize.width, newPosition.dy),
           ));
         }
-        // 缂傚倸鍊搁崐椋庣矆娓氣偓钘濋柟鍓佺摂閺佸鎲告惔銊ョ疄闁靛ň鏅涢悡娑㈡煕濞戝崬骞樻い鏂匡躬閹嘲顭ㄩ崘顓烆伃闂佸疇顕ч柊锝嗘叏閳ь剟鏌曢崼婵囶棞闁告搩鍙冨娲川婵犲啫顦╂繛瀛樼矌閸嬨倝骞冮悜钘夌閻犲洩灏欐鍥⒑閸撴彃浜剧紓宥呮椤洭骞囬婊€绨婚梺闈涚箳婵參宕曢幇顔剧＜閻庯綆浜跺Σ褰掓煙椤栨稒顥堥柛銊╃畺瀹曟﹢鎳犻鍌滃€冲┑鐘垫暩閸嬫盯顢氶鐔稿弿闁汇垹鎲￠崑瀣繆閵堝懎鏆為柡鍡樼矒閺屻倝宕妷锔芥瘎濡炪倐鏅濋崗姗€寮诲☉銏犵闁肩⒈鍓欐俊浠嬫⒑娴兼瑧鍒扮€规洦鍓熼崺銉﹀緞閹邦剛顔掔紓浣圭☉缂嶅﹦娆㈢€靛摜纾藉ù锝堫潐閳锋帡鏌涢悩鏌ュ弰闁靛棗鎳忕缓鐣岀矙閸喛鈧灝鈹戞幊閸婃洟鏁冮妶鍛灁闁告稑锕ラ崣?
+        // 画布及元素属性处理
         if ((newPosition.dy + movingElement.size.height).round() ==
             otherElement.position.dy.round()) {
           alignmentLines.add(AlignmentLine(
@@ -744,7 +753,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
           return;
         }
 
-        // 闂傚倷绀侀幖顐λ囬鐐村亱闁糕剝顨愰懓鍧楁⒑椤掆偓缁夋挳鎮块悙顑句簻闁硅埇鍔嶉崵鎺撶箾閹存瑥鐏╅柣鎺戠仛閵囧嫰骞掗幋婵愪患闂?
+        // 画布及元素属性处理
         newX = newX.clamp(0, canvasSize.width - movingElement.size.width);
         newY = newY.clamp(0, canvasSize.height - movingElement.size.height);
 
@@ -753,7 +762,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         _calculateAlignmentLines(movingElement, newPosition);
 
         movingElement.position = newPosition;
-        // 闂傚倸鍊风粈渚€骞栭鈷氭椽濡舵径瀣槐闂侀潧艌閺呮盯鎷戦悢灏佹斀闁绘ê寮堕幖鎰磼閻樿尙锛嶉柟鎻掓憸娴狅妇鎲撮敐鍡欌偓濠氭⒑闂堟盯鐛滅紒杈ㄦ礋閸╃偛顓兼径瀣帗闂佸疇妗ㄧ粈渚€寮抽弴鐘电＜?
+        // 计算元素间对齐辅助线
         _positionXController.text = newPosition.dx.toInt().toString();
         _positionYController.text = newPosition.dy.toInt().toString();
         _elementWidthController.text = movingElement.size.width.toString();
@@ -762,7 +771,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     } else {
       setState(() {
         alignmentLines.clear();
-        // 闂傚倸鍊烽懗鍫曗€﹂崼銏″床闁规壆澧楅崑瀣攽閻樺弶纭藉鑸靛姇瀹告繈鏌℃径瀣伇闁硅姤娲熷娲濞戣鲸顎嗙紓浣哄У閸ㄥ潡濡撮崒鐐茶摕闁靛濡囬崢鎼佹⒑閸撴彃浜濈紒璇茬Т鍗辩憸鐗堝笚閸嬨劍銇勯弽銊х畵闁绘挻鍔楃槐鎺楀磼濞戞ɑ璇為梺纭呮珪缁挸鐣疯ぐ鎺濇晝鐎广儱绻掗悾鐢告煛鐏炲墽鈽夋い顐ｇ箞瀹曟粏顦寸紒鎰殘缁辨挻鎷呮禒瀣懙婵犮垻鎳撳Λ婵嬬嵁閺嶃劊鍋呴柛鎰╁妼缁愭稑顪冮妶鍡樺暗闁稿鍋ら幆渚€寮崼鐔哄幐婵犮垼娉涢敃锔芥櫠閺囩喓绡€闁逞屽墴閺屽棗顓奸崨顖涚叄?
+        // 画布及元素属性处理
         bool outOfBounds = false;
         for (DraggableElement element in selectedElements) {
           double newX = element.position.dx + delta.dx;
@@ -785,7 +794,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
             element.position = newPosition;
           }
         }
-        // 闂傚倸鍊搁崐椋庢閿熺姴纾婚柛鏇ㄥ瀬閸ヮ剙绠ユい鏃傛嚀娴滅偓鎱ㄥΟ绋垮姎濠碉紕鏅埀顒€鐏氬妯尖偓姘煎墴閿濈偛鈹戠€ｅ灚鏅濋梺鎸庢磵閸嬫挻绻涢崼鐔虹疄婵﹨娅ｅ☉鐢稿川椤栨粌濮洪梻浣侯焾閺堫剚绗熷Δ鍛；闁靛ň鏅滈埛鎴︽煕濠靛棗顏╅柡鍡愬灲閺屾盯鍩￠崒婊冣拡缂備緡鍠掗弲鐘诲箠閿熺姴围闁搞儮鏅濋崢浼存⒑閸濆嫷妲洪柛瀣ㄥ€濋妴鍌炴晜閻愵剙搴婇梺绯曞墲缁嬫帡鎮?
+        // 计算元素间对齐辅助线
         _positionXController.clear();
         _positionYController.clear();
         _elementWidthController.clear();
@@ -803,7 +812,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       _textController.clear();
       _textWidthController.clear();
       _textHeightController.clear();
-      // 婵犵數濮烽弫鎼佸磻閻愬搫绠伴柟闂寸缁犵娀鏌熼悧鍫熺凡闁绘挻锕㈤弻鈥愁吋鎼粹€崇缂備胶濮寸壕顓㈠箟閸濄儰娌悷娆欑稻閻庡姊洪棃娑㈢崪缂佽鲸娲熼崺鐐差吋婢跺鍘撻梺瀹犳〃缁€渚€寮抽弴鐘电＜?
+      // 画布及元素属性处理
       _positionXController.clear();
       _positionYController.clear();
       _elementWidthController.clear();
@@ -812,7 +821,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
   }
 
   void deleteSelectedElements() {
-    _saveState(); // 濠电姷鏁搁崕鎴犲緤閽樺娲晜閻愵剙搴婇梺绋跨灱閸嬬偤宕戦妶澶嬬厪濠电偛鐏濇俊绋棵瑰鍐Ш闁哄瞼鍠栭獮鍡氼槻闁哄棜椴搁妵鍕Χ閸涱喖娈楅梺鍝勭焿缁插€熺亽闂佸壊鐓堥崰姘跺储椤愶附鈷?
+    _saveState(); // 画布及元素属性处理
     setState(() {
       elements.removeWhere((element) => selectedElements.contains(element));
       selectedElements.clear();
@@ -821,7 +830,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       _textController.clear();
       _textWidthController.clear();
       _textHeightController.clear();
-      // 婵犵數濮烽弫鎼佸磻閻愬搫绠伴柟闂寸缁犵娀鏌熼悧鍫熺凡闁绘挻锕㈤弻鈥愁吋鎼粹€崇缂備胶濮寸壕顓㈠箟閸濄儰娌悷娆欑稻閻庡姊洪棃娑㈢崪缂佽鲸娲熼崺鐐差吋婢跺鍘撻梺瀹犳〃缁€渚€寮抽弴鐘电＜?
+      // 画布及元素属性处理
       _positionXController.clear();
       _positionYController.clear();
       _elementWidthController.clear();
@@ -838,7 +847,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       _textController.clear();
       _textWidthController.clear();
       _textHeightController.clear();
-      // 婵犵數濮烽弫鎼佸磻閻愬搫绠伴柟闂寸缁犵娀鏌熼悧鍫熺凡闁绘挻锕㈤弻鈥愁吋鎼粹€崇缂備胶濮寸壕顓㈠箟閸濄儰娌悷娆欑稻閻庡姊洪棃娑㈢崪缂佽鲸娲熼崺鐐差吋婢跺鍘撻梺瀹犳〃缁€渚€寮抽弴鐘电＜?
+      // 画布及元素属性处理
       _positionXController.clear();
       _positionYController.clear();
       _elementWidthController.clear();
@@ -909,7 +918,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         _textWidthController.clear();
         _textHeightController.clear();
       }
-      // 闂傚倸鍊风粈渚€骞栭鈷氭椽濡舵径瀣槐闂侀潧艌閺呮盯鎷戦悢灏佹斀闁绘ê寮堕幖鎰磼閻樿尙锛嶉柟鎻掓憸娴狅妇鎲撮敐鍡欌偓濠氭⒑闂堟盯鐛滅紒杈ㄦ礋閸╃偛顓兼径瀣帗闂佸疇妗ㄧ粈渚€寮抽弴鐘电＜?
+      // 画布及元素属性处理
       _positionXController.text = element.position.dx.toInt().toString();
       _positionYController.text = element.position.dy.toInt().toString();
       _elementWidthController.text = element.size.width.toString();
@@ -938,7 +947,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         canvasSize = Size(width * 8.toInt(), height * 8.toInt());
       });
     } else {
-      // 闂傚倷绀侀幖顐λ囬鐐村亱濠电姴娲ょ粻浼存煙闂傚顦﹂柣顓燁殜閺屾盯鍩勯崘鍓у姺闂佸磭绮濠氬焵椤掆偓缁犲秹宕曢柆宥呯疇闊洦绋戠壕褰掓煏閸繃顥犵紒鐘冲劤椤法鎹勬笟顖氬壉缂備礁鐭佸▔鏇犳閹烘挻缍囬柕濞у懐鏆紓鍌欐祰妞村摜鏁幒妤€鐓濋幖娣€楅悿鈧梺瑙勫劤椤曨厼危濮椻偓濮婄粯鎷呴崨濠呯缂備緡鍣崹璺虹暦濠靛柈鏃堝川椤?
+      // 画布及元素属性处理
       ScaffoldMessenger.of(scaffoldContext).showSnackBar(
         SnackBar(
           backgroundColor: Theme.of(context).colorScheme.error,
@@ -946,7 +955,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
               Text('Please enter valid numbers for canvas width and height.'),
         ),
       );
-      // 濠电姷鏁搁崕鎴犲緤閽樺娲晜閻愵剙搴婇梺鍛婂姦娴滄牠宕戦幘璇插瀭妞ゆ劧缍嗗Λ鍐倵鐟欏嫭纾搁柛銊ょ矙楠炲啴濮€閵堝懎绐涙繝鐢靛Т濞诧箓顢撻弽顓熲拻濞达絽婀卞﹢浠嬫煕閺傝法鐏遍柍褜鍓氶崙褰掑闯閿濆拋鍤曟い鎰剁畱缁€鍫㈡喐鎼淬劌姹叉繝濠傜墛閻撴洟鏌熼幍铏珔濠碉紕顭堥湁婵犲﹥鍔楃粔顕€鏌?
+      // 画布及元素属性处理
       _widthController.text = (canvasSize.width / 8.toInt()).toString();
       _heightController.text = (canvasSize.height / 8.toInt()).toString();
     }
@@ -995,13 +1004,13 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         (canvasSize.height - height) >= 0) {
       setState(() {
         selectedElements.first.size = Size(width, height);
-        // 闂傚倷绀侀幖顐λ囬鐐村亱闁糕剝顨愰懓鍧楁⒑椤掆偓缁夋挳鎮块悙顑句簻闁硅埇鍔嶉崵鎺撶箾閹存瑥鐏╅柣鎺戠仛閵囧嫰骞掗幋婵愪患闂?
+        // 画布及元素属性处理
         double newX = selectedElements.first.position.dx
             .clamp(0, canvasSize.width - width);
         double newY = selectedElements.first.position.dy
             .clamp(0, canvasSize.height - height);
         selectedElements.first.position = Offset(newX, newY);
-        // 闂傚倸鍊风粈渚€骞栭鈷氭椽濡舵径瀣槐闂侀潧艌閺呮盯鎷戦悢灏佹斀闁绘ê寮堕幖鎰磼閻樿尙锛嶉柟鎻掓憸娴狅妇鎲撮敐鍡欌偓濠氭⒑闂堟盯鐛滅紒杈ㄦ礋閸╃偛顓兼径瀣帗闂佸疇妗ㄧ粈渚€寮抽弴鐘电＜?
+        // 画布及元素属性处理
         _positionXController.text = newX.toString();
         _positionYController.text = newY.toString();
         _elementWidthController.text = width.toString();
@@ -1044,7 +1053,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         DraggableElement element = selectedElements.first;
         element.rotation = degreeInt;
         _selectedRotation = degrees;
-        // 濠电姷鏁搁崑娑㈡偤閵娾晛鍚归幖娣妼绾惧綊鏌″畵顔兼噺濞堥箖姊洪懖鈹炬嫛闁稿繑锕㈠畷鎴﹀箻缂佹鍔靛┑鐐村灦濮樸劑鎮￠幘缁樷拺缂備焦顭囩粻銉╂煕閻樻剚娈樼紒顔碱儔楠炴帒螖閳ь剙鏁梻浣哥枃椤宕曢搹顐ゎ洸濡わ絽鍟悡鏇㈡倶閻愰潧浜鹃柣銊﹀灴閹鎮烽柇锔解枅闂佸搫鐭夌换婵嗙暦濮椻偓閳ワ箓骞嬪┑鍡楊棐濠?
+        // 画布及元素属性处理
         if ([90, 270].contains(degreeInt)) {
           double temp = element.size.width;
           element.size = Size(element.size.height, temp);
@@ -1114,7 +1123,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     return findIndex;
   }
 
-  //濠电姷鏁搁崑鐐哄垂閸洖绠伴柟闂寸贰閺佸嫰鏌涢埄鍏狀亪宕归弮鍌滅＜闁炽儵妾查埡鐢de
+  // 画布及元素属性处理
   void _handleBarcodeSelected(String value) {
     _saveState();
     _focusNode.requestFocus();
@@ -1133,7 +1142,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
               _findVarcontent(_selectedBarcode, element.type.name);
           if (barcodeIndex != -1) {
             element.style =
-                1; // 1濠电姷鏁搁崑鐐哄垂閸洖绠板Δ锝呭暙绾惧潡鏌曢崼婵囧闁绘帟濮ら妵鍕冀椤愵澀娌梺绋垮閿氶棁澶愭煥濠靛棙鍣洪柟鎻掓啞閹便劌螣缁嬪灝顬堥梺瀹犳椤︾敻鐛▎鎾崇闁靛鍎抽鎰版⒑鐠囨煡顎楅柣蹇斿哺閺佸啴濮€閻樺灚娈鹃梺闈涱槴閺呪晠寮崘顔界叆婵炴垶锚椤忊晠鏌￠崨顏呮珚婵﹥妞藉畷顐﹀礋閸偒鈧棛绱撴担浠嬪摵婵炶尙鍠栭獮鍐Ψ閵夘喚鍙嗛梺鍓插亞閸犳劕鈻?濠电姷鏁搁崑鐐哄垂閸洖绠板Δ锝呭暙绾惧潡鏌曢崼婵囧闁绘帟濮ら妵鍕冀椤愵澀娌梺绋垮閿氶棁澶愭煥濠靛棙鍣洪柟鎻掓啞閹便劌螣缁嬪灝顬堥梺瀹犳椤︾敻鐛▎鎾崇闁靛鍎抽鎴︽⒒娴ｅ湱婀介柛搴ㄤ憾楠炲﹤螣娓氼垰娈ㄩ梺鍓茬厛閸嬪嫮娆㈤悙鐑樺€甸柨婵嗩槹濞懷冣攽閳ユ彃宓嗘慨濠冩そ瀹曨偊宕熼崹顐偓鍡欑磽娴ｄ粙鍝烘繛鑼枛楠?
+                1; // 画布及元素属性处理
             element.barcodeType =
                 myBarCodeListList.barCodeListList[barcodeIndex].barCodeType;
             element.barcodeName =
@@ -1168,7 +1177,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     });
   }
 
-  //濠电姷鏁搁崑鐐哄垂閸洖绠伴柟闂寸贰閺佸嫰鏌涢埄鍏狀亪宕归弮鍌滅＜闁靛鍎茬欢娑㈡⒒娴ｇ瓔鍤欐繛瀵稿厴閵嗕焦绻濋崑鑺ョ洴瀹曠喖顢樺☉妯瑰?
+  // 画布及元素属性处理
   void _handleQrWidthSelected(String value) {
     _saveState();
     _focusNode.requestFocus();
@@ -1185,7 +1194,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     });
   }
 
-  //濠电姷鏁搁崑鐐哄垂閸洖绠伴柟闂寸贰閺佸嫰鏌涢埄鍏狀亪宕归弮鍌滅＜闁炽儵妾查埡鐢de
+  // 画布及元素属性处理
   void _handleQrcodeSelected(String value) {
     _saveState();
     _focusNode.requestFocus();
@@ -1247,7 +1256,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     _saveState();
     DraggableElement newElement = copyElementFun(element);
     setState(() {
-      // 闂傚倷娴囬褏鎹㈤幇顔藉床闁归偊鍎靛☉妯锋瀻闁规儳鐤囬幗鏇熺節閻㈤潧孝婵炲眰鍊楃划鍫ュ磼閻愬鍘遍梺瑙勬緲閸氣偓缂併劏濮ら妵鍕晝娓氣偓閸濊櫣绱掔紒妯兼创闁轰焦鍔欏畷濂割敃閵忊槅鍞叉繝鐢靛У椤旀牠宕板璺虹；闁靛牆鎳愰弳锔芥叏濡寧纭剧紒鐙欏洦鐓曟い顓熷灥閺嬨倕霉閻樺啿鍝洪柡宀嬬秮閹瑧鈧數纭跺Λ銊╂⒑閸涘﹥鐓ユい鎴濐樀楠?
+      // 画布及元素属性处理
       elements.add(newElement);
     });
   }
@@ -1256,7 +1265,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     copyElement(element);
   }
 
-  /// 闂傚倸鍊风粈渚€骞夐敍鍕殰婵°倕鍟伴惌娆撴煙鐎电啸缁惧彞绮欓弻鐔煎箲閹伴潧娈紓浣插亾闁糕剝眉缁诲棝鏌曢崼婵囧櫣妞ゅ繈鍎甸弻?, 婵犵數濮甸鏍闯椤栨粌绶ら柣锝呮湰瀹曟煡鎮楅敐搴℃灍闁绘挸鍊圭换婵囩節閸屾粌顣虹紓浣插亾闁稿瞼鍋為悡鏇㈡煙閺夊灝鎮佺紒銊ㄥГ閵囧嫰鏁冮崒娆愬枤濠殿喖锕ュ浠嬨€佸▎鎾冲瀭妞ゆ枮鍕鞍濞ｅ洤锕獮鎾诲箳閹捐櫕娈樼紓鍌欑椤戝懘藝閻㈢鏄ラ柍褜鍓氶妵鍕箳瀹ュ牆鍘￠梺?ExpansionTile 缂傚倸鍊搁崐鎼佸磹妞嬪海鐭嗗ù锝堛€€閸嬫挸顫濋梻瀵哥泿闂?
+  // 画布及元素属性处理
   List<Widget> _buildList(BuildContext context) {
     List<Widget> widgets = [];
     for (var key in varCollection.keys) {
@@ -1334,7 +1343,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     );
   }
 
-  /// 闂傚倸鍊烽悞锕傛儑瑜版帒鍨傚┑鐘宠壘缁愭鏌熼悧鍫熺凡闁?ExpansionTile 濠电姷鏁搁崑鐐哄垂閸洖绠伴柟闂寸贰閺佸嫰鏌涢妷鎴斿亾闁?ListView 闂傚倸鍊烽悞锕傛儑瑜版帒绀夌€光偓閳ь剟鍩€椤掍礁鍤柛鎾寸懇閹箖鎮滈懞銉ヤ簻闂佸憡绺块崕顕€寮搁弽褜娓婚柕鍫濇噽缁犵増淇婇锝囨创闁诡垰鐬奸埀顒婄秵閳?
+  // 画布及元素属性处理
   Widget _generateWidget(name) {
     text = name.split(",")[0];
     type = name.split(",")[1];
@@ -1347,7 +1356,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       text = langVarMap[text]!;
     }
 
-    /// 濠电姷鏁搁崑鐘诲箵椤忓棛绀婇柍褜鍓氱换娑欏緞鐎ｎ偆顦伴悗娈垮櫘閸嬪﹥淇婇崼鏇炵倞闁靛鍎宠ぐ鎾⒒娓氣偓濞佳囨晬韫囨稑宸濇い鏍ㄧ矊鐢帗绻濋悽闈涗粶妞ゆ洦鍘介幈銊╁箚瑜夐弸鏍ㄧ箾閹寸偛娈犲ù婊冪秺閺屾稑鈻庤箛锝喰ㄥ銈傛櫇閸忔﹢寮婚弴鐔风窞闁割偅绺鹃崑鎾诲即閵忕姷鍘洪棅顐㈡处缁嬫帡宕愰悽鐢垫／妞ゆ挾鍋為崳鐑樸亜閵夈儺妯€闁诡喗顨堥幉鎾礋椤愮喐鐏嗘俊銈囧Х閸嬬偤鏁冮姀銈囧祦閻庯綆鍠楅崐鐑芥煙缂佹ê閱?
+    // 画布及元素属性处理
     return FractionallySizedBox(
         widthFactor: 1,
         child: Container(
@@ -1376,9 +1385,9 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                 },
                 child: Container(
                   width:
-                      150, // 闂傚倸鍊烽悞锕傚箖閸洖纾块梺顒€绉寸粻瑙勩亜閹板爼妾柛瀣ф櫊閺屾盯骞樺璇蹭壕闂佺顑嗛幐鎯р槈閻㈢宸濇い鏇炴噺椤ュ姊?
+                      150, // 画布及元素属性处理
                   height:
-                      36, // 闂傚倸鍊烽悞锕傚箖閸洖纾块梺顒€绉寸粻瑙勩亜閹板爼妾柛瀣ф櫊閺岋綁骞囬棃娑樷拻濠电偛鐗婇〃鍡樼┍婵犲浂鏁嶆慨姗嗗幗閸庢挸顪?
+                      36, // 画布及元素属性处理
 
                   alignment: Alignment.center,
                   child: Text(
@@ -1392,8 +1401,8 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         ));
   }
 
-  //闂備浇顕ф鍝ョ礊婵犲偆鐒介柤濮愬€楃壕鑺ユ叏濡寧纭鹃柣銈夌畺閺屾盯顢曢敐鍡欘槬缂備讲鍋撻柛鈩兠肩换鍡涙煏閸繃鍣规い蹇嬪劦閺屽秷顧侀柛鎾寸懇瀹曨垶骞橀鑹版憰閻庡厜鍋撻柍褜鍓氱粋鎺楁晝閸屾氨鐣鹃悷婊冪箰铻ｉ柛鈩冪⊕閳锋帒霉閿濆牊顏犻柟钘夊€块弻娑㈡偐鐎圭姴顥濋梺宕囩帛閹瑰洭鐛€ｎ喗鏅滈柦妯侯槴閸嬫捇鎮滈懞銉у幗闂佺粯鏌ㄩ幉锛勬閸欏鍙忛柨婵嗘嫅瀹搞儵妫佹径瀣瘈濠电姴鍊搁弸銈夋煕鎼粹€愁劉缂?
-//闂傚倸鍊风欢姘焽閼姐倖瀚婚柣鏃傚帶缁€澶愭倵閿濆骸鏋熼柛銈呯墦閺岀喐娼忔ィ鍐╊€嶉梺鎶芥敱鐢繝寮婚悢铏圭＜闁靛繒濮甸悘鍫ユ⒑閸涘﹥鐓熼柛搴ｆ暬瀵鈽夐姀鐘殿唺闂佺懓顕崕鎰涢敓鐘斥拺缂佸妫楅崰娑㈢叕椤掑倵鍋撶憴鍕缂佽鐗撻獮鍐煛閸涱厾顔岄梺鍦劋濞诧箓宕ぐ鎺撯拻濞达絽鎽滅粔娲煛閳ь剟鏌嗗鍡椾罕濠德板€曢崯鐘诲磻閹炬剚娼╂い鎺嶇娴犳潙螖閻橀潧浠﹂悽顖滃枛钘濋弶鍫涘妿缁犻箖鏌涢埄鍐ㄥ闁诲繑鐓￠弻鈩冩媴閸濄儛銈吤归悪鍛暤鐎规洘鍔欓幃銏☆槹鎼绰ゎ唹婵犵數濮烽弫鎼佸磿閹寸姷绀婇柍褜鍓氶妵鍕即閸℃顏柛娆忕箻閺岋綁骞囬浣瑰創缂備讲鍋撻柛鈩冪⊕閻撶喓鎲歌箛娴板骞庨妶娉傿uttonList闂傚倸鍊峰ù鍥ь浖閵娾晜鍊块柨鏃傛櫕閻濆爼鏌涢埄鍐噧闁搞劍绻勯埀顒€绠嶉崕閬嵥囨导瀛樺亗闁稿本澹曢崑鎾诲礂婢跺﹣澹曢梺璇插嚱缂嶅棝宕滃☉鈶哄洭顢氶埀顒€顫忓ú顏勪紶闁告洦鍋€閸嬫捇宕稿Δ鈧悞鍨亜閹哄秷鍏岄柕鍡樺浮閺屽秶鎲撮崟顐ｈ癁闂佸搫鐭夌换婵嗙暦閻旂⒈鏁冮柍鍨涙櫆鐎垫牠姊?
+  // 画布及元素属性处理
+// 画布及元素属性处理
   void addFloatButton(name) {
     DraggableElement element = addElementToList(name, lastFontSize);
 
@@ -1408,7 +1417,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     List<DraggableElement> targetElements = exportElements ?? elements;
     List<List<dynamic>> csvData = <List<dynamic>>[];
     // csvData.add(['Time', 'Name']);
-    //闂傚倸鍊烽懗鍫曞箠閹剧粯鍊舵慨妯挎硾缁犳壆绱掔€ｎ厽纭堕柡鍡愬€濋弻娑㈠箛閻㈤潧甯ュ┑鐐烘？閸楁娊寮婚妸銉㈡斀闁糕剝锚濞呫倝姊虹粙鍖″伐妞ゎ厾鍏樺濠氭偄鐞涒€充壕婵炴垶鐟悞钘夘熆瑜庢繛濠囧蓟瀹ュ牜妾ㄩ梺鍛婃尰閻熲晠鐛繝鍐╁劅闁宠棄妫楀▓銊︾箾鐎电孝妞ゆ垵鎳愰幉?
+    // 画布及元素属性处理
     if (_selectedPrintDirection == 'Forward') {
       csvData.add(['ROTATE', '0']);
     } else {
@@ -1417,7 +1426,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     int width = int.parse(_widthController.text) * 8;
     int height = int.parse(_heightController.text) * 8;
 
-    //闂傚倸鍊烽懗鍫曞箠閹剧粯鍊舵慨妯挎硾缁犳壆绱掔€ｎ厽纭堕柡鍡愬€濋弻娑㈠箛閸忓摜鏁栧┑鈽嗗亽閸ㄥ磭妲愰幒鏂哄亾閿濆骸骞楃痪顓炵埣閺岋綁骞囬濠備紣濡炪値鍘煎鈥崇暦婵傜骞㈡俊銈傚亾闁哄棛鍠愰幈?
+    // 画布及元素属性处理
     csvData.add(['P', width.toString(), height.toString()]);
 
     for (var i = 0; i < targetElements.length; i++) {
@@ -1535,7 +1544,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
           targetElements[i].index,
         ]);
       }
-      //缂傚倸鍊搁崐鐑芥嚄閸洖纾婚柟鎯х亪閸嬫挾绮☉妯烘灓闁绘帟濮ら妵鍕冀閵娧€妲堢紓浣稿閸嬨倝寮诲☉銏犖ㄦい鏍ㄧ矌閺嗙娀姊?
+      // 画布及元素属性处理
       // else if (targetElements[i].type.name == 'line') {
       //   if (targetElements[i].lineWidth! <= targetElements[i].x2Pos!) {
       //     csvData.add([
@@ -1545,7 +1554,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       //       (targetElements[i].x2Pos! + targetElements[i].position.dx.toInt()).toInt(),
       //       targetElements[i].position.dy.toInt(),
       //       targetElements[i].lineWidth!.toInt(),
-      //       0, //缂傚倸鍊搁崐鐑芥倿閿曗偓閻ｅ嘲螣鐞涒剝鐏冮梺鍝勬川婵敻宕戦弽銊ｄ簻闁规澘澧庨悾閬嶆煕?
+      // 画布及元素属性处理
       //       targetElements[i].index,
       //     ]);
       //   } else {
@@ -1556,7 +1565,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       //       targetElements[i].position.dx.toInt(),
       //       (targetElements[i].lineWidth! + targetElements[i].position.dy.toInt()).toInt(),
       //       targetElements[i].x2Pos!.toInt(),
-      //       0, //缂傚倸鍊搁崐鐑芥倿閿曗偓閻ｅ嘲螣鐞涒剝鐏冮梺鍝勬川婵敻宕戦弽銊ｄ簻闁规澘澧庨悾閬嶆煕?
+      // 画布及元素属性处理
       //       targetElements[i].index,
       //     ]);
       //   }
@@ -1565,7 +1574,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       else if (targetElements[i].type.name == 'line') {
         int lineWidth = targetElements[i].size.width.toInt();
         int lineHeight = targetElements[i].size.height.toInt();
-        //婵犵數濮烽。钘壩ｉ崨鏉戝瀭闁稿繗鍋愰々鏌ユ煟閹邦剚鎯堥柛?
+        // 画布及元素属性处理
         if (lineHeight <= lineWidth) {
           csvData.add([
             'L',
@@ -1574,7 +1583,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
             (lineWidth + targetElements[i].position.dx.toInt()).toInt(),
             targetElements[i].position.dy.toInt(),
             lineHeight,
-            0, //缂傚倸鍊搁崐鐑芥倿閿曗偓閻ｅ嘲螣鐞涒剝鐏冮梺鍝勬川婵敻宕戦弽銊ｄ簻闁规澘澧庨悾閬嶆煕?
+            0, // 画布及元素属性处理
             targetElements[i].index,
           ]);
           // print(csvData.last);
@@ -1586,7 +1595,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
             targetElements[i].position.dx.toInt(),
             (lineHeight + targetElements[i].position.dy.toInt()).toInt(),
             lineWidth,
-            0, //缂傚倸鍊搁崐鐑芥倿閿曗偓閻ｅ嘲螣鐞涒剝鐏冮梺鍝勬川婵敻宕戦弽銊ｄ簻闁规澘澧庨悾閬嶆煕?
+            0, // 画布及元素属性处理
             targetElements[i].index,
           ]);
           // print(csvData.last);
@@ -1632,17 +1641,17 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     return barcodedata.toString();
   }
 
-//婵犵數濮甸鏍窗濡ゅ啰绱﹂柛褎顨呯壕褰掓煛閸ワ絾鍤嶉柛銉墮閻撴盯鏌涢幇銊︽珔闁哄鍊垮娲箰鎼达絿鐣靛┑鈽嗗亝閻╊垶宕洪埀顒併亜閹达絾纭堕柣顓熺懅閳ь剚顔栭崰鏍偉婵傜鏋佺€广儱顦粈瀣亜閹捐泛浠уù鐙€鍨跺缁樻媴閸涘﹤鏆堥梺鍛婃⒐濞茬喖鐛繝鍐╁劅妞ゎ厽鍨堕弲鈺呮⒑鐟欏嫬顥嬪褎顨婂鏌ヮ敆閸曨剙鈧爼鏌ｉ幇鐗堟锭濞存粓绠栭弻鐔兼倻閹存帗鍠氶梺鍝勬湰閻╊垶寮崘顔肩＜闁靛牆妫欓鑲╃磽閸屾瑧鍔嶆い銊ユ嚇钘濋柟娈垮枤閻瑥顭块懜闈涘闁绘帒鐏氶妵鍕箳閹存績鍋撻悽绋跨；闁规崘鍩栭崰鍡涙煕閺囥劌寮鹃柡鍡忊偓鏂ユ斀闁绘﹩鍋勬禍鐐箾鏉堝墽鍒板鐟帮工椤洦瀵肩€涙鍘梺鍓插亝缁诲啴藟閻愮儤鐓㈤柛灞惧嚬閸庢棃鏌″畝瀣М妞ゃ垺鐟╅幊锟犲Χ閸涱収鐎撮梻鍌欒兌缁垶銆冮崼銉⑩偓锕傚醇閵夘喗鏅梺鎸庣箓閻楀繘鎮块埀顒勬煟鎼搭垱鈧儵宕樿椤ユ岸姊绘担渚劸闁活剙銈稿畷鎴濃槈閵忕姴鍋嶉梺鍦檸閸犳鎮″▎鎴犵＜閻庯綆鍋掗崕銉︿繆閹绘帞绉洪柡宀嬬秮婵＄兘濡烽敃鈧▓妤呮倵濞堝灝鏋涢柣蹇旇壘椤曘儵宕熼娑樹壕闁挎繂顦板☉褍鈹戦垾鎻掑祮婵﹥妞藉畷顐﹀礋閸偒鈧棛绱撴担浠嬪摵婵炶尙鍠栭獮鍐Ψ閵夘喚鍙嗛梺鍓插亝缁诲倿宕妸鈺傗拺缂備焦蓱鐏忣厽绻涢幘顕呮婵炴垹鏁婚崺鈧い鎺嶈兌缁♀偓闂侀潧楠忕徊鍓ф兜妤ｅ啯鍊垫慨妯煎帶濞呭秵顨?
+// 画布及元素属性处理
   String _barcodeContent1(List<dynamic> con) {
     final barcodedata =
-        StringBuffer(); // 濠电姷鏁搁崑鐘诲箵椤忓棛绀婇柍褜鍓氱换娑欏緞鐎ｎ偆顦伴悗?StringBuffer 闂傚倸鍊风粈渚€骞栭位鍥敇閵忕姷锛熼梺鍝勮閸庢煡宕愰崹顐犱簻闁哄秲鍔岄崵顒勬煕閵堝懐澧﹂柡灞剧☉閳规垿宕卞Δ濠佺磻闂備礁婀遍弲顐﹀窗閹捐埖顫曢柟鐑樺殾閺冨倵鍋撻敐搴″缂佹劖顨婇弻?
+        StringBuffer(); // 画布及元素属性处理
     if (con.isEmpty) {
       return barcodedata.toString();
     }
     for (final item in con) {
       if (barcodedata.isNotEmpty) {
         barcodedata.write(
-            ','); // 闂傚倸鍊风欢姘焽閼姐倖瀚婚柣鏃傚帶缁€澶愭倶閻愰潧浜炬繛鍛█閺岋絽螣閾忕櫢绱為梺宕囩帛濡啴寮诲鍫闂佸憡鎸诲銊у垝濞嗘劕绶為柟鏉跨仛閺呮粓姊洪崜鎻掍簼缂佸鐗撳畷鎴﹀箻閹颁礁鎮戞繝銏ｆ硾椤戝懘宕滈纰辨富闁靛牆妫欓ˉ鍡欌偓瑙勬礈閺佸銆佸Ο濂芥椽顢旈崨顖氬箞婵犳鍠楅敃鈺呭礈閻旂厧鐭楅柛鏇ㄥ厸缁诲棛绱撴担闈涚仼婵炲懎绉堕埀顒冾潐濞叉鎹㈤崼銉ョ畺闁冲搫鎳忛崐濠氭煃鏉炵増顦峰瑙勬礀閳规垶骞婇柛濠冨姍瀹曟垿骞橀懜闈涙瀾闂佸搫顦扮€笛囧磻閵壯€鍋撶憴鍕鐎光偓缁嬭法鏆﹂柛妤冨亹濡插牊绻涢崱妯忣亪骞冮埡鍐＝?
+            ','); // 画布及元素属性处理
       }
       if (item is Map) {
         if (item['type'] == 'TEXT') {
@@ -1652,7 +1661,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
           if (item['alignment'] == 'Center') {
             varalignment = 2;
           } else if (item['alignment'] == 'Right') {
-            // 缂傚倸鍊搁崐鎼佸磹閻戣姤鍤勯柛顐ｆ礀缁愭鈧箍鍎卞ú銊╁础濮樿埖鍊甸柣銏犳啞濞呮粓鏌ｉ幒鎴含闁哄本鐩崺鍕礂閳哄倸鐏ユい鏇秮楠炴绱掑Ο鐓庡箞婵犵數鍋為崹鍫曟偡閵夆晜鍊跺┑鐘叉处閻撶娀鏌涢…鎴濅簻闁诲繑鎸抽弻鐔碱敍濮橆剚娈婚悗瑙勬礈閸犳牠銆佸Δ鍛劦妞ゆ帒瀚粈鍫澝归悡搴ｆ憼闁绘挻娲熼弻鐔兼焽閿旇法鏁栫紓浣风窔閺€閬嶅Φ閸曨垼鏁冮柕蹇婃櫅閸撹京绱?'Left'
+            // 画布及元素属性处理
             varalignment = 3;
           }
           barcodedata.write(
@@ -1666,7 +1675,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
           if (item.alignment == 'Center') {
             varalignment = 2;
           } else if (item.alignment == 'Right') {
-            // 缂傚倸鍊搁崐鎼佸磹閻戣姤鍤勯柛顐ｆ礀缁愭鈧箍鍎卞ú銊╁础濮樿埖鍊甸柣銏犳啞濞呮粓鏌ｉ幒鎴含闁哄本鐩崺鍕礂閳哄倸鐏ユい鏇秮楠炴绱掑Ο鐓庡箞婵犵數鍋為崹鍫曟偡閵夆晜鍊跺┑鐘叉处閻撶娀鏌涢…鎴濅簻闁诲繑鎸抽弻鐔碱敍濮橆剚娈婚悗瑙勬礈閸犳牠銆佸Δ鍛劦妞ゆ帒瀚粈鍫澝归悡搴ｆ憼闁绘挻娲熼弻鐔兼焽閿旇法鏁栫紓浣风窔閺€閬嶅Φ閸曨垼鏁冮柕蹇婃櫅閸撹京绱?'Left'
+            // 画布及元素属性处理
             varalignment = 3;
           }
           barcodedata.write(
@@ -1801,13 +1810,13 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
 
         String formatjson = jsonEncode(myFormatContent);
 
-        // final file = await _localFilepath; ///////闂傚倸鍊风粈渚€宕ョ€ｎ喖纾块柟鎯版鎼村﹪鏌ら懝鎵牚濞存粌缍婇弻娑㈠Ψ椤旂厧顫╅梺缁樺姇閿曨亪寮诲☉妯锋斀闁糕剝顨忔导鈧梻浣告惈濡瑥顭垮鈧﹢渚€姊洪幐搴ｇ畵闁硅櫕鍔橀崐鎾⒒?
+        // 画布及元素属性处理
         final file = File(p.join(path));
-        // 闂傚倷娴囬褏鎹㈤幇顔藉床闁归偊鍎靛☉妯滄棃宕ㄩ闂存闁荤喐绮岀换鎺楀礆閹烘鏁囬柕蹇婂墲濞呭棝姊洪崗鐓庡闁搞劎鍘х叅妞ゆ帒瀚埛鎴︽煕濞戞﹫宸ュ┑顔肩墦閺岋綁鎮㈤弶鎴濆Е閻庤娲╃紞浣哥暦閸楃偐妲堟俊顖涙た濡喖姊绘担瑙勫仩闁稿骸顭峰浠嬪礋椤栵絾鏅濋梺鑺ッˇ顐⑽?
+        // 画布及元素属性处理
         // print(formatjson);
         file.writeAsStringSync(formatjson);
 
-        // await loadData();   婵犵數濮甸鏍窗濡ゅ啰绱﹂柛褎顨呯壕褰掓煛閸ワ絾鍤嶉柛銉墮閻撴稑銆掑顒佹悙闁哄懐濞€濮婃椽鎳栭埞鐐珱闂佸憡鎸婚惄顖炲箚閳ь剟鏌涘☉妯兼憼闁绘挻娲熼弻鐔兼焽閿曗偓楠炴﹢鏌熼崘鎻掓殻闁哄本娲熷畷濂告晲閸涘懏鎸剧槐鎺楀磼濮樻瘷褏鈧娲栧畷顒冪亙婵犵數濮撮崯顖炲箖濞嗗繆鏀介柣鎰煐瑜把呯磼閸欏鍔ら悡銈嗕繆椤栨繃顏犻柡鍡檮閵囧嫰骞掗幋婵愪患闂佺粯鍔曢敃顏堝蓟閿濆绠涙い鎺戝€归幉濂告⒒閸屾艾顏╃紒澶婄秺瀵鍩勯崘銊х獮濠电偞鍨跺銊╂晬閻斿吋鈷戠紓浣诡焽婢ь剛绱掗鑲┬ょ紒顔藉哺閺屽棗顓奸崨顖氬Ф闂備礁鎲￠崜顒勫川椤栵絾袣
+        // 画布及元素属性处理
       }
     } catch (e) {
       setState(() {
@@ -1816,9 +1825,9 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
     }
   }
 
-  //闂傚倸鍊风粈渚€骞夐敍鍕殰闁搞儺鍓欑壕褰掓煛瀹ュ骸骞栭柦鍐枛閺屾盯濡烽鐓庮潻濠碘槅鍋呴敃銏ゅ蓟濞戙垹唯妞ゆ牜鍋為宥咁渻閵堝棗濮冪紒顔界懇瀵鏁撻悩鑼槹闂傚倸鐗婄粙鎾寸閳哄懏鈷戦悹鍥ｂ偓宕囦户缂備浇鍩栭懝楣冾敋閿濆棗顕遍柟纰卞幗閺咁剙鈹戦鏂や緵闁告﹢绠栭妴鍛搭敇閵忊檧鎷虹紓鍌欑劍閿曗晛鈻撻弮鈧换娑氭嫚瑜忛幃鑲╃磼椤曞懎寮€殿喕绮欓、姗€鎮欓幓鎺撳皨濠碉紕鍋戦崐鏍偋濡ゅ啫鏋堢€广儱顦壕鍨攽閻樺弶澶勯柣鎾跺枑閵囧嫯绠涢幘鎼闂佸搫顑呴柊锝夊蓟閿濆围闁告侗鍙庢导鈧梻渚€鈧偛鑻晶顖滅磼鐎ｎ偄娴柡浣割儏閳规垿鎮╅顫?
+  // 画布及元素属性处理
   bool isImagePath(String path) {
-    // 闂傚倷娴囬褍顫濋敃鍌︾稏濠㈣埖鍔栭崕妤併亜閺傚灝鈷斿☉鎾崇Ч閺岋綁寮崒姘闂佸搫妫欑划宥夊箞閵娿儮鏀介柛鈩冪懅閸旂鈹戦悙闈涘付闁活厼鍊垮濠氭晲婢跺á鈺呮煏婢跺牆鍔村ù鐘靛帶閳规垿鎮欓懠顒佹喖闂佹寧娲忛崹浠嬬嵁閸愵収妯勯悗瑙勬礀閻栧吋淇婇幖浣规櫆闂佹鍨版禍鐐亜閺冣偓缁佺銇愰幒鎾充汗闂佸憡绻傜€氼噣宕㈤锝囩瘈闁冲皝鍋撻柛鈩冾焽閵嗗﹥绻涚€电顎撶紒鐘虫尭椤曪綁骞橀钘夆偓鐑芥煛婢跺鐏嶉柛?
+    // 画布及元素属性处理
     const List<String> imageExtensions = [
       '.jpg',
       '.jpeg',
@@ -1828,18 +1837,18 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       '.webp'
     ];
 
-    // 闂傚倸鍊风粈渚€骞夐敍鍕殰婵°倕鍟伴惌娆撴煙鐎电啸缁惧彞绮欓弻鐔煎箲閹伴潧娈┑鈽嗗亝閿曘垽寮诲☉銏犖ㄦい鏍仦椤庡秴顪冮妶鍡楀缂侇喗鐟╅獮鍐ㄎ旈崨顔间缓濠电偛鐗婄€笛囧极椤栫偞鈷?
+    // 画布及元素属性处理
     File file = File(path);
 
-    // 婵犵數濮烽。钘壩ｉ崨鏉戠；闁逞屽墴閺屾稓鈧綆鍋呭畷宀勬煛瀹€瀣？濞寸媴濡囬幏鐘诲箵閹烘埈娼ラ梻鍌欑閹碱偊顢栭崨鏉戠柈妞ゆ牗绮庨惌澶愭煙閻戞﹩娈曢柛銈咁儔閺屾盯鈥﹂幋婵冨亾閿濆鏅濋柛灞剧〒閸樺崬鈹戦鐭亝鏅舵禒瀣仼闂侇剙绉甸悡鐔煎箳閹惰棄绀夐柟瀛樼箘閺?
+    // 画布及元素属性处理
     if (!file.existsSync()) {
       return false;
     }
 
-    // 闂傚倸鍊风粈渚€宕ョ€ｎ喖纾块柟鎯版鎼村﹪鏌ら懝鎵牚濞存粌缍婇弻娑㈠Ψ椤旂厧顫╁┑鈽嗗亝閿曘垽寮诲☉銏犖ㄦい鏍仦椤庡秴顪冮妶鍡楀缂侇喗鐟╁濠氭晲婢跺á鈺呮煏婢跺牆鍔村ù鐘靛亾缁绘繈鍩涢埀顒勫幢濡鈧﹥绻涚€电顎撶紒鐘虫尭椤曪綁骞橀钘夆偓鐑芥煛婢跺鐏嶉柛?
+    // 画布及元素属性处理
     String extension = path.substring(path.lastIndexOf('.')).toLowerCase();
 
-    // 闂傚倸鍊风粈渚€骞夐敍鍕殰闁搞儺鍓欑壕褰掓煛瀹ュ骸骞栭柦鍐枛閺屾盯濡烽鐓庮潻缂備胶濮伴崕鐢稿蓟瀹ュ棙濮滈柟宄拌嫰閸樷€斥攽閻愭彃鎮戞俊顐㈠暣瀵鈽夊鍡樺兊濡炪倖甯掗崐鎰版晲閸℃洜绠氶梺鍛婄懃椤︿即宕愰幇顔瑰亾鐟欏嫭纾搁柛搴ｆ暬瀵偊宕橀鑲╁姦濡炪倖宸婚崑鎾绘煥閺囨ê鐏叉い銏℃瀹曠厧鈹戦崼婵冨亾閻愮儤鈷戦柛娑橈攻鐎垫瑩鏌涢幇顔间壕婵絽鐗撳缁樻媴閸涘﹨纭€濡炪倧绲肩划娆忣嚕閹绘巻妲堥柕蹇娾偓鍐插闁诲骸绠嶉崕閬嵥囬婊勫枂闁挎棃鏁崑鎾荤嵁閸喖濮庨梺鐟板暱闁帮綁骞冨Ο琛℃瀻闁圭偓娼欐禒鈺佲攽閻愭潙鐏﹂柣妤佹礃娣囧﹤煤椤忓懐鍘?
+    // 画布及元素属性处理
     return imageExtensions.contains(extension);
   }
 
@@ -1862,7 +1871,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
   }
 
   void redrawInterface(List list) {
-    //闂傚倸鍊风粈渚€骞夐敍鍕殰闁搞儺鍓欑壕褰掓煛瀹ュ骸骞栭柦鍐枛閺屾盯濡烽鐓庮潻缂備胶瀚忛崶銊у弳濠电偞鍨堕敋妞ゅ浚鍋婇弻娑㈠Ω閿曗偓閳绘洟鏌＄仦璇插闁宠棄顦灒濞撴凹鍨遍鍕磽閸屾瑩妾烽柛鏂款樀瀵彃鈹戦崼鐕佹綗闂佸湱鍎ら弻锟犲磻閹剧粯顥堟繛鎴炵懄閸犳劙姊洪幖鐐插濠电偛锕璇测槈閵忊剝娅嗛梺鍛婄箓鐎氼剟鈥栭崱娆戠＝濞达綀顕栧▓鏃€銇勯敃鍌涙锭闁?
+    // 画布及元素属性处理
 
     setState(() {
       for (var i = 0; i < list.length; i++) {
@@ -2056,7 +2065,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                             ),
                             SizedBox(
                               width:
-                                  150, // 闂傚倷娴囧畷鍨叏瀹曞洨鐭嗗ù锝堫潐濞呯姴霉閻樺樊鍎愰柛瀣典邯閺屾盯鍩勯崘顏佹闂佺粯鍔曢敃顏堝蓟濞戞ǚ鏀介柛鈩冾殢娴尖偓闂備礁鎼Λ鏃堝础閹惰棄绠栨俊銈呭暞閸忔粓鏌涘☉鍗炴珮婵☆偄瀚伴弻?
+                                  150, // 画布及元素属性处理
                               child: showDropDownButton(
                                   context, '', printerCtl, _printers,
                                   (String? newValue) {
@@ -2095,7 +2104,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                             ),
                             SizedBox(
                               width:
-                                  150, // 闂傚倷娴囧畷鍨叏瀹曞洨鐭嗗ù锝堫潐濞呯姴霉閻樺樊鍎愰柛瀣典邯閺屾盯鍩勯崘顏佹闂佺粯鍔曢敃顏堝蓟濞戞ǚ鏀介柛鈩冾殢娴尖偓闂備礁鎼Λ鏃堝础閹惰棄绠栨俊銈呭暞閸忔粓鏌涘☉鍗炴珮婵☆偄瀚伴弻?
+                                  150, // 画布及元素属性处理
                               child: showDropDownButton(
                                   context,
                                   '',
@@ -2131,7 +2140,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                             ),
                             SizedBox(
                                 width:
-                                    80, // 闂傚倷娴囧畷鍨叏瀹曞洨鐭嗗ù锝堫潐濞呯姴霉閻樺樊鍎愰柛瀣典邯閺屾盯鍩勯崘顏佹闂佺粯鍔曢敃顏堝蓟濞戞ǚ鏀介柛鈩冾殢娴尖偓闂備礁鎼Λ鏃堝础閹惰棄绠栨俊銈呭暞閸忔粓鏌涘☉鍗炴珮婵☆偄瀚伴弻?
+                                    80, // 画布及元素属性处理
                                 height: 48,
                                 child: showInputBox(
                                     context, _widthController, '', (value) {
@@ -2155,7 +2164,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                             ),
                             SizedBox(
                                 width:
-                                    80, // 闂傚倷娴囧畷鍨叏瀹曞洨鐭嗗ù锝堫潐濞呯姴霉閻樺樊鍎愰柛瀣典邯閺屾盯鍩勯崘顏佹闂佺粯鍔曢敃顏堝蓟濞戞ǚ鏀介柛鈩冾殢娴尖偓闂備礁鎼Λ鏃堝础閹惰棄绠栨俊銈呭暞閸忔粓鏌涘☉鍗炴珮婵☆偄瀚伴弻?
+                                    80, // 画布及元素属性处理
                                 height: 48,
                                 child: showInputBox(
                                     context, _heightController, '', (value) {
@@ -2259,7 +2268,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                                         content: Text('Open fail',
                                             style: Theme.of(context)
                                                 .textTheme
-                                                .bodySmall), ////婵犵數濮甸鏍窗濡ゅ啰绱﹂柛褎顨呯壕褰掓煛閸ワ絾鍤嶉柛銉墮閻撴盯鏌涘☉鍗炴珮婵﹤娼″娲焻閻愯尪瀚板褌鍗抽弻鐔兼嚑椤掆偓椤ｅジ鏌熷畡鐗堝殗闁诡垰瀚伴獮鎺楀箻閺夋垹锛撻柣搴ゎ潐濞叉牠鎮ユ總绋跨畺婵炲棗娴氶崯鍛亜閺傚灝寤?
+                                                .bodySmall), // 画布及元素属性处理
                                         duration: const Duration(seconds: 1),
                                         backgroundColor: Theme.of(context)
                                             .colorScheme
@@ -2336,7 +2345,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                                   outputFile.replaceAll('.fmt', '.json');
                               _saveFormatToJson(jsonFilePath);
                             }
-                            ////婵犵數濮烽弫鎼佸磿閹寸姷绀婇柍褜鍓氶妵鍕即閸℃顏柛娆忕箻閺岋綁骞囬鍛瘜闂佺顑嗛幑鍥х暦閻戠瓔鏁囬柣鎰閸╂稒淇?
+                            // 画布及元素属性处理
                           },
                               Theme.of(context).colorScheme.onPrimary,
                               Theme.of(context)
@@ -2782,13 +2791,13 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                   side: BorderSide(
                     color: Theme.of(context)
                         .colorScheme
-                        .primary, // 闂傚倷绀侀幖顐λ囬鐐村亱闁规澘搴滅紞鏍ь熆閼搁潧濮傞柍褜鍏涢懗鍫曞焵椤掑﹦绉甸柛瀣尵濡叉劙鏁愰崱娆戠槇婵犵數濮撮崐褰捤夊鍕╀簻闁靛鍎崇粻濠氭煛鐏炶濡奸柍钘夘槸铻ｉ柤娴嬫櫅婵壆绱撻崒娆掑厡缂侇噮鍨堕幃褔鎮╃拠鑼舵憰閻庡厜鍋撻柍褜鍓氱粋鎺楁晝閸屾稑浜楅柟鐓庣摠钃遍柣搴°偢濮婄粯鎷呯憴鍕╀户濠电偟鍘у鈥崇暦濠靛牃鍋撻敐搴″幋闁稿鎹囧Λ鍐ㄢ槈濞嗘劖瀚抽梻浣瑰缁嬫帡宕濋弴锛勪航闂備胶顭堢换妤呭磻閹版澘姹查柣妯虹－缁犻箖鏌熺€电浠﹂悘蹇曞娣囧﹪宕ｆ径濠勭懖缂?
+                        .primary, // 主色调边框
                     width:
-                        1, // 闂傚倷绀侀幖顐λ囬鐐村亱闁规澘搴滅紞鏍ь熆閼搁潧濮傞柍褜鍏涢懗鍫曞焵椤掑﹦绉甸柛蹇旓耿瀹曟垿骞橀懜闈涘幑闂佸憡渚楅崳顔嘉涢崟顖涚厽閹艰揪缍嗛弨鐗堢箾閸涱喗绀堢紒?2 闂傚倸鍊烽懗鍫曗€﹂崼銏㈢煋閻庨潧鎲″畷鏌ユ煙閻戞ɑ鈷掗柣?
+                        1, // 画布及元素属性处理
                   ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(
-                        4), // 闂傚倷绀侀幖顐λ囬鐐村亱闁规澘搴滅紞鏍ь熆閼搁潧濮傞柍褜鍏涢懗鍫曞焵椤掑﹦绉甸柛鐘崇墵楠炴垿宕奸弴鐔哄幈闂佹枼鏅涢崯顐﹀吹椤掍胶绠剧痪顓㈩棑缁♀偓闂佸搫鏈粙鎴ｇ亙闂侀€炲苯澧撮柡浣稿暣婵″爼宕堕…鎴濅缓闂備胶绮崝鏇㈩敋椤撱垹鐓?8 闂傚倸鍊烽懗鍫曗€﹂崼銏㈢煋閻庨潧鎲″畷鏌ユ煙閻戞ɑ鈷掗柣?
+                        4), // 画布及元素属性处理
                   ),
                 ),
                 onPressed: _pickImage,
@@ -2800,20 +2809,20 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
         height: 10,
       ),
       Container(
-        // 闂傚倷娴囧畷鍨叏瀹曞洨鐭嗗ù锝堫潐濞呯姴霉閻樺樊鍎愰柛瀣典邯閺屾盯鍩勯崗鈺傚灩缁辩偤宕堕浣镐画濠电偛妫楃换鎰邦敂閹绢喗鐓涢柍褜鍓熼弻鍡楊吋閸℃瑥骞愰柣搴＄畭閸庨亶骞婃惔鈭ワ綁鎳￠妶鍥╋紲?
+        // 画布及元素属性处理
         decoration: BoxDecoration(
           border: Border.all(
             color: Theme.of(context)
                 .colorScheme
-                .primary, // 闂傚倷绀侀幖顐λ囬鐐村亱闁规澘搴滅紞鏍ь熆閼搁潧濮傞柍褜鍏涢懗鍫曞焵椤掑﹦绉甸柛瀣尵濡叉劙鏁愰崱娆戠槇婵犵數濮撮崐褰捤夊鍕╀簻闁靛鍎崇粻浼存煃閽樺妯€妤犵偞锕㈤幊锟犲Χ閸モ晝宕堕梻鍌欒兌椤㈠﹥鎱ㄩ妶澶婂瀭闁秆勵殔缁?
+                .primary, // 主色调边框
             width:
-                1, // 闂傚倷绀侀幖顐λ囬鐐村亱闁规澘搴滅紞鏍ь熆閼搁潧濮傞柍褜鍏涢懗鍫曞焵椤掑﹦绉甸柛蹇旓耿瀹曟垿骞橀懜闈涘幑闂佸憡渚楅崳顔嘉涢崟顖涚厽閹艰揪缍嗛弨鐗堢箾閸涱喗绀堢紒?2 闂傚倸鍊烽懗鍫曗€﹂崼銏㈢煋閻庨潧鎲″畷鏌ユ煙閻戞ɑ鈷掗柣?
+                1, // 画布及元素属性处理
           ),
           borderRadius: BorderRadius.circular(
-              4), // 闂傚倷绀侀幖顐λ囬鐐村亱闁规澘搴滅紞鏍ь熆閼搁潧濮傞柍褜鍏涢懗鍫曞焵椤掑﹦绉甸柛鐘崇墵楠炴垿宕奸弴鐔哄幈闂佹枼鏅涢崯顐﹀吹椤掍胶绠剧痪顓㈩棑缁♀偓闂佸搫鏈粙鎴ｇ亙闂侀€炲苯澧撮柡浣稿暣婵″爼宕堕…鎴濅缓闂備胶绮崝鏇㈩敋椤撱垹鐓?8 闂傚倸鍊烽懗鍫曗€﹂崼銏㈢煋閻庨潧鎲″畷鏌ユ煙閻戞ɑ鈷掗柣?
+              4), // 画布及元素属性处理
         ),
         padding: EdgeInsets.all(
-            10), // 闂傚倷娴囧畷鍨叏瀹曞洨鐭嗗ù锝堫潐濞呯姴霉閻樺樊鍎愰柛瀣典邯閺屾盯鍩勯崘顏佹缂備讲鍋撻柛鎰靛枟閻撴洘绻涢幋鐐垫噧妞ゃ儱顑夐弻锝呪攽閸℃瑥鐓熼梺璇″枛缂嶅﹪骞冨鍏剧喖鎳栭埡鍐╂闂?10 闂傚倸鍊烽懗鍫曗€﹂崼銏㈢煋閻庨潧鎲″畷鏌ユ煙閻戞ɑ鈷掗柣?
+            10), // 画布及元素属性处理
         child: Text(
           element.content.toString(),
           textAlign: TextAlign.left,
@@ -2891,7 +2900,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                                     : []);
   }
 
-//闂傚倸鍊烽悞锕傛儑瑜版帒鍨傚┑鍌氬閺佸鎲歌箛鏇炲灊闁冲搫鎳忛崐濠氭煠閹帒鍔ら柛鏃€鎮傚娲濞戣京鍔搁梺绋块叄娴滃爼骞?
+// 画布及元素属性处理
   Stack buildCanvasPart() {
     return Stack(
       children: [
@@ -3025,7 +3034,8 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                         child = RotatedBox(
                           quarterTurns: quarterTurns,
                           child: BarcodeWidget(
-                            barcode: getBarcodeType(element.barcodeType ?? "Code128"),
+                            barcode: getBarcodeType(
+                                element.barcodeType ?? "Code128"),
                             data: getBarcodeContant(element.barcodeType!),
                             drawText: (element.hralignment == 'Bottom')
                                 ? true
@@ -3052,7 +3062,10 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                       case ElementType.qrcode:
                         child = BarcodeWidget(
                           barcode: Barcode.qrCode(),
-                          data: element.content != null && element.content!.isNotEmpty ? element.content! : "Qrcode",
+                          data: element.content != null &&
+                                  element.content!.isNotEmpty
+                              ? element.content!
+                              : "Qrcode",
                           // width: element.size.width,
                           // height: element.size.height,
                         );
@@ -3110,7 +3123,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                           selectSingleElement(element);
                         },
                         onScaleStart: (details) {
-                          //婵犳鍠楀畷鍧楀川椤撳缍侀弻锝夊冀閻㈠灚鍋х紓渚囧枟濮婂骞忛悩璇茬闁硅鍋呴〃濠囧蓟濞戙垹绠荤€规洖娉﹂敍鍕＜缂備焦蓱閻ㄦ垿鏌嶈閸撴氨绮欓幒妞烩偓锕傚炊閵婏箑寮块梺褰掓？缁€浣虹不?
+                          // 画布及元素属性处理
                           _saveState();
                         },
                         onScaleUpdate: (details) {
@@ -3120,7 +3133,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                             } else {
                               setState(() {
                                 element.position += details.focalPointDelta;
-                                // 缂傚倸鍊风粈渚€藝閹剁瓔鏁嬬憸搴ㄥ箞閵娾晛鐓涢柛娑卞幘閻嫰姊洪崜鎻掍簼婵炴彃绉瑰畷鎴﹀箻閺夋垹绐炴繝銏ｆ硾妤犳悂鐛埀顒勬⒑閼姐倕孝婵炲眰鍨藉畷鏇㈡焼瀹ュ懎鍋嶉梺瑙勫礃閸╂牠锝?
+                                // 移动选中的元素
                                 selectSingleElement(element);
                               });
                             }
@@ -3134,7 +3147,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                           }
                         },
                         onScaleEnd: (details) {
-                          //婵犳鍠楀畷鍧楀川椤撳缍侀弻锝夊冀閻㈠灚鍋х紓渚囧枟濮婂骞忛悩璇茬闁硅鍋呴〃濠囧蓟濞戞﹩娼╂い鎺戝€搁崵顒傜磽娴ｈ櫣甯涙慨妯稿姂閸┾偓妞ゆ帊鑳堕埊鏇熴亜椤撶偞澶勯柟渚垮姂楠炴牗鎷呴崫銉ф殸?
+                          // 画布及元素属性处理
                           _saveState();
                         },
                         onSecondaryTapDown: (details) {
@@ -3295,122 +3308,208 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+          backgroundColor: Colors.white,
+          surfaceTintColor: Colors.transparent,
+          titlePadding: EdgeInsets.zero,
+          contentPadding:
+              const EdgeInsets.only(top: 20, bottom: 20, left: 30, right: 30),
+          actionsPadding: const EdgeInsets.only(bottom: 24, top: 10),
+          title: Column(
             children: [
-              Text(localizedStrings.printPreview),
-              IconButton(
-                icon: const Icon(Icons.close),
-                onPressed: () => Navigator.of(context).pop(),
-              )
+              Padding(
+                padding: const EdgeInsets.only(
+                    left: 20, right: 20, top: 16, bottom: 16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 3,
+                          height: 16,
+                          color: Colors.black,
+                          margin: const EdgeInsets.only(right: 8),
+                        ),
+                        Text(
+                          S.of(context).printPreview,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF333333),
+                          ),
+                        ),
+                      ],
+                    ),
+                    InkWell(
+                      onTap: () => Navigator.of(context).pop(),
+                      child: Container(
+                        width: 24,
+                        height: 24,
+                        decoration: const BoxDecoration(
+                          color: Color(0xFFD0D0D0),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(Icons.close,
+                            size: 14, color: Colors.white),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(height: 1, color: const Color(0xFFEEEEEE)),
             ],
           ),
-          content: Container(
-            width: canvasSize.width * 1.0,
-            height: canvasSize.height * 1.0,
-            color: Colors.white,
-            child: Stack(
-              children: previewElements.map((element) {
-                Widget child;
-                int quarterTurns = (element.rotation! / 90).round();
+          content: Center(
+            child: Container(
+              width: canvasSize.width * 1.0,
+              height: canvasSize.height * 1.0,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                border: Border.all(color: const Color(0xFFE0E0E0), width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.04),
+                    blurRadius: 4,
+                    offset: const Offset(0, 2),
+                  )
+                ],
+              ),
+              child: Stack(
+                children: previewElements.map((element) {
+                  Widget child;
+                  int quarterTurns = (element.rotation! / 90).round();
 
-                switch (element.type) {
-                  case ElementType.barcode:
-                    child = RotatedBox(
-                      quarterTurns: quarterTurns,
-                      child: BarcodeWidget(
-                        barcode:
-                            getBarcodeType(element.barcodeType ?? "Code128"),
-                        data: element.content ?? "",
-                        drawText:
-                            (element.hralignment == "Bottom") ? true : false,
-                        width: [90, 270].contains(element.rotation)
-                            ? element.size.height < 0
-                                ? 20
-                                : element.size.height
-                            : element.size.width < 0
-                                ? 20
-                                : element.size.width,
-                        height: [90, 270].contains(element.rotation)
-                            ? element.size.width < 0
-                                ? 20
-                                : element.size.width
-                            : element.size.height < 0
-                                ? 20
-                                : element.size.height,
-                      ),
-                    );
-                    break;
-
-                  case ElementType.qrcode:
-                    child = BarcodeWidget(
-                      barcode: Barcode.qrCode(),
-                      data: element.content ?? "",
-                    );
-                    break;
-
-                  case ElementType.img:
-                    child = RotatedBox(
+                  switch (element.type) {
+                    case ElementType.barcode:
+                      child = RotatedBox(
                         quarterTurns: quarterTurns,
-                        child: Image.file(
-                          File(element.content == "image"
-                              ? "assets/images/grey_circle.png"
-                              : element.content!),
-                          fit: BoxFit.fill,
-                        ));
-                    break;
+                        child: BarcodeWidget(
+                          barcode:
+                              getBarcodeType(element.barcodeType ?? "Code128"),
+                          data: element.content ?? "",
+                          drawText:
+                              (element.hralignment == "Bottom") ? true : false,
+                          width: [90, 270].contains(element.rotation)
+                              ? element.size.height < 0
+                                  ? 20
+                                  : element.size.height
+                              : element.size.width < 0
+                                  ? 20
+                                  : element.size.width,
+                          height: [90, 270].contains(element.rotation)
+                              ? element.size.width < 0
+                                  ? 20
+                                  : element.size.width
+                              : element.size.height < 0
+                                  ? 20
+                                  : element.size.height,
+                        ),
+                      );
+                      break;
 
-                  case ElementType.line:
-                    child = RotatedBox(
-                      quarterTurns: quarterTurns,
-                      child: Container(
-                        width: element.size.width + 2,
-                        height: element.size.height + 2,
-                        color: Colors.black,
-                      ),
-                    );
-                    break;
+                    case ElementType.qrcode:
+                      child = BarcodeWidget(
+                        barcode: Barcode.qrCode(),
+                        data: element.content ?? "",
+                      );
+                      break;
 
-                  default:
-                    String displayContent = element.content ?? "";
-                    child = RotatedBox(
-                      quarterTurns: quarterTurns,
-                      child: SizedBox(
-                          width: element.size.width,
-                          height: element.size.height,
-                          child: Text(displayContent,
-                              softWrap: true,
-                              style: TextStyle(
-                                  fontFamily: "simsunb",
-                                  fontSize: double.parse(
-                                      element.fontSize.toString()),
-                                  color: Colors.black,
-                                  fontWeight: (element.fontBold == "true")
-                                      ? FontWeight.bold
-                                      : FontWeight.normal))),
-                    );
-                    break;
-                }
+                    case ElementType.img:
+                      child = RotatedBox(
+                          quarterTurns: quarterTurns,
+                          child: Image.file(
+                            File(element.content == "image"
+                                ? "assets/images/grey_circle.png"
+                                : element.content!),
+                            fit: BoxFit.fill,
+                          ));
+                      break;
 
-                return Positioned(
-                  left: element.position.dx,
-                  top: element.position.dy,
-                  child: child,
-                );
-              }).toList(),
+                    case ElementType.line:
+                      child = RotatedBox(
+                        quarterTurns: quarterTurns,
+                        child: Container(
+                          width: element.size.width + 2,
+                          height: element.size.height + 2,
+                          color: Colors.black,
+                        ),
+                      );
+                      break;
+
+                    default:
+                      String displayContent = element.content ?? "";
+                      child = RotatedBox(
+                        quarterTurns: quarterTurns,
+                        child: SizedBox(
+                            width: element.size.width,
+                            height: element.size.height,
+                            child: Text(displayContent,
+                                softWrap: true,
+                                style: TextStyle(
+                                    fontFamily: "simsunb",
+                                    fontSize: double.parse(
+                                        element.fontSize.toString()),
+                                    color: Colors.black,
+                                    fontWeight: (element.fontBold == "true")
+                                        ? FontWeight.bold
+                                        : FontWeight.normal))),
+                      );
+                      break;
+                  }
+
+                  return Positioned(
+                    left: element.position.dx,
+                    top: element.position.dy,
+                    child: child,
+                  );
+                }).toList(),
+              ),
             ),
           ),
+          actionsAlignment: MainAxisAlignment.center,
           actions: [
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _executePrint(previewElements);
-              },
-              child: Text(localizedStrings.gPrint),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(localizedStrings.gBtnCancel),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: 120,
+                  height: 40,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero),
+                      elevation: 0,
+                    ),
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                      _executePrint(previewElements);
+                    },
+                    child: const Text("print",
+                        style: TextStyle(fontSize: 14, color: Colors.white)),
+                  ),
+                ),
+                const SizedBox(width: 16),
+                SizedBox(
+                  width: 120,
+                  height: 40,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor:
+                          Theme.of(context).colorScheme.onSurfaceVariant,
+                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
+                      shape: const RoundedRectangleBorder(
+                          borderRadius: BorderRadius.zero),
+                      elevation: 0,
+                    ),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text("Cancel",
+                        style: TextStyle(fontSize: 14, color: Colors.white)),
+                  ),
+                ),
+              ],
             ),
           ],
         );
@@ -3518,7 +3617,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                                       crossAxisAlignment:
                                           CrossAxisAlignment.start,
                                       children: [
-                                        //闂備浇顕ф鍝ョ礊婵犲偆鐒介柤濮愬€楃壕鑺ユ叏濡寧纭鹃柣銈夌畺閺屾盯顢曢敐鍡欘槬闂佹椿鍘介〃鍡涘箞閵娿儺娓婚悹鍥紦婢规洟姊绘笟鈧鑽ゅ緤閹屾富濞寸姴顑呴拑鐔兼煕椤愮姴鍔氶幆鐔兼⒑闂堟侗妲堕柛搴㈠▕閸┾偓?
+                                        // 画布及元素属性处理
                                         Container(
                                           width: leftBtnWidth - 80,
                                           color: Theme.of(context)
@@ -3535,7 +3634,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                                           ),
                                         ),
 
-                                        //濠电姷鏁搁崑鐐哄垂閸洖绠归柍鍝勬噹閻鏌涢幇鈺佸婵炴垯鍨归柨銈嗕繆閵堝嫮顦﹀ù鐘虫そ閺岋綁鎮╅崣澶屸敍闁诲繐绻戦悷鈺呫€侀弮鍫濈妞ゆ棁袙閹峰搫顪冮妶鍡樼叆闁圭⒈鍋呮穱濠冪附閸涘﹦鍘?
+                                        // 画布及元素属性处理
 
                                         Expanded(
                                           flex: 7,
@@ -3649,7 +3748,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                                           ),
                                         ),
 
-                                        //闂傚倸鍊风粈渚€骞夐敓鐘冲仭闁靛鏅涢崒銊╂煛瀹ュ骸骞栭柣銈夌畺閺屾盯骞橀崣澶樻▊濠电偛鐭堟禍顏堝蓟閿濆绠涙い鏂垮帬婢舵劖鐓曢悗锝庡亝瀹曞嫭銇勯敃鈧紞濠囧蓟濞戞瑦鍎熼柕蹇娾偓鍐叉敪闁?
+                                        // 画布及元素属性处理
                                         Container(
                                           width: rightBtnWidth,
                                           alignment: Alignment.topLeft,
@@ -3667,7 +3766,7 @@ class PrintOnlinePageState extends State<PrintOnlinePage> {
                                                   event.logicalKey ==
                                                       LogicalKeyboardKey
                                                           .arrowDown)) {
-                                                // 濠电姷鏁告慨浼村垂閻撳簶鏋栨繛鎴炲焹閸嬫挸顫濋悡搴㈢彎濡ょ姷鍋涢崯顖滄崲濠靛纾奸柕鍫濇噺濞呭﹪姊绘担鐟邦嚋婵﹤顭烽幖瑙勬償閵娿儴鍩為梺鍦帛鐢晠鎮㈤崱娑欑厾缂佸娉曟禒娑㈡倶韫囥儳鐣甸柡灞稿墲缁楃喖宕惰缁秴螖閻橀潧浠﹂柛鏃€鐗曢銉╁礋椤掆偓缁剁偟鈧厜鍋撻柍褜鍓熼獮澶愵敊閻ｅ瞼顔曢柣搴㈢⊕椤洭鎯屾繝鍐︿簻闁瑰瓨绻傞鈺呮煃?
+                                                // 画布及元素属性处理
 
                                                 return KeyEventResult.handled;
                                               } else {

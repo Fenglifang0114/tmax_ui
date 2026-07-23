@@ -27,7 +27,7 @@ extension MultiScaleManagementModbusExt on MultiScaleManagementState {
             children: [
               Container(
                 width: 1,
-                color: Theme.of(context).colorScheme.outlineVariant, // 分隔�?              ),
+                color: Theme.of(context).colorScheme.outlineVariant, // 分隔符              ),
               (isAddModbus || isEditModbus)
                   ? Expanded(child: _buildModbusForm())
                   : SizedBox(),
@@ -235,14 +235,14 @@ extension MultiScaleManagementModbusExt on MultiScaleManagementState {
   }
 
   Widget _buildModbusForm() {
-    // 找出所有已存在�?ModbusID，只能选现有的秤的 ModbusID
+    // 找出所有已存在的 ModbusID，只能选现有的秤的 ModbusID
     List<String> availableModbusIds = [];
     for (var scale in myAllScalesList) {
       if (scale.modbusId != null && scale.modbusId! > 0) {
         availableModbusIds.add(scale.modbusId.toString());
       }
     }
-    // 如果是编辑，要保留当前的 ModbusID
+    // 找出所有已存在的 ModbusID，只能选现有的秤的 ModbusID
     if (isEditModbus && modbusIdCtl.text.isNotEmpty && !availableModbusIds.contains(modbusIdCtl.text)) {
       availableModbusIds.add(modbusIdCtl.text);
     }
@@ -370,7 +370,7 @@ extension MultiScaleManagementModbusExt on MultiScaleManagementState {
                               showTipInfo(localizedStrings.gSerialPortMissingTip, context);
                               return;
                            }
-                           // 防冲突校验：串口是否被普通的秤占�?                           for (var scale in myAllScalesList) {
+                           // 防冲突校验：串口是否被普通的秤占用                           for (var scale in myAllScalesList) {
                               if (scale.tMedia == comScaleType) {
                                  final serialConfig = scale.mediaConfig as SerialMediaConfig;
                                  if (serialConfig.devPath == modbusComPortCtl.text) {
@@ -379,7 +379,7 @@ extension MultiScaleManagementModbusExt on MultiScaleManagementState {
                                  }
                               }
                            }
-                           // 防冲突校验：串口是否被其�?Modbus 服务占用
+                           // 防冲突校验：串口是否被其他 Modbus 服务占用
                            for (var ms in modbusServicesList) {
                               if (isEditModbus && ms.id == currentEditModbusId) continue;
                               if (ms.protocol == "Modbus RTU" && ms.port == modbusComPortCtl.text) {
