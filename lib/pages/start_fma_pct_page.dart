@@ -1157,7 +1157,7 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
         context: context,
         barrierDismissible: false,
         builder: (BuildContext context) {
-          return ShowDeleteTipDialog(
+          return ShowNormalTipDialog(
             title: localizedStrings.fTipTitle,
             msg: isZh ? "当前配方未完全称完或不合格，确定要完成吗？" : "The formula is incomplete or unqualified. Are you sure you want to finish?",
           );
