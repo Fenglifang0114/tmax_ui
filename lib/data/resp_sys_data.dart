@@ -11,6 +11,7 @@ import 'package:t_max/data/plu_data_source.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/data/scalelist_data.dart';
 import 'package:t_max/data/settingparam_data.dart';
+import 'package:t_max/data/pt10_printer_data.dart';
 
 import 'package:t_max/data/wifi_list_info.dart';
 import '../data/ipinfodata.dart';
@@ -151,6 +152,8 @@ class RespSysMsgType {
   
   static const String respGetAutoScan = 'resp_get_auto_scan';
   static const String respSetAutoScan = 'resp_set_auto_scan';
+  static const String respPt10Connect = 'resp_pt10_connect';
+  static const String respPt10WriteParam = 'resp_pt10_write_param';
 
   static final Map<String, Function> handlers = {
     RespSysMsgType.respPortsList: handlePortsList,
@@ -265,6 +268,8 @@ class RespSysMsgType {
     RespSysMsgType.respModbusDel: handleRespModbusDel,
     RespSysMsgType.respGetAutoScan: handleRespGetAutoScan,
     RespSysMsgType.respSetAutoScan: handleRespSetAutoScan,
+    RespSysMsgType.respPt10Connect: handleRespPt10Connect,
+    RespSysMsgType.respPt10WriteParam: handleRespPt10WriteParam,
   };
 
   static void handleRespModbusServices(dynamic jsonData) {
@@ -280,6 +285,32 @@ class RespSysMsgType {
   static void handleRespSetAutoScan(dynamic jsonData) {
     String dataString = jsonData['MsgBody'];
     eventBus.fire(EventRespSetAutoScan(dataString));
+  }
+
+  static void handleRespPt10Connect(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    if (dataString.startsWith('error:')) {
+      eventBus.fire(EventPt10ConnectResult(success: false, message: dataString.substring(6).trim()));
+    } else {
+      try {
+        final decoded = json.decode(dataString);
+        final params = Pt10PrinterParams.fromJson(decoded);
+        eventBus.fire(EventPt10ConnectResult(success: true, message: ''));
+        eventBus.fire(EventPt10ParamsLoaded(params));
+      } catch (e) {
+        eventBus.fire(EventPt10ConnectResult(success: false, message: '解析参数失败: $e'));
+      }
+    }
+  }
+
+  static void handleRespPt10WriteParam(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    if (dataString == 'ok') {
+      eventBus.fire(EventPt10WriteResult(success: true, message: ''));
+    } else {
+      String msg = dataString.startsWith('error:') ? dataString.substring(6).trim() : dataString;
+      eventBus.fire(EventPt10WriteResult(success: false, message: msg));
+    }
   }
 
   static void handleRespModbusAdd(dynamic jsonData) {

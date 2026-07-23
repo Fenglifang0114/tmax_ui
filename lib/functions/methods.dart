@@ -800,6 +800,25 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
+  static void pt10Connect(String port, int baudRate) {
+    myScaleCmd.cmdMode = "pt10_connect";
+    myScaleCmd.cmdData = jsonEncode({
+      "Port": port,
+      "BaudRate": baudRate,
+    });
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  static void pt10WriteParams(String port, int baudRate, Map<String, String> cmdParams) {
+    myScaleCmd.cmdMode = "pt10_write_param";
+    myScaleCmd.cmdData = jsonEncode({
+      "Port": port,
+      "BaudRate": baudRate,
+      "CmdParams": cmdParams,
+    });
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
   //获取用户信息
   static void getUserInfo(String userName) {
     SysUserNameReq sysUserNameReq = SysUserNameReq(userName);
