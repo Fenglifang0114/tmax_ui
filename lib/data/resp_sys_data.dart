@@ -985,7 +985,7 @@ Future<void> pasterScaleList(String jsonDataString) async {
         // 若存在，则更新相应项的属性
         var existingScale = myAllScalesList[existingIndex];
         tempScale.isOnline = existingScale.isOnline;
-        tempScale.scaleModel = existingScale.scaleModel;
+        tempScale.innerModel ??= existingScale.innerModel;
         tempScale.scaleSn = existingScale.scaleSn;
       }
     }

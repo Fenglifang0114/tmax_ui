@@ -718,9 +718,6 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myMediaConf.type = 1;
     myAddNetScale.scaleId = selScaleId;
     myAddNetScale.scaleModel = scaleModelCtl.text;
-    if (myAddNetScale.scaleModel == null || myAddNetScale.scaleModel!.isEmpty) {
-      myAddNetScale.scaleModel = 'TMax';
-    }
     myAddNetScale.protocolName = protocolNameCtl.text;
     if (myAddNetScale.protocolName != 'SCP-X') {
       myAddNetScale.modbusId = 0;
@@ -738,7 +735,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myMediaConf.mediaInfoJson = netInfoStr;
     myMediaConf.type = 1;
     myAddNetScale.scaleId = 10;
-    myAddNetScale.scaleModel = 'TMax';
+    myAddNetScale.scaleModel = scaleModelCtl.text;
     myAddNetScale.mediaConf = myMediaConf;
     myAddNetScale.protocolName = protocolNameCtl.text;
     myAddNetScale.modbusId = currentModbusId;
@@ -757,12 +754,11 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     tempPort.parity = 0;
     tempPort.stopBits = 0;
     String infoString = jsonEncode(tempPort);
-    AddNetScale addNetScale = AddNetScale(scaleModel: 'TMax');
+    AddNetScale addNetScale = AddNetScale(scaleModel: scaleModelCtl.text);
     myMediaConf.mediaInfoJson = infoString;
     myMediaConf.type = 0;
     addNetScale.scaleId = 10;
-    addNetScale.scaleModel =
-        scaleModelCtl.text.isEmpty ? 'TMax' : scaleModelCtl.text;
+    addNetScale.scaleModel = scaleModelCtl.text;
     if (isDC500) {
       addNetScale.scaleModel = 'DC500';
     }
@@ -791,7 +787,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     myMediaConf.mediaInfoJson = btInfoStr;
     myMediaConf.type = 2;
     myAddNetScale.scaleId = 10;
-    myAddNetScale.scaleModel = 'TMax';
+    myAddNetScale.scaleModel = scaleModelCtl.text;
     myAddNetScale.mediaConf = myMediaConf;
     myAddNetScale.protocolName = protocolNameCtl.text;
     myAddNetScale.modbusId = int.tryParse(modbusIdCtl.text) ?? 1;
