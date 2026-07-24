@@ -41,6 +41,7 @@ class ComScaleInfo {
   int parity;
   int stopBits;
   String scaleModel;
+  String? innerModel;
   String scaleSn;
   bool isDefault;
   String scaleName;
@@ -57,7 +58,8 @@ class ComScaleInfo {
       this.scaleModel,
       this.scaleSn,
       this.isDefault,
-      this.scaleName);
+      this.scaleName,
+      {this.innerModel});
 }
 
 ComScaleInfo myComScaleInfo =
@@ -226,6 +228,7 @@ class NetScaleListMgr {
 class NetScaleInfoLocal {
   bool? isOnline;
   String? scaleModel;
+  String? innerModel;
   int? scaleCat;
   String? scaleSn;
   int? scaleId;
@@ -238,6 +241,7 @@ class NetScaleInfoLocal {
   NetScaleInfoLocal({
     this.isOnline,
     this.scaleModel,
+    this.innerModel,
     this.scaleCat,
     this.scaleSn,
     this.scaleId,

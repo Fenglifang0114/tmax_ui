@@ -475,7 +475,7 @@ class RespSysMsgType {
           // 现在可以正常更新状态
           scale.isOnline = scaleOnline.isOnline!;
           if (scaleOnline.isOnline!) {
-            scale.scaleModel = scaleOnline.modelName!;
+            scale.innerModel = scaleOnline.modelName!;
             scale.scaleSn = scaleOnline.sn!;
           }
           break;
@@ -486,7 +486,7 @@ class RespSysMsgType {
         if (scale.scaleId == scaleOnline.scaleId) {
           scale.isOnline = scaleOnline.isOnline!;
           if (scaleOnline.isOnline!) {
-            scale.scaleModel = scaleOnline.modelName!;
+            scale.innerModel = scaleOnline.modelName!;
             scale.scaleSn = scaleOnline.sn!;
           }
           break;
@@ -497,7 +497,7 @@ class RespSysMsgType {
         if (scale.scaleId == scaleOnline.scaleId) {
           scale.isOnline = scaleOnline.isOnline!;
           if (scaleOnline.isOnline!) {
-            scale.scaleModel = scaleOnline.modelName!;
+            scale.innerModel = scaleOnline.modelName!;
             scale.scaleSn = scaleOnline.sn!;
           }
           break;
