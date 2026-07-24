@@ -718,6 +718,7 @@ class OneFmaWgtRecPageState extends State<OneFmaWgtRecPage> {
         localizedStrings.fActualSingleWeight,
         localizedStrings.fAllowableError,
         localizedStrings.fActualError,
+        localizedStrings.fWgtUnit,
         localizedStrings.fQualificationStatus,
         localizedStrings.fCreatedAtCol,
         localizedStrings.operator,
@@ -730,56 +731,78 @@ class OneFmaWgtRecPageState extends State<OneFmaWgtRecPage> {
         if (_selectedOrders[key] == false) {
           continue;
         }
-        FmaRecFromDb tempFmaRec = FmaRecFromDb();
+        FmaRecFromDb? tempFmaRec;
         for (int j = 0; j < _fmaRecsList.length; j++) {
-          if (_fmaRecsList[j].header!.recordId == key) {
+          if (_fmaRecsList[j].header?.recordId == key) {
             tempFmaRec = _fmaRecsList[j];
             break;
           }
         }
-        if (tempFmaRec.header == null) {
+        if (tempFmaRec?.header == null) {
           continue;
         }
 
-        FmaRecFromDb rowData = tempFmaRec;
-        final headerData = rowData.header;
+        final headerData = tempFmaRec!.header!;
+        final unit = headerData.totalWeightUnit ?? '';
 
         final headerRow = [
-          headerData?.recordId ?? "",
-          headerData?.formulaId ?? "",
-          headerData?.formulaName ?? "",
-          headerData?.formulaBarcode ?? "",
+          headerData.recordId ?? "",
+          headerData.formulaId ?? "",
+          headerData.formulaName ?? "",
+          headerData.formulaBarcode ?? "",
           "",
           "",
-          headerData?.formulaMode == 'wgt'
+          headerData.formulaMode == 'wgt'
               ? localizedStrings.fWeightMode
               : localizedStrings.fPctMode,
-          headerData?.isEncrypted.toString() == "true"
+          headerData.isEncrypted.toString() == "true"
               ? localizedStrings.fConfidential
               : localizedStrings.fPublic,
-          "${headerData?.actualFmaTotalWgt} ${headerData?.totalWeightUnit}",
-          "${(headerData?.actualTotalWeight)!.toStringAsFixed(3)} ${headerData?.totalWeightUnit}",
-          "",
-          "",
-          "",
-          "",
-          headerData?.isQualified.toString() == "yes" ? "Pass" : "Fail",
-          headerData?.recordSaveTime != null
-              ? DateFormat('yyyy-MM-dd HH:mm:ss')
-                  .format(headerData!.recordSaveTime!)
+          headerData.actualFmaTotalWgt ?? '',
+          headerData.actualTotalWeight != null
+              ? double.parse(headerData.actualTotalWeight!.toStringAsFixed(3))
               : '',
-          headerData?.headerOperator ?? ''
+          "",
+          "",
+          "",
+          "",
+          unit,
+          headerData.isQualified.toString() == "yes" ? "Pass" : "Fail",
+          headerData.recordSaveTime != null
+              ? DateFormat('yyyy-MM-dd HH:mm:ss')
+                  .format(headerData.recordSaveTime!)
+              : '',
+          headerData.headerOperator ?? ''
         ];
         csvData.add(headerRow);
 
-        if (rowData.details != null) {
-          for (var detail in rowData.details!) {
+        if (tempFmaRec.details != null) {
+          for (var detail in tempFmaRec.details!) {
+            final isEncrypted = headerData.isEncrypted.toString() == "true";
+            final isContainer = detail.sequence == 0;
+
+            String allowableErrorStr = '-';
+            if (!isContainer && !isEncrypted) {
+              final err = detail.allowableError;
+              if (err != null) {
+                if (headerData.formulaMode == "pct") {
+                  final totalWgt = headerData.actualFmaTotalWgt;
+                  if (totalWgt != null) {
+                    allowableErrorStr =
+                        "${double.parse((err * totalWgt / 100).toStringAsFixed(3))}";
+                  }
+                } else {
+                  allowableErrorStr = "$err";
+                }
+              }
+            }
+
             final detailRow = [
               "",
               "",
               "",
               "",
-              detail.sequence == 0
+              isContainer
                   ? localizedStrings.fFmaContainer
                   : detail.materialName ?? "",
               detail.materialId ?? "",
@@ -787,31 +810,22 @@ class OneFmaWgtRecPageState extends State<OneFmaWgtRecPage> {
               "",
               "",
               "",
-              detail.sequence == 0 ||
-                      headerData!.isEncrypted.toString() == "true"
-                  ? '-'
-                  : "${detail.targetWgt.toString()} ${headerData.totalWeightUnit!}",
-              (detail.sequence == 0 ||
-                      headerData!.isEncrypted.toString() != "true")
-                  ? '${detail.actualWeight.toString()} ${headerData!.totalWeightUnit!}'
+              (isContainer || isEncrypted) ? '-' : "${detail.targetWgt ?? ''}",
+              (isContainer || !isEncrypted)
+                  ? "${detail.actualWeight ?? ''}"
                   : "-",
-              detail.sequence == 0 ||
-                      headerData.isEncrypted.toString() == "true"
+              allowableErrorStr,
+              (isContainer || isEncrypted)
                   ? '-'
-                  : headerData.formulaMode! == "pct"
-                      ? "${double.parse((detail.allowableError! * headerData.actualFmaTotalWgt! / 100).toStringAsFixed(3)).toString()} ${headerData.totalWeightUnit!}"
-                      : "${detail.allowableError!.toString()} ${headerData.totalWeightUnit!}",
-              detail.sequence == 0 ||
-                      headerData.isEncrypted.toString() == "true"
-                  ? '-'
-                  : "${detail.actualErrorWgt.toString()} ${headerData.totalWeightUnit!}",
-              detail.sequence == 0 ||
-                      headerData.isEncrypted.toString() == "true"
+                  : "${detail.actualErrorWgt ?? ''}",
+              unit,
+              (isContainer || isEncrypted)
                   ? '-'
                   : detail.isQualified.toString() == "ok"
                       ? "Pass"
                       : "Fail",
-              ""
+              "",
+              "",
             ];
             csvData.add(detailRow);
           }
@@ -824,7 +838,8 @@ class OneFmaWgtRecPageState extends State<OneFmaWgtRecPage> {
       if (!mounted) return;
       showExportDialog(path, context);
     } catch (e) {
-      // 处理导出错误
+      if (!mounted) return;
+      showTipInfo('导出失败: $e', context);
     }
   }
 

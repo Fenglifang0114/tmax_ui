@@ -143,7 +143,7 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
   // 启动自动下一步定时器
   void startAutoNextStepTimer() {
     autoNextStepTimer =
-        Timer.periodic(const Duration(milliseconds: 50), (timer) {
+        Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (myReqWeightCountine.msgBody == null) {
         stableDurationCounter = 0;
       } else if (!myReqWeightCountine.msgBody!.isStable) {
@@ -154,7 +154,7 @@ class FormulaSecretWeighingPageState extends State<FormulaSecretWeighingPage>
           isWgtStart &&
           checkValueIsOk() == 'ok') {
         stableDurationCounter++;
-        if (stableDurationCounter >= stableTime * 20) {
+        if (stableDurationCounter >= stableTime * 10) {
           final isOk = checkValueIsOk();
           if (isOk == "ok" && startFormula) {
             nextStep(isOk); // 执行下一步操作

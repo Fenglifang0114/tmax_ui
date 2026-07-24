@@ -175,7 +175,7 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
   // 启动自动下一步定时器
   void startAutoNextStepTimer() {
     autoNextStepTimer =
-        Timer.periodic(const Duration(milliseconds: 50), (timer) {
+        Timer.periodic(const Duration(milliseconds: 100), (timer) {
       if (myReqWeightCountine.msgBody == null) {
         stableDurationCounter = 0;
       } else if (!(myReqWeightCountine.msgBody?.isStable ?? false)) {
@@ -186,7 +186,7 @@ class FormulaPctWeighingPageState extends State<FormulaPctWeighingPage>
           scaleMap[myScale.scaleId]! &&
           checkValueIsOk() == 'ok') {
         stableDurationCounter++;
-        if (stableDurationCounter >= stableTime * 20) {
+        if (stableDurationCounter >= stableTime * 10) {
           if (checkCodeflag && !checkCodeOk) {
             return;
           }

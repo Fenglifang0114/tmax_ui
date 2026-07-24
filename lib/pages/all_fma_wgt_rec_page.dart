@@ -8,6 +8,7 @@ import 'package:t_max/data/fma_rec_list_db_data.dart';
 import 'package:t_max/data/formula_common.dart';
 import 'package:t_max/data/language.dart';
 import 'package:t_max/data/plu_field_status_data.dart';
+import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/dialog/fma_rpt_print_setting.dart';
 import 'package:t_max/dialog/fma_server_setting.dart';
 import 'package:t_max/eventbus/eventbus.dart';
@@ -732,6 +733,7 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
         localizedStrings.fActualSingleWeight,
         localizedStrings.fAllowableError,
         localizedStrings.fActualError,
+        localizedStrings.fWgtUnit,
         localizedStrings.fQualificationStatus,
         localizedStrings.fCreatedAtCol,
         localizedStrings.operator,
@@ -771,12 +773,15 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
           headerData?.isEncrypted.toString() == "true"
               ? localizedStrings.fConfidential
               : localizedStrings.fPublic,
-          "${headerData?.actualFmaTotalWgt} ${headerData?.totalWeightUnit}",
-          "${(headerData?.actualTotalWeight)!.toStringAsFixed(3)} ${headerData?.totalWeightUnit}",
+          headerData?.actualFmaTotalWgt,
+          (headerData?.actualTotalWeight != null
+              ? headerData?.actualTotalWeight!.toStringAsFixed(3)
+              : ''),
           "",
           "",
           "",
           "",
+          headerData?.totalWeightUnit,
           headerData?.isQualified.toString() == "yes" ? "Pass" : "Fail",
           headerData?.recordSaveTime != null
               ? DateFormat('yyyy-MM-dd HH:mm:ss')
@@ -804,27 +809,32 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
               detail.sequence == 0 ||
                       headerData!.isEncrypted.toString() == "true"
                   ? '-'
-                  : "${detail.targetWgt.toString()} ${headerData.totalWeightUnit!}",
+                  : detail.targetWgt.toString(),
               (detail.sequence == 0 ||
                       headerData!.isEncrypted.toString() != "true")
-                  ? '${detail.actualWeight.toString()} ${headerData!.totalWeightUnit!}'
+                  ? detail.actualWeight.toString()
                   : "-",
               detail.sequence == 0 ||
-                      headerData.isEncrypted.toString() == "true"
+                      headerData!.isEncrypted.toString() == "true"
                   ? '-'
                   : headerData.formulaMode! == "pct"
-                      ? "${double.parse((detail.allowableError! * headerData.actualFmaTotalWgt! / 100).toStringAsFixed(3)).toString()} ${headerData.totalWeightUnit!}"
-                      : "${detail.allowableError!.toString()} ${headerData.totalWeightUnit!}",
+                      ? (detail.allowableError! *
+                              headerData.actualFmaTotalWgt! /
+                              100)
+                          .toStringAsFixed(3)
+                      : detail.allowableError!.toString(),
               detail.sequence == 0 ||
-                      headerData.isEncrypted.toString() == "true"
+                      headerData!.isEncrypted.toString() == "true"
                   ? '-'
-                  : "${detail.actualErrorWgt.toString()} ${headerData.totalWeightUnit!}",
+                  : detail.actualErrorWgt.toString(),
+              headerData!.totalWeightUnit!,
               detail.sequence == 0 ||
                       headerData.isEncrypted.toString() == "true"
                   ? '-'
                   : detail.isQualified.toString() == "ok"
                       ? "Pass"
                       : "Fail",
+              "",
               ""
             ];
             csvData.add(detailRow);
@@ -838,7 +848,9 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
       if (!mounted) return;
       showExportDialog(path, context);
     } catch (e) {
-      // 处理导出错误
+      if (mounted) {
+        showTipInfo(e.toString(), context);
+      }
     }
   }
 
