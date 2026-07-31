@@ -23,12 +23,19 @@ class RowDataWidget extends StatefulWidget {
 class RowDataWidgetState extends State<RowDataWidget> {
   final List<String> _types = [
     'TEXT',
+    'NO.',
     'Gross',
     'Tare',
     'Net',
-    'Pcs',
+    'PCS',
     'WeightUnit',
+    'U.WGT',
+    'U.WU',
+    'UnitWeight',
     'Percent',
+    'TotalWeight',
+    'TotalCount',
+    'TotalPcs',
   ];
 
   final List<String> _alignments = [
@@ -81,6 +88,14 @@ class RowDataWidgetState extends State<RowDataWidget> {
   @override
   Widget build(BuildContext context) {
     _selectedType = widget.rowData.type;
+    if (_selectedType == 'Pcs') {
+      _selectedType = 'PCS';
+      widget.rowData.type = 'PCS';
+    }
+    if (!_types.contains(_selectedType)) {
+      _selectedType = 'TEXT';
+      widget.rowData.type = 'TEXT';
+    }
     _selectedAlignment = widget.rowData.alignment;
     _textEditingController =
         TextEditingController(text: widget.rowData.content);

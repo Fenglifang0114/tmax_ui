@@ -882,16 +882,16 @@ class EditBarCodeDialogState extends State<EditBarCodeDialog> {
 
   _saveBarCodeNameToList() {
     if (myBarCodeListList.barCodeListList.isNotEmpty) {
-      mySavedBarcodeName.savedBarcodeName.clear();
+      mySavedQrcodeName.savedQrcodeName.clear();
       for (var i = 0; i < myBarCodeListList.barCodeListList.length; i++) {
-        if (myBarCodeListList.barCodeListList[i].barCodeType != 'Qrcode') {
-          mySavedBarcodeName.savedBarcodeName
+        if (myBarCodeListList.barCodeListList[i].barCodeType == 'Qrcode') {
+          mySavedQrcodeName.savedQrcodeName
               .add(myBarCodeListList.barCodeListList[i].barCodeName);
         }
       }
-      mySavedBarcodeName.savedBarcodeName.add('--');
+      mySavedQrcodeName.savedQrcodeName.add('--');
     } else {
-      mySavedBarcodeName.savedBarcodeName.clear();
+      mySavedQrcodeName.savedQrcodeName.clear();
     }
   }
 
@@ -930,7 +930,7 @@ class EditBarCodeDialogState extends State<EditBarCodeDialog> {
         for (var i = 0; i < myBarCodeListList.barCodeListList.length; i++) {
           if (myBarCodeListList.barCodeListList[i].barCodeName ==
                   _barCodeNameCtl.text &&
-              myBarCodeListList.barCodeListList[i].barCodeType != 'Qrcode') {
+              myBarCodeListList.barCodeListList[i].barCodeType == 'Qrcode') {
             showTipInfo(localizedStrings.nameAlreadyExists, context);
             res = false;
             return res;
