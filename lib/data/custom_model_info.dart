@@ -1,8 +1,7 @@
-// 自定义机种信息
+// 自定义的机种与协议配置管理
 
+import 'dart:collection';
 import 'dart:convert';
-import 'dart:io';
-
 import 'package:flutter/services.dart';
 
 List<ModelNameInfo> modelNameInfoFromJson(String str) =>
@@ -93,1196 +92,168 @@ class SubModel {
       };
 }
 
-//
-
 class ModelNameInfoList {
   List<ModelNameInfo> modelNameInfoList = [];
+  bool _isLoaded = false;
 
   ModelNameInfoList(this.modelNameInfoList);
 
-  Future<String> getModelStrFromJson() async {
-    try {
-      // 1. 获取 exe 所在同级目录
-      String exePath = Platform.resolvedExecutable;
-      String dirPath = File(exePath).parent.path;
-      File jsonFile = File('$dirPath${Platform.pathSeparator}custom_model_name.json');
+  /// 核心加载入口：支持内存缓存，避免页面切换/弹窗重复解析 CSV
+  Future<void> getModelName({bool forceReload = false}) async {
+    // 内存缓存优化：若已解析过且不强制刷，直接返回内存数据（0ms 开销）
+    if (_isLoaded && !forceReload && modelNameInfoList.isNotEmpty) {
+      return;
+    }
 
-      // 2. 如果存在，直接读取并返回
-      if (jsonFile.existsSync()) {
-        return await jsonFile.readAsString();
+    try {
+      // 1. 读取 SCP.csv (3列：Customer, Inner, SCP)
+      String scpCsvData = await rootBundle.loadString('assets/template/SCP.csv');
+
+      // 2. 读取 ModelCategory.csv (2列：Inner, Category)
+      String catCsvData = "";
+      try {
+        catCsvData = await rootBundle.loadString('assets/template/ModelCategory.csv');
+      } catch (_) {
+        catCsvData = ""; // 文件缺失时降级处理
       }
 
-      // 3. 如果不存在，从 assets 读取 CSV 解析
-      String csvData = await rootBundle.loadString('assets/template/scp.csv');
-      String generatedJson = _parseCsvToJson(csvData);
-
-      // 4. 将生成的 JSON 写入到 exe 同级目录
-      await jsonFile.writeAsString(generatedJson);
-
-      return generatedJson;
+      // 3. 内存中解析并生成对象列表
+      modelNameInfoList = _parseCsvToModelList(scpCsvData, catCsvData);
+      _isLoaded = true;
     } catch (e) {
-      print("getModelStrFromJson error: $e");
-      return "";
+      print("getModelName 解析异常: $e");
+      modelNameInfoList = [];
     }
   }
 
-  String _parseCsvToJson(String csvData) {
-    List<String> lines = csvData.split('\n');
-    Map<String, Map<String, dynamic>> modelMap = {};
+  /// 内存解析核心算法（鲁棒处理 + 大小写空格容错 + 类别去重 + 智能排序）
+  List<ModelNameInfo> _parseCsvToModelList(String scpCsvData, String categoryCsvData) {
+    // Step 1: 解析 ModelCategory.csv -> Map<UpperInnerName, Set<Category>>
+    // 使用大写+trim键值作为索引做大小写/空格容错，Set自动去重
+    Map<String, LinkedHashSet<String>> categoryMap = {};
+    
+    if (categoryCsvData.trim().isNotEmpty) {
+      List<String> catLines = categoryCsvData.replaceAll('\r\n', '\n').split('\n');
+      for (int i = 1; i < catLines.length; i++) {
+        String line = catLines[i].trim();
+        if (line.isEmpty) continue;
 
-    // 跳过表头，按行解析
-    for (int i = 1; i < lines.length; i++) {
-      if (lines[i].trim().isEmpty) continue;
+        List<String> columns = line.split(',');
+        if (columns.length >= 2) {
+          String inner = columns[0].trim();
+          String category = columns[1].trim();
 
-      List<String> columns = lines[i].split(',');
+          if (inner.isNotEmpty && category.isNotEmpty) {
+            String lookupKey = inner.toUpperCase(); // 转大写容错
+            categoryMap.putIfAbsent(lookupKey, () => LinkedHashSet<String>()).add(category);
+          }
+        }
+      }
+    }
+
+    // Step 2: 解析 SCP.csv，按 (客户机种名 + 内部机种名) 唯一 Key 合并协议
+    Map<String, ModelNameInfo> mergedModelMap = {};
+    List<String> scpLines = scpCsvData.replaceAll('\r\n', '\n').split('\n');
+
+    for (int i = 1; i < scpLines.length; i++) {
+      String line = scpLines[i].trim();
+      if (line.isEmpty) continue;
+
+      List<String> columns = line.split(',');
       if (columns.length >= 3) {
         String customer = columns[0].trim();
         String inner = columns[1].trim();
         String scpStr = columns[2].trim();
 
+        if (customer.isEmpty || inner.isEmpty) continue;
+
+        // 拼接唯一 Key (客户机种名不同，即为不同记录)
         String mapKey = '${customer}_$inner';
 
-        // 简单大类推断
-        String category = "Weighing Scale";
-        if (customer.contains("C")) {
-          category = "Counting Scale";
-        } else if (customer.contains("P")) {
-          category = "Pricing Scale";
+        if (!mergedModelMap.containsKey(mapKey)) {
+          mergedModelMap[mapKey] = ModelNameInfo(
+            customScaleName: customer,
+            innerScaleName: inner,
+            subModel: [],
+            remark: "",
+          );
         }
 
-        if (!modelMap.containsKey(mapKey)) {
-          modelMap[mapKey] = {
-            "Category": category,
-            "CustomScaleName": customer,
-            "InnerScaleName": inner,
-            "SubModel": [],
-            "Remark": ""
-          };
-        }
-
-        // 分割协议 (SCP-01/SCP-02)
+        // 拆分协议 (如 SCP-01/SCP-02) 并去重追加
         List<String> protocols = scpStr
             .split('/')
             .map((e) => e.trim())
             .where((e) => e.isNotEmpty)
             .toList();
 
-        // 将协议去重追加到 SubModel
-        List currentSubModels = modelMap[mapKey]!["SubModel"];
+        List<SubModel> currentSubModels = mergedModelMap[mapKey]!.subModel!;
         for (var p in protocols) {
-          bool exists = currentSubModels
-              .any((element) => element["ProtocolName"] == p);
+          bool exists = currentSubModels.any((element) => element.protocolName == p);
           if (!exists) {
-            currentSubModels.add({
-              "ModelName": "",
-              "ProtocolName": p
-            });
+            currentSubModels.add(SubModel(modelName: "", protocolName: p));
           }
         }
       }
     }
 
-    // 转换为 List 并输出 JSON 字符串，带有缩进以提高可读性
-    List<Map<String, dynamic>> resultList = modelMap.values.toList();
-    return JsonEncoder.withIndent('  ').convert(resultList);
-  }
+    // Step 3: 根据 InnerScaleName 检索分类表，一对多展开
+    List<ModelNameInfo> resultList = [];
 
+    mergedModelMap.forEach((key, modelInfo) {
+      String inner = modelInfo.innerScaleName ?? "";
+      String lookupKey = inner.trim().toUpperCase(); // 检索大写 key
+      
+      LinkedHashSet<String>? matchedCategories = categoryMap[lookupKey];
 
-  getModelName() async {
-    String modelStr = "";
-    try {
-      modelStr = await getModelStrFromJson();
-      // print(modelStr);
-      if (modelStr.isEmpty) {
-        modelStr = defaultModelString;
+      // 未匹配到分类时自动归为 "Other" 英文兜底
+      List<String> categoriesToApply = (matchedCategories != null && matchedCategories.isNotEmpty)
+          ? matchedCategories.toList()
+          : ["Other"];
+
+      // 查到 N 个类别，生成 N 条独立记录
+      for (String cat in categoriesToApply) {
+        resultList.add(ModelNameInfo(
+          category: cat,
+          customScaleName: modelInfo.customScaleName,
+          innerScaleName: modelInfo.innerScaleName,
+          subModel: modelInfo.subModel
+              ?.map((e) => SubModel(modelName: e.modelName, protocolName: e.protocolName))
+              .toList(),
+          remark: modelInfo.remark,
+        ));
       }
-      modelNameInfoList = modelNameInfoFromJson(modelStr);
-      // print(modelNameInfoList);
-    } catch (e) {
-      modelNameInfoList = modelNameInfoFromJson(defaultModelString);
-    }
+    });
+
+    return resultList;
   }
 
-  String defaultModelString = """[
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "AHW",
-        "InnerScaleName": "AHW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "ATW",
-        "InnerScaleName": "ATW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-02"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "QHW",
-        "InnerScaleName": "QHW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-03"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "JW",
-        "InnerScaleName": "JW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-04"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "JWP",
-        "InnerScaleName": "JWP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-05"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "ZHW-2",
-        "InnerScaleName": "ZHW-2",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-06"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "UTW-2",
-        "InnerScaleName": "UTW-2",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-06"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "ROW",
-        "InnerScaleName": "ROW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-07"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "PRW",
-        "InnerScaleName": "PRW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-08"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "PRWS",
-        "InnerScaleName": "PRWS",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "FOX",
-        "InnerScaleName": "FOX",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "AW20",
-        "InnerScaleName": "AW20",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-09"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "AA7",
-        "InnerScaleName": "AA7",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "PCA10",
-        "InnerScaleName": "PCA10",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Weighing Scale",
-        "CustomScaleName": "XD",
-        "InnerScaleName": "XD",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-X"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "AHC",
-        "InnerScaleName": "AHC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-10"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "QHC",
-        "InnerScaleName": "QHC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "QHD",
-        "InnerScaleName": "QHD",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "ATC",
-        "InnerScaleName": "ATC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "QCC",
-        "InnerScaleName": "QCC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "JC",
-        "InnerScaleName": "JC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "JCD",
-        "InnerScaleName": "JCD",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "ZHC",
-        "InnerScaleName": "ZHC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-11"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "ZCC",
-        "InnerScaleName": "ZCC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Counting Scale",
-        "CustomScaleName": "UTC",
-        "InnerScaleName": "UTC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-12"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "ATP",
-        "InnerScaleName": "ATP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "ASP",
-        "InnerScaleName": "ASP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "AHP",
-        "InnerScaleName": "AHP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "ASUP",
-        "InnerScaleName": "ASUP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "QTP",
-        "InnerScaleName": "QTP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "QSP",
-        "InnerScaleName": "QSP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "JP",
-        "InnerScaleName": "JP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "JSP",
-        "InnerScaleName": "JSP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "JSUP",
-        "InnerScaleName": "JSUP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "JPP",
-        "InnerScaleName": "JPP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "JPP-N",
-        "InnerScaleName": "JPP-N",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "ZTP",
-        "InnerScaleName": "ZTP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-12"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "ZSP",
-        "InnerScaleName": "ZSP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-12"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "UTP",
-        "InnerScaleName": "UTP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-12"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "USP",
-        "InnerScaleName": "USP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-12"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "WTP",
-        "InnerScaleName": "WTP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-12"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "WSP",
-        "InnerScaleName": "WSP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-12"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "APP",
-        "InnerScaleName": "APP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-X"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "LPP",
-        "InnerScaleName": "LPP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-X"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Pricing Scale",
-        "CustomScaleName": "XP",
-        "InnerScaleName": "XP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-X"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "RW",
-        "InnerScaleName": "RW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-13"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "RWP",
-        "InnerScaleName": "RWP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-13"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "RWS",
-        "InnerScaleName": "RWS",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-13"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "BW",
-        "InnerScaleName": "BW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-03"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "BWS",
-        "InnerScaleName": "BWS",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-03"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "CW",
-        "InnerScaleName": "CW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-03"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "CWS",
-        "InnerScaleName": "CWS",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-03"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "NTW",
-        "InnerScaleName": "NTW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-03"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "NSW",
-        "InnerScaleName": "NSW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-03"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "VW",
-        "InnerScaleName": "VW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-03"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "VC",
-        "InnerScaleName": "VC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "KW",
-        "InnerScaleName": "KW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "KP",
-        "InnerScaleName": "KP",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "KC",
-        "InnerScaleName": "KC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "EW",
-        "InnerScaleName": "EW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "ELW",
-        "InnerScaleName": "ELW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "T2000A",
-        "InnerScaleName": "T2000A",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "T2200P",
-        "InnerScaleName": "T2200P",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "VW-L",
-        "InnerScaleName": "VW-L",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-15"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "VW-LC",
-        "InnerScaleName": "VW-LC",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "HW",
-        "InnerScaleName": "HW",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "HWS",
-        "InnerScaleName": "HWS",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Instrument",
-        "CustomScaleName": "PDS",
-        "InnerScaleName": "PDS",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-14"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "TB",
-        "InnerScaleName": "TB",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "THB",
-        "InnerScaleName": "THB",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "NHB",
-        "InnerScaleName": "NHB",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-16"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "EHB",
-        "InnerScaleName": "EHB",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-16"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "IHB",
-        "InnerScaleName": "IHB",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-16"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "NHB24",
-        "InnerScaleName": "NHB24",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-17"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "EHB24",
-        "InnerScaleName": "EHB24",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-17"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "IHB24",
-        "InnerScaleName": "IHB24",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-17"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "QHW24",
-        "InnerScaleName": "QHW24",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-17"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "DHB",
-        "InnerScaleName": "DHB",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-18"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Balance Scale",
-        "CustomScaleName": "TB-L",
-        "InnerScaleName": "TB-L",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-19"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M101",
-        "InnerScaleName": "M101",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M105",
-        "InnerScaleName": "M105",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M301",
-        "InnerScaleName": "M301",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M307",
-        "InnerScaleName": "M307",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M302",
-        "InnerScaleName": "M302",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M303",
-        "InnerScaleName": "M303",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M501",
-        "InnerScaleName": "M501",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M503",
-        "InnerScaleName": "M503",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M701",
-        "InnerScaleName": "M701",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M531",
-        "InnerScaleName": "M531",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
-    },
-    {
-        "Category": "Medical Scale",
-        "CustomScaleName": "M533",
-        "InnerScaleName": "M533",
-        "SubModel": [
-            {
-                "ModelName": "",
-                "ProtocolName": "SCP-01"
-            }
-        ],
-        "Remark": ""
+  // ==================== UI 辅助便利 API ====================
+
+  /// 获取所有唯一的分类名称列表（按字母排序，且自动将 'Other' 置底）
+  List<String> getCategories() {
+    Set<String> categories = {};
+    bool hasOther = false;
+
+    for (var item in modelNameInfoList) {
+      if (item.category != null && item.category!.isNotEmpty) {
+        if (item.category == "Other") {
+          hasOther = true;
+        } else {
+          categories.add(item.category!);
+        }
+      }
     }
-]""";
+
+    List<String> sortedList = categories.toList()..sort();
+    if (hasOther) {
+      sortedList.add("Other"); // 保证 Other 始终在最后一位
+    }
+    return sortedList;
+  }
+
+  /// 根据分类名称快速筛选机种列表
+  List<ModelNameInfo> getModelsByCategory(String category) {
+    return modelNameInfoList.where((e) => e.category == category).toList();
+  }
 }
+
