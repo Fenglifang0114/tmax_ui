@@ -6542,10 +6542,10 @@ class S {
     );
   }
 
-  /// `Applying a software seal to further prevent device tampering.`
+  /// `Enable software calibration lock to further prevent device tampering.`
   String get subTitleSealManagment {
     return Intl.message(
-      'Applying a software seal to further prevent device tampering.',
+      'Enable software calibration lock to further prevent device tampering.',
       name: 'subTitleSealManagment',
       desc: 'SubTitle for seal management',
       args: [],

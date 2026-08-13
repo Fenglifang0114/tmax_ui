@@ -1643,7 +1643,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Automatically collect, record, and generate reports for retail data.",
     ),
     "subTitleSealManagment": MessageLookupByLibrary.simpleMessage(
-      "Applying a software seal to further prevent device tampering.",
+      "Enable software calibration lock to further prevent device tampering.",
     ),
     "subTitleSerialOutputDesign": MessageLookupByLibrary.simpleMessage(
       "Customize and download serial port output content.",
