@@ -26,8 +26,8 @@ class AddNetScale {
   }
 }
 
-AddNetScale myAddNetScale = AddNetScale(scaleModel: 'TMax');
-AddNetScale myModifyScale = AddNetScale(scaleModel: 'TMax');
+AddNetScale myAddNetScale = AddNetScale(scaleModel: '');
+AddNetScale myModifyScale = AddNetScale(scaleModel: '');
 
 class MediaConf {
   int? type;
@@ -82,7 +82,7 @@ class ModifyNetScale {
   }
 }
 
-ModifyNetScale myModifyNetScale = ModifyNetScale(scaleModel: 'TMax');
+ModifyNetScale myModifyNetScale = ModifyNetScale(scaleModel: '');
 
 class ModifyScaleName {
   int? scaleId;

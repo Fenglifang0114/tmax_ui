@@ -34,10 +34,6 @@ class DefScaleInfo {
       myDefScaleInfo.defScalePort = myComScaleInfo.portName;
       myDefScaleInfo.defScaleBaud = myComScaleInfo.baudRate.toString();
       myDefScaleInfo.defScaleName = myComScaleInfo.scaleName;
-      if (myDefScaleInfo.defScaleModel == "TMax") {
-        myDefScaleInfo.defScaleModel = "";
-        myDefScaleInfo.defScaleSn = "";
-      }
       return;
     }
 
@@ -57,10 +53,6 @@ class DefScaleInfo {
           myDefScaleInfo.defScalePort = serialConfig.devPath;
           myDefScaleInfo.defScaleBaud = serialConfig.baudRate.toString();
         }
-        if (myDefScaleInfo.defScaleModel == "TMax") {
-          myDefScaleInfo.defScaleModel = "";
-          myDefScaleInfo.defScaleSn = "";
-        }
         return;
       }
     }
@@ -74,10 +66,6 @@ class DefScaleInfo {
         tempscale.port != null ? tempscale.port.toString() : "";
     myDefScaleInfo.defScaleIp = tempscale.ip ?? "";
     myDefScaleInfo.defScaleName = tempscale.scaleName ?? "";
-    if (myDefScaleInfo.defScaleModel == "TMax") {
-      myDefScaleInfo.defScaleModel = "";
-      myDefScaleInfo.defScaleSn = "";
-    }
   }
 
   static DefScaleInfo getScaleInfoById(int scaleId) {
@@ -89,10 +77,6 @@ class DefScaleInfo {
       tempScaleInfo.defScalePort = myComScaleInfo.portName;
       tempScaleInfo.defScaleBaud = myComScaleInfo.baudRate.toString();
       tempScaleInfo.defScaleName = myComScaleInfo.scaleName;
-      if (tempScaleInfo.defScaleModel == "TMax") {
-        tempScaleInfo.defScaleModel = "";
-        tempScaleInfo.defScaleSn = "";
-      }
       return tempScaleInfo;
     }
 
@@ -111,10 +95,6 @@ class DefScaleInfo {
           tempScaleInfo.defScalePort = serialConfig.devPath;
           tempScaleInfo.defScaleBaud = serialConfig.baudRate.toString();
         }
-        if (tempScaleInfo.defScaleModel == "TMax") {
-          tempScaleInfo.defScaleModel = "";
-          tempScaleInfo.defScaleSn = "";
-        }
         return tempScaleInfo;
       }
     }
@@ -127,10 +107,6 @@ class DefScaleInfo {
         tempscale.port != null ? tempscale.port.toString() : "";
     tempScaleInfo.defScaleIp = tempscale.ip ?? "";
     tempScaleInfo.defScaleName = tempscale.scaleName ?? "";
-    if (tempScaleInfo.defScaleModel == "TMax") {
-      tempScaleInfo.defScaleModel = "";
-      tempScaleInfo.defScaleSn = "";
-    }
     return tempScaleInfo;
   }
 }

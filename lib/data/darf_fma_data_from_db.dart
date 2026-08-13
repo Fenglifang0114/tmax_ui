@@ -183,3 +183,7 @@ class DarfFmaInfo {
     this.fmaInfo,
   });
 }
+
+typedef DraftFmaInfo = DarfFmaInfo;
+typedef DraftFmaInfoListFromDb = DarfFmaInfoListFromDb;
+

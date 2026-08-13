@@ -16,6 +16,7 @@ import 'package:t_max/data/language.dart';
 import 'package:t_max/data/plu_data.dart';
 import 'package:t_max/data/plu_data_source.dart';
 import 'package:t_max/data/plu_field_status_data.dart';
+import 'package:t_max/data/manager_scale_channel.dart';
 import 'package:t_max/data/scalecmd_data.dart';
 import 'package:t_max/dialog/add_plu_info_dialog.dart';
 import 'package:t_max/dialog/custom_dialog_tip.dart';
@@ -1872,7 +1873,7 @@ class _PluEidtPageState extends State<PluEidtPage> {
       myScaleCmd.cmdMode = "insert_plu_to_scale";
     }
 
-    myDownLoadPluFile.scaleModel = 'TMax';
+    myDownLoadPluFile.scaleModel = myDefScaleInfo.defScaleModel ?? '';
     myDownLoadPluFile.filePath = fmtPath;
     myDownLoadPluFile.nameMaxLen = 30;
     myScaleCmd.cmdData = json.encode(myDownLoadPluFile);

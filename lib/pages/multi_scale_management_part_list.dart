@@ -233,12 +233,6 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
                           macCtl.text = bluetoothConfig.mac;
                           btNameCtl.text = bluetoothConfig.name;
                         }
-                        if ((scale.scaleModel == 'T-Max' ||
-                                scale.scaleModel == 'TMax') &&
-                            scale.scaleSn.length == 10) {
-                          scaleModelCtl.text = '';
-                          snCtl.text = '';
-                        }
                       });
                     },
                     child: Container(

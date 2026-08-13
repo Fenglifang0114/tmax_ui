@@ -30,6 +30,8 @@ import 'package:t_max/widget/fma_process_bar.dart';
 import 'package:t_max/widget/sticky_table.dart';
 import '../data/language.dart';
 
+typedef DraftFmaPctWgtPage = DarftFmaPctWgtPage;
+
 class DarftFmaPctWgtPage extends StatefulWidget {
   const DarftFmaPctWgtPage(
       {super.key,

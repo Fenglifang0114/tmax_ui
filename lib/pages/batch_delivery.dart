@@ -1923,7 +1923,7 @@ class _BatchDeliveryPageState extends State<BatchDeliveryPage> {
     paths = await checkAndAddPath(prnFmt4Ctl, '4', paths);
 
     if (paths.isNotEmpty) {
-      myDownLoadPrtFmt.scaleModel = 'TMax';
+      myDownLoadPrtFmt.scaleModel = myDefScaleInfo.defScaleModel ?? '';
       myDownLoadPrtFmt.printerModel = 'EPM205';
       myDownLoadPrtFmt.filePaths = paths;
 

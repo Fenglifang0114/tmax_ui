@@ -8,6 +8,7 @@ import 'package:t_max/data/f_raw_name.dart';
 import 'package:t_max/data/fma_import_raw.dart';
 import 'package:t_max/data/formula_common.dart';
 import 'package:t_max/data/formula_scale_data.dart';
+import 'package:t_max/modules/formula/controllers/formula_scale_controller.dart';
 import 'package:t_max/data/g_data.dart';
 import 'package:t_max/data/get_auto_next_data.dart';
 import 'package:t_max/data/home_page_common_data.dart';
@@ -136,9 +137,12 @@ class FormulationScalePageState extends State<FormulationScalePage>
   dynamic _eventbus25;
   dynamic _eventbus26;
 
+  final FormulaScaleController _controller = FormulaScaleController();
+
   @override
   void initState() {
     super.initState();
+    _controller.init();
     startTestScaleOnline();
 
     _tabController = TabController(length: 3, vsync: this);
@@ -184,7 +188,7 @@ class FormulationScalePageState extends State<FormulationScalePage>
           setState(() {
             _selectedRawIndex = -1; // 重置选中的原料 index
             List<RawDataInfo> temp = rawDataInfoFromJson(dataStr);
-            rawDataList.addAll(temp);
+            rawDataList = List.from(temp);
             searchRawList = List.from(rawDataList);
           });
         } else {
@@ -201,10 +205,9 @@ class FormulationScalePageState extends State<FormulationScalePage>
     _eventbus4 = eventBus.on<EventRespAddRawData>().listen((event) {
       if (mounted) {
         String res = event.obj;
-        if (res.startsWith('ok,')) {
+        int? id = ResultParser.tryExtractId(res);
+        if (id != null) {
           showTipInfo(localizedStrings.fSuccessMsg, context);
-          String idStr = res.substring(3);
-          int id = int.parse(idStr);
           PublicFunctions.getRawData(id);
         }
       }
@@ -213,17 +216,14 @@ class FormulationScalePageState extends State<FormulationScalePage>
       if (mounted) {
         //删除单条配方，返回配方的ID，用于删除配方和原料关系表
         String res = event.obj;
-        //解析 "ok,52"，获取52
-        if (res.startsWith('ok,')) {
+        int? id = ResultParser.tryExtractId(res);
+        if (id != null) {
           showTipInfo(localizedStrings.fSuccessMsg, context);
-          String idStr = res.substring(3);
-          int id = int.parse(idStr);
           //删除配方和原料关系表中所有包含该配方ID的记录
-          formulaDataList.removeWhere((element) => element.header!.recId == id);
+          formulaDataList.removeWhere((element) => element.header?.recId == id);
           clearFmaSearch();
           performFmaSearch();
           selectedFormula = null;
-          showTipInfo(localizedStrings.fSuccessMsg, context);
         }
       }
     });
@@ -240,7 +240,7 @@ class FormulationScalePageState extends State<FormulationScalePage>
 
             List<FormulaInfoDb> tempFmaDataList =
                 formulaInfoDbFromJson(dataStr);
-            formulaDataList.addAll(tempFmaDataList);
+            formulaDataList = List.from(tempFmaDataList);
             searchFmaList = List.from(formulaDataList);
           });
         } else {
@@ -252,16 +252,17 @@ class FormulationScalePageState extends State<FormulationScalePage>
             searchFmaList = [];
           });
         }
+        // 配方列表加载完成后自动获取草稿记录，实现数据响应式关联
+        PublicFunctions.getDraftRecords();
       }
     });
 
     _eventbus7 = eventBus.on<EventRespAddFormula>().listen((event) {
       if (mounted) {
         String res = event.obj;
-        if (res.startsWith('ok,')) {
+        int? id = ResultParser.tryExtractId(res);
+        if (id != null) {
           showTipInfo(localizedStrings.fSuccessMsg, context);
-          String idStr = res.substring(3);
-          int id = int.parse(idStr);
           PublicFunctions.getFmaData(id);
           clearFmaSearch();
         }
@@ -271,10 +272,9 @@ class FormulationScalePageState extends State<FormulationScalePage>
     _eventbus10 = eventBus.on<EventRespEditRawData>().listen((event) {
       if (mounted) {
         String res = event.obj;
-        if (res.startsWith('ok,')) {
+        int? id = ResultParser.tryExtractId(res);
+        if (id != null) {
           showTipInfo(localizedStrings.fSuccessMsg, context);
-          String idStr = res.substring(3);
-          int id = int.parse(idStr);
           PublicFunctions.getRawData(id);
         }
       }
@@ -295,7 +295,8 @@ class FormulationScalePageState extends State<FormulationScalePage>
             //在fmaRecFromDbList中查找对应的配方
             DarfFmaInfo tempDarfFma = DarfFmaInfo();
             for (var fmaRec in formulaDataList) {
-              if (fmaRec.header!.formulaId == item.header!.formulaId) {
+              if (fmaRec.header?.formulaId != null &&
+                  fmaRec.header?.formulaId == item.header?.formulaId) {
                 tempDarfFma.fmaRec = item;
                 tempDarfFma.fmaInfo = fmaRec;
                 break;
@@ -529,24 +530,13 @@ class FormulationScalePageState extends State<FormulationScalePage>
       PublicFunctions.getFormulaTypeList();
       PublicFunctions.getRawList();
       PublicFunctions.getPrintSetting();
-
-      Future.delayed(const Duration(milliseconds: 500), () {
-        PublicFunctions.getFormulaList();
-      });
-
-      Future.delayed(const Duration(milliseconds: 1500), () {
-        // PublicFunctions.getFormulaRecList();
-      });
-      //等1秒再获取配方称重记录
-      Future.delayed(const Duration(milliseconds: 2000), () {
-        PublicFunctions.getDraftRecords();
-      });
+      PublicFunctions.getFormulaList();
     });
   }
 
   void getDarftFmaInfo(int id) {
     for (var item in darfFmaInfoList) {
-      if (item.fmaInfo!.header!.recId == id) {
+      if (item.fmaInfo?.header?.recId == id) {
         darfFmaInfoList = [];
         searchDarfFmaInfoList = [];
         selDarftFmaList = [];
@@ -560,6 +550,7 @@ class FormulationScalePageState extends State<FormulationScalePage>
 
   @override
   void dispose() {
+    _controller.dispose();
     super.dispose();
 
     _tabController.dispose();

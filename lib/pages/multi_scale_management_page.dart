@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:t_max/data/btinfodata.dart';
@@ -8,7 +7,6 @@ import 'package:t_max/data/comscaleinfo_data.dart';
 import 'package:t_max/data/g_data.dart';
 import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/icons.dart';
-import 'package:t_max/data/license_data.dart';
 import 'package:t_max/data/modbus_data.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/data/scalecmd_data.dart';
@@ -133,7 +131,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
     '115200',
     '9600',
   ];
-  List<String> scaleModelList = ['TMax'];
+  List<String> scaleModelList = [];
   String scaleModel = myModifyScale.scaleModel.toString();
   List<String> dataBitsList = ['8']; //去掉5,6,7,8
   List<String> stopBitsList = ['1']; //, '1.5', '2'

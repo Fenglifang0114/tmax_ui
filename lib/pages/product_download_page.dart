@@ -403,7 +403,7 @@ class _ProductDownloadPageState extends State<ProductDownloadPage> {
   }
 
   void sendFileToScale(String fmtPath) {
-    myDownLoadPluFile.scaleModel = 'TMax';
+    myDownLoadPluFile.scaleModel = myDefScaleInfo.defScaleModel ?? '';
     myDownLoadPluFile.filePath = fmtPath;
     myDownLoadPluFile.nameMaxLen = 30;
     myScaleCmd.cmdData = json.encode(myDownLoadPluFile);
@@ -420,7 +420,7 @@ class _ProductDownloadPageState extends State<ProductDownloadPage> {
       myScaleCmd.cmdMode = "insert_plu_to_scale";
       fmtPath = pluPartCtl.text;
     }
-    myDownLoadPluFile.scaleModel = 'TMax';
+    myDownLoadPluFile.scaleModel = myDefScaleInfo.defScaleModel ?? '';
     myDownLoadPluFile.filePath = fmtPath;
     myDownLoadPluFile.nameMaxLen = 30;
     myScaleCmd.cmdData = json.encode(myDownLoadPluFile);
@@ -429,7 +429,7 @@ class _ProductDownloadPageState extends State<ProductDownloadPage> {
 
   void delPluListFromScale(List<String> pluList) {
     myScaleCmd.cmdMode = "del_plu_from_scale";
-    myDelPlu.scaleModel = 'TMax';
+    myDelPlu.scaleModel = myDefScaleInfo.defScaleModel ?? '';
     myDelPlu.pluId = pluList;
     myScaleCmd.cmdData = json.encode(myDelPlu);
     PublicFunctions.sendMsg(myDefScaleInfo.defScaleId!, jsonEncode(myScaleCmd));

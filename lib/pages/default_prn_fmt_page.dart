@@ -8,6 +8,7 @@ import 'package:t_max/pages/all_page_path.dart';
 import 'package:t_max/widget/custom_button.dart';
 import '../data/download_prt_fmt.dart';
 import '../data/language.dart';
+import '../data/manager_scale_channel.dart';
 import '../data/scalecmd_data.dart';
 import '../data/timer_manager.dart';
 import '../data/writelog.dart';
@@ -443,7 +444,7 @@ class _DefaultPrnFmtPageState extends State<DefaultPrnFmtPage> {
     if (fmtSequence.isEmpty) {
       return "";
     }
-    myDefaultPrtFmt.scaleModel = 'TMax';
+    myDefaultPrtFmt.scaleModel = myDefScaleInfo.defScaleModel ?? '';
     myDefaultPrtFmt.printerModel = _selectedValue;
     myDefaultPrtFmt.filePathList = fmtSequence;
     myScaleCmd.cmdData = json.encode(myDefaultPrtFmt);

@@ -17,6 +17,8 @@ import 'package:t_max/widget/common_widget.dart';
 import 'package:t_max/widget/dialog_head_style.dart';
 import '../data/language.dart';
 
+typedef EditDraftFmaPage = EditDarftFmaPage;
+
 class EditDarftFmaPage extends StatefulWidget {
   final FormulaInfoDb editFormulaInfo;
 

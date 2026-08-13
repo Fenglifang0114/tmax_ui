@@ -16,23 +16,31 @@ bool isFormulaExist(String formulaId) {
   if (formulaDataList.isEmpty) {
     return false;
   }
-  return formulaDataList
-      .any((formula) => formula.header!.formulaId == formulaId);
+  final target = formulaId.trim().toLowerCase();
+  return formulaDataList.any((formula) =>
+      (formula.header?.formulaId ?? '').trim().toLowerCase() == target);
 }
 
 bool isFormulaBarcodeExist(String barcode) {
   if (formulaDataList.isEmpty) {
     return false;
   }
-  return formulaDataList
-      .any((formula) => formula.header!.formulaBarcode == barcode);
+  final target = barcode.trim().toLowerCase();
+  return formulaDataList.any((formula) =>
+      (formula.header?.formulaBarcode ?? '').trim().toLowerCase() == target);
 }
 
 bool isRawExist(String rawId) {
   if (rawDataList.isEmpty) {
     return false;
   }
-  return rawDataList.any((raw) => raw.materialId == rawId);
+  final cleanId = rawId.trim().toLowerCase();
+  final strippedId = cleanId.replaceFirst(RegExp(r'^0+'), '');
+  return rawDataList.any((raw) {
+    final matId = (raw.materialId ?? '').trim().toLowerCase();
+    final strippedMatId = matId.replaceFirst(RegExp(r'^0+'), '');
+    return matId == cleanId || (strippedId.isNotEmpty && strippedId == strippedMatId);
+  });
 }
 
 // 优化后的导入函数：提前校验字段，过滤无效行

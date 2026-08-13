@@ -14,6 +14,7 @@ List<FormulaInfoDb> formulaDataList = [];
 List<FormulaInfoDb> searchFmaList = [];
 
 List<DarfFmaInfo> darfFmaInfoList = []; //暂存的配方称重记录和配方明细
+List<DraftFmaInfo> get draftFmaInfoList => darfFmaInfoList;
 
 RptPrintSetting rptPrintSetting = RptPrintSetting(); //打印设置
 
@@ -97,3 +98,29 @@ enum FormulaWgtUnit {
   g,
   lb,
 }
+
+/// 安全协议结果解析器，避免格式不规范时 int.parse 抛出 FormatException 导致 UI 卡死
+class ResultParser {
+  /// 判断响应是否成功 (以 "ok," 开头或等于 "ok")
+  static bool isSuccess(String? res) {
+    if (res == null || res.isEmpty) return false;
+    final trimmed = res.trim();
+    return trimmed == 'ok' || trimmed.startsWith('ok,') || trimmed.startsWith('ok');
+  }
+
+  /// 提取 "ok,52" 或 "ok, 52" 中的 ID，失败返回 null 且不抛出异常
+  static int? tryExtractId(String? res) {
+    if (res == null || res.isEmpty) return null;
+    final trimmed = res.trim();
+    if (!trimmed.contains(',')) return null;
+    try {
+      final parts = trimmed.split(',');
+      if (parts.length >= 2) {
+        final idStr = parts[1].trim();
+        return int.tryParse(idStr);
+      }
+    } catch (_) {}
+    return null;
+  }
+}
+

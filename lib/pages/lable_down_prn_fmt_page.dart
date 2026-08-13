@@ -558,7 +558,7 @@ class _DownloadPageState extends State<DownloadLabelPage> {
       paths.add('4${pctModeController.text}');
     }
     if (paths.isNotEmpty) {
-      myDownLoadPrtFmt.scaleModel = 'TMax';
+    myDownLoadPrtFmt.scaleModel = myDefScaleInfo.defScaleModel ?? '';
       myDownLoadPrtFmt.printerModel = 'Label';
       // myDownLoadPrtFmt.printerModel = 'ESP/POS';
       myDownLoadPrtFmt.filePaths = paths;
@@ -589,7 +589,7 @@ class _DownloadPageState extends State<DownloadLabelPage> {
       return "";
     }
 
-    myDownLoadPrtFmt.scaleModel = 'TMax';
+    myDownLoadPrtFmt.scaleModel = myDefScaleInfo.defScaleModel ?? '';
     myDownLoadPrtFmt.printerModel = 'Label';
     myDownLoadPrtFmt.filePaths = paths;
     myScaleCmd.cmdData = json.encode(myDownLoadPrtFmt);

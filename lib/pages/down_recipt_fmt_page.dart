@@ -438,7 +438,7 @@ class _DownReciptPageState extends State<DownReciptPage> {
       return "";
     }
 
-    myDownLoadPrtFmt.scaleModel = 'TMax';
+    myDownLoadPrtFmt.scaleModel = myDefScaleInfo.defScaleModel ?? '';
     myDownLoadPrtFmt.printerModel = 'Receipt';
     myDownLoadPrtFmt.filePaths = paths;
     myScaleCmd.cmdData = json.encode(myDownLoadPrtFmt);
@@ -464,7 +464,7 @@ class _DownReciptPageState extends State<DownReciptPage> {
       paths.add('4${pctModeController.text}');
     }
     if (paths.isNotEmpty) {
-      myDownLoadPrtFmt.scaleModel = 'TMax';
+      myDownLoadPrtFmt.scaleModel = myDefScaleInfo.defScaleModel ?? '';
       // myDownLoadPrtFmt.printerModel = 'EPM205';
       myDownLoadPrtFmt.printerModel = 'Receipt';
       myDownLoadPrtFmt.filePaths = paths;
