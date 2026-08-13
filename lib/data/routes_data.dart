@@ -396,6 +396,13 @@ List<RouteData> getAllAppsMenus() {
 }
 
 bool getUserPermission(int id) {
+  if (mySysUser.roleId == operatorRoleId) {
+    if (id == MenuId.retailReportPage ||
+        id == MenuId.weightDataCollectionPage ||
+        id == MenuId.basicDataCollectionPage) {
+      return false;
+    }
+  }
   if (mySysUser.roleId == adminRoleId || mySysUser.roleId == superAdminRoleId) {
     return true;
   }

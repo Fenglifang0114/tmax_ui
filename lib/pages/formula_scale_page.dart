@@ -2338,40 +2338,53 @@ class FormulationScalePageState extends State<FormulationScalePage>
           color: colorScheme.onPrimary,
           style: IconButton.styleFrom(
             backgroundColor: colorScheme.onTertiaryFixedVariant,
+            disabledBackgroundColor: colorScheme.surfaceContainerLow,
             shape: RoundedRectangleBorder(
-              // 设置为矩形形状
-              borderRadius: BorderRadius.zero, // 没有圆角，即正方形
+              borderRadius: BorderRadius.zero,
             ),
-            fixedSize: const Size(40, 40), // 设置固定大小
+            fixedSize: const Size(40, 40),
           ),
-          onPressed: () {
-            showAddRawInfoDialog();
-          },
-          icon: getSvgIcon(takeInSvgIcon(), 24, 24, colorScheme.onPrimary),
+          onPressed: mySysUser.roleId != operatorRoleId
+              ? () {
+                  showAddRawInfoDialog();
+                }
+              : null,
+          icon: getSvgIcon(
+              takeInSvgIcon(),
+              24,
+              24,
+              mySysUser.roleId != operatorRoleId
+                  ? colorScheme.onPrimary
+                  : colorScheme.outline),
         ),
         SizedBox(
           width: regularPadding,
         ),
-        buildIconBtn(localizedStrings.gBtnExport, exportSvgIcon(), exportRaw),
+        buildIconBtn(
+            localizedStrings.gBtnExport, exportSvgIcon(), exportRaw,
+            enabled: mySysUser.roleId != operatorRoleId),
         SizedBox(
           width: regularPadding,
         ),
-        buildIconBtn(localizedStrings.gBtnImport, importSvgIcon(), importRaw),
+        buildIconBtn(
+            localizedStrings.gBtnImport, importSvgIcon(), importRaw,
+            enabled: mySysUser.roleId != operatorRoleId),
         SizedBox(
           width: regularPadding,
         ),
-        buildIconBtn(localizedStrings.fGetRawTemplateBtn, rawTemplateSvgIcon(),
-            getRawTemplate),
+        buildIconBtn(localizedStrings.fGetRawTemplateBtn,
+            rawTemplateSvgIcon(), getRawTemplate,
+            enabled: mySysUser.roleId != operatorRoleId),
         SizedBox(
           width: regularPadding,
         ),
         buildDelIconBtn(
-            selRawList.isEmpty
+            (mySysUser.roleId == operatorRoleId || selRawList.isEmpty)
                 ? null
                 : () {
                     _deleteSelectedRaw();
                   },
-            selRawList.isEmpty),
+            mySysUser.roleId == operatorRoleId || selRawList.isEmpty),
 
         SizedBox(
           width: 20,
@@ -2403,7 +2416,9 @@ class FormulationScalePageState extends State<FormulationScalePage>
     });
   }
 
-  Widget buildIconBtn(String tip, String iconPath, Function() onPressed) {
+  Widget buildIconBtn(String tip, String iconPath, Function()? onPressed,
+      {bool enabled = true}) {
+    final bool isEnabled = enabled && onPressed != null;
     return Tooltip(
       message: tip,
       child: IconButton(
@@ -2413,42 +2428,46 @@ class FormulationScalePageState extends State<FormulationScalePage>
         hoverColor: colorScheme.outline,
         style: IconButton.styleFrom(
           backgroundColor: colorScheme.primary,
+          disabledBackgroundColor: colorScheme.surfaceContainerLow,
           shape: RoundedRectangleBorder(
-            // 设置为矩形形状
-            borderRadius: BorderRadius.zero, // 没有圆角，即正方形
+            borderRadius: BorderRadius.zero,
           ),
-          fixedSize: const Size(40, 40), // 设置固定大小
+          fixedSize: const Size(40, 40),
         ),
-        onPressed: () {
-          onPressed();
-        },
-        icon: getSvgIcon(iconPath, 24, 24, colorScheme.onPrimary),
+        onPressed: isEnabled ? onPressed : null,
+        icon: getSvgIcon(iconPath, 24, 24,
+            isEnabled ? colorScheme.onPrimary : colorScheme.outline),
       ),
     );
   }
 
-  showAddFormulaIconBtn(String tip, IconData icon, Function() onPressed) {
+  showAddFormulaIconBtn(String tip, IconData icon, Function()? onPressed,
+      {bool enabled = true}) {
+    final bool isEnabled = enabled && onPressed != null;
     return Tooltip(
-        message: tip, // 提示信息
+        message: tip,
         child: IconButton(
           iconSize: 24,
           color: colorScheme.onPrimary,
           style: IconButton.styleFrom(
             backgroundColor: colorScheme.onTertiaryFixedVariant,
+            disabledBackgroundColor: colorScheme.surfaceContainerLow,
             shape: RoundedRectangleBorder(
-              // 设置为矩形形状
-              borderRadius: BorderRadius.zero, // 没有圆角，即正方形
+              borderRadius: BorderRadius.zero,
             ),
-            fixedSize: const Size(40, 40), // 设置固定大小
+            fixedSize: const Size(40, 40),
           ),
-          onPressed: onPressed,
-          icon: getSvgIcon(takeInSvgIcon(), 24, 24, colorScheme.onPrimary),
+          onPressed: isEnabled ? onPressed : null,
+          icon: getSvgIcon(takeInSvgIcon(), 24, 24,
+              isEnabled ? colorScheme.onPrimary : colorScheme.outline),
         ));
   }
 
-  showIconButton(String tip, String iconPath, Function() onPressed) {
+  showIconButton(String tip, String iconPath, Function()? onPressed,
+      {bool enabled = true}) {
+    final bool isEnabled = enabled && onPressed != null;
     return Tooltip(
-      message: tip, // 提示信息
+      message: tip,
       child: IconButton(
         iconSize: 24,
         color: colorScheme.primary,
@@ -2456,14 +2475,15 @@ class FormulationScalePageState extends State<FormulationScalePage>
         hoverColor: colorScheme.outline,
         style: IconButton.styleFrom(
           backgroundColor: colorScheme.primary,
+          disabledBackgroundColor: colorScheme.surfaceContainerLow,
           shape: RoundedRectangleBorder(
-            // 设置为矩形形状
-            borderRadius: BorderRadius.zero, // 没有圆角，即正方形
+            borderRadius: BorderRadius.zero,
           ),
-          fixedSize: const Size(40, 40), // 设置固定大小
+          fixedSize: const Size(40, 40),
         ),
-        onPressed: onPressed,
-        icon: getSvgIcon(iconPath, 24, 24, colorScheme.onPrimary),
+        onPressed: isEnabled ? onPressed : null,
+        icon: getSvgIcon(iconPath, 24, 24,
+            isEnabled ? colorScheme.onPrimary : colorScheme.outline),
       ),
     );
   }
@@ -2978,11 +2998,11 @@ class FormulationScalePageState extends State<FormulationScalePage>
             localizedStrings.fAddFmaBtn, Icons.add_box_outlined, () {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => AddFormulaPage()));
-        }),
+        }, enabled: mySysUser.roleId != operatorRoleId),
         SizedBox(
           width: 12,
         ),
-        //配方称重记录
+        //配方条码搜索
         showIconButton(localizedStrings.fFmaBarcode, fmaBarcodeIcon(), () {
           showDialog(
             context: context,
@@ -3023,13 +3043,14 @@ class FormulationScalePageState extends State<FormulationScalePage>
             localizedStrings.fHistoricalWeighingRecordsBtn, recordsIcon(), () {
           Navigator.push(context,
               MaterialPageRoute(builder: (context) => AllFmaWgtRecPage()));
-        }),
+        }, enabled: mySysUser.roleId != operatorRoleId),
         SizedBox(
           width: 12,
         ),
         //导入配方
         showIconButton(
-            localizedStrings.gBtnImport, importSvgIcon(), importFormula),
+            localizedStrings.gBtnImport, importSvgIcon(), importFormula,
+            enabled: mySysUser.roleId != operatorRoleId),
         SizedBox(
           width: 12,
         ),
@@ -3037,22 +3058,23 @@ class FormulationScalePageState extends State<FormulationScalePage>
         showIconButton(localizedStrings.gBtnExport, exportSvgIcon(), () {
           //导出配方
           exportFormula();
-        }),
+        }, enabled: mySysUser.roleId != operatorRoleId),
         SizedBox(
           width: 12,
         ),
-        buildIconBtn(localizedStrings.fGetFmaTemplateBtn, rawTemplateSvgIcon(),
-            getFmaTemplate),
+        buildIconBtn(localizedStrings.fGetFmaTemplateBtn,
+            rawTemplateSvgIcon(), getFmaTemplate,
+            enabled: mySysUser.roleId != operatorRoleId),
         SizedBox(
           width: regularPadding,
         ),
         buildDelIconBtn(
-            selFormulas.isEmpty
+            (mySysUser.roleId == operatorRoleId || selFormulas.isEmpty)
                 ? null
                 : () {
                     _deleteSelectedFmas();
                   },
-            selFormulas.isEmpty),
+            mySysUser.roleId == operatorRoleId || selFormulas.isEmpty),
 
         SizedBox(
           width: 20,

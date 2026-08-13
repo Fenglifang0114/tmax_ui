@@ -1400,51 +1400,52 @@ class DarftFmaPctWgtPageState extends State<DarftFmaPctWgtPage>
                           maxLines: 1,
                         ),
                       ),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(
-                          maxWidth: 300, // 最大宽度限制为300
-                        ),
-                        child: IntrinsicWidth(
-                          child: TextButton(
-                              onPressed: !isEnableNext
-                                  ? null
-                                  : () {
-                                      // showDeleteTipDialog();
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (context) =>
-                                                  EditDarftFmaPage(
-                                                    editFormulaInfo: myFmaInfo,
-                                                  ))).then((value) {
-                                        setState(() {});
-                                      });
-                                    },
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  Flexible(
-                                    child: Text(
-                                      localizedStrings.fEditFmaBtn,
-                                      style: Theme.of(context)
-                                          .textTheme
-                                          .bodyMedium!
-                                          .apply(
-                                              color: Theme.of(context)
-                                                  .colorScheme
-                                                  .primary),
-                                      overflow: TextOverflow.ellipsis,
+                      if (mySysUser.roleId != operatorRoleId)
+                        ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxWidth: 300, // 最大宽度限制为300
+                          ),
+                          child: IntrinsicWidth(
+                            child: TextButton(
+                                onPressed: !isEnableNext
+                                    ? null
+                                    : () {
+                                        // showDeleteTipDialog();
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (context) =>
+                                                    EditDarftFmaPage(
+                                                      editFormulaInfo: myFmaInfo,
+                                                    ))).then((value) {
+                                          setState(() {});
+                                        });
+                                      },
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        localizedStrings.fEditFmaBtn,
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium!
+                                            .apply(
+                                                color: Theme.of(context)
+                                                    .colorScheme
+                                                    .primary),
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(width: smallPadding),
-                                  Icon(
-                                    Icons.mode_edit_outlined,
-                                    color: colorScheme.primary,
-                                  ),
-                                ],
-                              )),
+                                    SizedBox(width: smallPadding),
+                                    Icon(
+                                      Icons.mode_edit_outlined,
+                                      color: colorScheme.primary,
+                                    ),
+                                  ],
+                                )),
+                          ),
                         ),
-                      ),
                       SizedBox(width: regularPadding),
                     ])),
                 showWgtTable(),

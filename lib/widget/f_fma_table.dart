@@ -3,6 +3,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:intl/intl.dart';
 import 'package:t_max/data/formula_common.dart';
 import 'package:t_max/data/formula_from_db_data.dart';
+import 'package:t_max/data/g_data.dart';
 import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/language.dart';
 import 'package:t_max/pages/edit_darft_fma_page.dart';
@@ -651,18 +652,33 @@ class FormulaDataSource extends DataGridSource {
           children: [
             IconButton(
               icon: Icon(Icons.receipt_long_sharp,
-                  size: 20, color: colorScheme.primary),
-              onPressed: () => _showHistoryRecords(formula),
+                  size: 20,
+                  color: mySysUser.roleId != operatorRoleId
+                      ? colorScheme.primary
+                      : colorScheme.outline),
+              onPressed: mySysUser.roleId != operatorRoleId
+                  ? () => _showHistoryRecords(formula)
+                  : null,
             ),
             IconButton(
               icon: Icon(Icons.edit_outlined,
-                  size: 20, color: colorScheme.primary),
-              onPressed: () => _editFormula(formula),
+                  size: 20,
+                  color: mySysUser.roleId != operatorRoleId
+                      ? colorScheme.primary
+                      : colorScheme.outline),
+              onPressed: mySysUser.roleId != operatorRoleId
+                  ? () => _editFormula(formula)
+                  : null,
             ),
             IconButton(
               icon: Icon(Icons.delete_forever_outlined,
-                  size: 20, color: colorScheme.error),
-              onPressed: () => _deleteFormula(formula),
+                  size: 20,
+                  color: mySysUser.roleId != operatorRoleId
+                      ? colorScheme.error
+                      : colorScheme.outline),
+              onPressed: mySysUser.roleId != operatorRoleId
+                  ? () => _deleteFormula(formula)
+                  : null,
             ),
           ],
         );

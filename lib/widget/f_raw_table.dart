@@ -3,6 +3,7 @@ import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:intl/intl.dart';
 import 'package:t_max/data/formula_common.dart';
 import 'package:t_max/data/formula_scale_data.dart';
+import 'package:t_max/data/g_data.dart';
 import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/language.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
@@ -640,13 +641,23 @@ class RawMaterialDataSource extends DataGridSource {
           children: [
             IconButton(
               icon: Icon(Icons.edit_outlined,
-                  size: 20, color: colorScheme.primary),
-              onPressed: () => _editRaw(raw),
+                  size: 20,
+                  color: mySysUser.roleId != operatorRoleId
+                      ? colorScheme.primary
+                      : colorScheme.outline),
+              onPressed: mySysUser.roleId != operatorRoleId
+                  ? () => _editRaw(raw)
+                  : null,
             ),
             IconButton(
               icon: Icon(Icons.delete_forever_outlined,
-                  size: 20, color: colorScheme.error),
-              onPressed: () => _deleteRaw(raw),
+                  size: 20,
+                  color: mySysUser.roleId != operatorRoleId
+                      ? colorScheme.error
+                      : colorScheme.outline),
+              onPressed: mySysUser.roleId != operatorRoleId
+                  ? () => _deleteRaw(raw)
+                  : null,
             )
           ],
         );
