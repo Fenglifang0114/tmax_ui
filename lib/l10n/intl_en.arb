@@ -2712,7 +2712,7 @@
     "@subTitleWiredSetting": {
         "description": "SubTitle for wired setting"
     },
-    "subTitleSealManagment": "Applying a software seal to further prevent device tampering.",
+    "subTitleSealManagment": "Enable software calibration lock to further prevent device tampering.",
     "@subTitleSealManagment": {
         "description": "SubTitle for seal management"
     },

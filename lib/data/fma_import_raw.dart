@@ -64,7 +64,7 @@ Future<ImportFmaResult> importFormulasFromExcel(File file) async {
     if (csvString.startsWith('\uFEFF')) {
       csvString = csvString.substring(1);
     }
-    List<List<dynamic>> sheetRows = const CsvToListConverter().convert(csvString);
+    List<List<dynamic>> sheetRows = const CsvToListConverter(shouldParseNumbers: false).convert(csvString);
 
     if (sheetRows.isEmpty) {
       result.errorMessage = localizedStrings.noDataImport;
@@ -644,7 +644,7 @@ ImportRawResult _parseExcelInBackground(params) {
   if (csvString.startsWith('\uFEFF')) {
     csvString = csvString.substring(1);
   }
-  List<List<dynamic>> sheetRows = const CsvToListConverter().convert(csvString);
+  List<List<dynamic>> sheetRows = const CsvToListConverter(shouldParseNumbers: false).convert(csvString);
 
   if (sheetRows.isEmpty) {
     return ImportRawResult(
@@ -902,7 +902,7 @@ _CsvDecodeResult _decodeCsvBytes(List<int> bytes, Map<String, String> localizedH
       csvString = csvString.substring(1);
     }
     try {
-      List<List<dynamic>> sheetRows = const CsvToListConverter().convert(csvString);
+      List<List<dynamic>> sheetRows = const CsvToListConverter(shouldParseNumbers: false).convert(csvString);
       if (sheetRows.isEmpty) return 0;
       int matchCount = 0;
       for (var cell in sheetRows.first) {
