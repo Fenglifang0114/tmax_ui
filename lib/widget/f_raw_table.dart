@@ -4,12 +4,12 @@ import 'package:intl/intl.dart';
 import 'package:t_max/data/formula_common.dart';
 import 'package:t_max/data/formula_scale_data.dart';
 import 'package:t_max/data/g_data.dart';
-import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/language.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
 import 'package:t_max/dialog/add_raw_info_dialog.dart';
 import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/functions/methods.dart';
+import 'package:t_max/widget/common_table_pagination.dart';
 
 class RawMaterialTable extends StatefulWidget {
   final List<RawDataInfo> searchRawList;
@@ -150,98 +150,6 @@ class _RawMaterialTableState extends State<RawMaterialTable> {
     }
   }
 
-  void _goToFirstPage() => _goToPage(1);
-  void _goToPreviousPage() => _goToPage(_currentPage - 1);
-  void _goToNextPage() => _goToPage(_currentPage + 1);
-  void _goToLastPage() => _goToPage(_totalPages);
-
-  Widget _buildPaginationControls() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      color: colorScheme.surface,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.first_page, size: 20),
-                onPressed: _currentPage > 1 ? _goToFirstPage : null,
-                color: _currentPage > 1
-                    ? colorScheme.primary
-                    : colorScheme.outline,
-              ),
-              IconButton(
-                icon: Icon(Icons.chevron_left, size: 20),
-                onPressed: _currentPage > 1 ? _goToPreviousPage : null,
-                color: _currentPage > 1
-                    ? colorScheme.primary
-                    : colorScheme.outline,
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  '$_currentPage / $_totalPages',
-                  style: textTheme.bodySmall,
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.chevron_right, size: 20),
-                onPressed: _currentPage < _totalPages ? _goToNextPage : null,
-                color: _currentPage < _totalPages
-                    ? colorScheme.primary
-                    : colorScheme.outline,
-              ),
-              IconButton(
-                icon: Icon(Icons.last_page, size: 20),
-                onPressed: _currentPage < _totalPages ? _goToLastPage : null,
-                color: _currentPage < _totalPages
-                    ? colorScheme.primary
-                    : colorScheme.outline,
-              ),
-              SizedBox(width: 16),
-              Text(
-                localizedStrings.tipJumpPage,
-                style: textTheme.bodySmall,
-              ),
-              SizedBox(width: 8),
-              SizedBox(
-                width: 60,
-                height: 32,
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    border: OutlineInputBorder(),
-                  ),
-                  onSubmitted: (value) {
-                    final page = int.tryParse(value);
-                    if (page != null) {
-                      _goToPage(page);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            width: regularPadding,
-          ),
-          Text(
-            '${localizedStrings.tipPageTotal}: ${widget.searchRawList.length} ${localizedStrings.tipPageItems}',
-            style: textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   void didUpdateWidget(covariant RawMaterialTable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -260,110 +168,16 @@ class _RawMaterialTableState extends State<RawMaterialTable> {
     _dataSource.updateSelection({});
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            color: colorScheme.surface,
-            child: SfDataGrid(
-              controller: _dataGridController,
-              source: _dataSource,
-              headerRowHeight: 48.0,
-              frozenColumnsCount: 2,
-              footerFrozenColumnsCount: 1,
-              columnWidthMode: ColumnWidthMode.fill,
-              gridLinesVisibility: GridLinesVisibility.horizontal,
-              headerGridLinesVisibility: GridLinesVisibility.none,
-              selectionMode: SelectionMode.none,
-              columnResizeMode: ColumnResizeMode.onResize,
-              allowSorting: false,
-              rowHeight: 44,
-              columns: _buildColumns(textTheme, colorScheme),
-            ),
-          ),
-        ),
-        _buildPaginationControls(),
-      ],
-    );
-  }
-
-  GridColumn getColumnWidget(double width, String columnName, String title,
-      TextTheme textTheme, ColorScheme colorScheme) {
-    return GridColumn(
-      width: width,
-      allowSorting: true,
-      columnName: columnName,
-      label: InkWell(
-        onTap: () {
-          setState(() {
-            if (_sortField == columnName) {
-              _sortAscending = !_sortAscending;
-            } else {
-              _sortField = columnName;
-              _sortAscending = true;
-            }
-            _sortData();
-          });
-        },
-        child: Container(
-          color: colorScheme.surfaceDim,
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          alignment: Alignment.centerLeft,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style:
-                      textTheme.bodyMedium!.apply(color: colorScheme.onSurface),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-              if (_sortField == columnName)
-                Icon(
-                    _sortAscending
-                        ? Icons.arrow_drop_up_outlined
-                        : Icons.arrow_drop_down_outlined,
-                    size: 22),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  GridColumn getColumnWidgetNoSort(double width, String columnName,
-      String title, TextTheme textTheme, ColorScheme colorScheme) {
-    return GridColumn(
-      width: width,
-      allowSorting: false,
-      columnName: columnName,
-      label: Container(
-        color: colorScheme.surfaceDim,
-        padding: EdgeInsets.symmetric(horizontal: 8),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style:
-                    textTheme.bodyMedium!.apply(color: colorScheme.onSurface),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _handleSort(String columnName) {
+    setState(() {
+      if (_sortField == columnName) {
+        _sortAscending = !_sortAscending;
+      } else {
+        _sortField = columnName;
+        _sortAscending = true;
+      }
+      _sortData();
+    });
   }
 
   void _sortData() {
@@ -449,27 +263,132 @@ class _RawMaterialTableState extends State<RawMaterialTable> {
           ),
         ),
       ),
-      getColumnWidget(150, 'materialId', localizedStrings.fMaterialIdCol,
-          textTheme, colorScheme),
-      getColumnWidget(300, 'materialName', localizedStrings.fMaterialNameCol,
-          textTheme, colorScheme),
-      getColumnWidget(200, 'checkCode', localizedStrings.verificationCode,
-          textTheme, colorScheme),
-      getColumnWidget(
-          150, 'output', localizedStrings.outputPort, textTheme, colorScheme),
-      getColumnWidget(150, 'scaleName', localizedStrings.gDeviceName, textTheme,
-          colorScheme),
-      getColumnWidget(200, 'category', localizedStrings.fRawMaterialTypeNameCol,
-          textTheme, colorScheme),
-      getColumnWidget(200, 'createdAt', localizedStrings.fCreatedAtCol,
-          textTheme, colorScheme),
-      getColumnWidget(200, 'updatedAt', localizedStrings.fUpdatedAtCol,
-          textTheme, colorScheme),
-      getColumnWidget(400, 'ingredient', localizedStrings.fIngredientRemark,
-          textTheme, colorScheme),
-      getColumnWidgetNoSort(120, 'operation', localizedStrings.fTipOperation,
-          textTheme, colorScheme),
+      buildSortableGridColumn(
+          width: 150,
+          columnName: 'materialId',
+          title: localizedStrings.fMaterialIdCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 300,
+          columnName: 'materialName',
+          title: localizedStrings.fMaterialNameCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 200,
+          columnName: 'checkCode',
+          title: localizedStrings.verificationCode,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 150,
+          columnName: 'output',
+          title: localizedStrings.outputPort,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 150,
+          columnName: 'scaleName',
+          title: localizedStrings.gDeviceName,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 200,
+          columnName: 'category',
+          title: localizedStrings.fRawMaterialTypeNameCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 200,
+          columnName: 'createdAt',
+          title: localizedStrings.fCreatedAtCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 200,
+          columnName: 'updatedAt',
+          title: localizedStrings.fUpdatedAtCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 400,
+          columnName: 'ingredient',
+          title: localizedStrings.fIngredientRemark,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildGridColumnNoSort(
+          width: 120,
+          columnName: 'operation',
+          title: localizedStrings.fTipOperation,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            color: colorScheme.surfaceContainerHigh,
+            child: SfDataGrid(
+              controller: _dataGridController,
+              source: _dataSource,
+              headerRowHeight: 48.0,
+              frozenColumnsCount: 2,
+              footerFrozenColumnsCount: 1,
+              columnWidthMode: ColumnWidthMode.fill,
+              gridLinesVisibility: GridLinesVisibility.horizontal,
+              headerGridLinesVisibility: GridLinesVisibility.none,
+              selectionMode: SelectionMode.none,
+              columnResizeMode: ColumnResizeMode.onResize,
+              allowSorting: false,
+              rowHeight: 44,
+              columns: _buildColumns(textTheme, colorScheme),
+            ),
+          ),
+        ),
+        TablePaginationControl(
+          currentPage: _currentPage,
+          totalPages: _totalPages,
+          totalItems: widget.searchRawList.length,
+          onPageChanged: _goToPage,
+        ),
+      ],
+    );
   }
 }
 
@@ -522,7 +441,7 @@ class RawMaterialDataSource extends DataGridSource {
   void buildDataGridRows() {
     _dataGridRows = currentPageData.map<DataGridRow>((raw) {
       return DataGridRow(cells: [
-        DataGridCell<bool>(columnName: 'select', value: false),
+        const DataGridCell<bool>(columnName: 'select', value: false),
         DataGridCell<String>(
           columnName: 'materialId',
           value: raw.materialId,
@@ -559,17 +478,13 @@ class RawMaterialDataSource extends DataGridSource {
           columnName: 'ingredient',
           value: raw.ingredient,
         ),
-        DataGridCell<Widget>(columnName: 'operation', value: null),
+        const DataGridCell<Widget>(columnName: 'operation', value: null),
       ]);
     }).toList();
   }
 
   String _getOutput(int? output) {
-    if (output == null) return '-';
-    if (output == 0) {
-      return '-';
-    }
-
+    if (output == null || output == 0) return '-';
     return output.toString();
   }
 
@@ -600,10 +515,10 @@ class RawMaterialDataSource extends DataGridSource {
           ? colorScheme.primary.withAlpha(20)
           : isMultiSelected
               ? colorScheme.secondary.withAlpha(20)
-              : colorScheme.surface,
+              : colorScheme.surfaceContainerHigh,
       cells: row.getCells().map<Widget>((dataGridCell) {
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           alignment: dataGridCell.columnName == 'select'
               ? Alignment.center
               : Alignment.centerLeft,
@@ -702,7 +617,6 @@ class RawMaterialDataSource extends DataGridSource {
   }
 
   void _deleteRaw(RawDataInfo raw) {
-    // 检查原料是否被配方使用
     bool canDelete = _checkRawDelete(raw);
     if (!canDelete) {
       showTipInfo(localizedStrings.fFormulaInUseDeleteErrorMsg, context);

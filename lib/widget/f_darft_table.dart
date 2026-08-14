@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'package:intl/intl.dart';
 import 'package:t_max/data/darf_fma_data_from_db.dart';
-import 'package:t_max/data/home_page_common_data.dart';
+import 'package:t_max/data/g_data.dart';
 import 'package:t_max/data/language.dart';
 import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/functions/methods.dart';
+import 'package:t_max/widget/common_table_pagination.dart';
 
 typedef DraftFmaTable = DarftFmaTable;
 
@@ -148,98 +149,6 @@ class _DarftFmaTableState extends State<DarftFmaTable> {
     }
   }
 
-  void _goToFirstPage() => _goToPage(1);
-  void _goToPreviousPage() => _goToPage(_currentPage - 1);
-  void _goToNextPage() => _goToPage(_currentPage + 1);
-  void _goToLastPage() => _goToPage(_totalPages);
-
-  Widget _buildPaginationControls() {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Container(
-      height: 40,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      color: colorScheme.surface,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.first_page, size: 20),
-                onPressed: _currentPage > 1 ? _goToFirstPage : null,
-                color: _currentPage > 1
-                    ? colorScheme.primary
-                    : colorScheme.outline,
-              ),
-              IconButton(
-                icon: Icon(Icons.chevron_left, size: 20),
-                onPressed: _currentPage > 1 ? _goToPreviousPage : null,
-                color: _currentPage > 1
-                    ? colorScheme.primary
-                    : colorScheme.outline,
-              ),
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  '$_currentPage / $_totalPages',
-                  style: textTheme.bodySmall,
-                ),
-              ),
-              IconButton(
-                icon: Icon(Icons.chevron_right, size: 20),
-                onPressed: _currentPage < _totalPages ? _goToNextPage : null,
-                color: _currentPage < _totalPages
-                    ? colorScheme.primary
-                    : colorScheme.outline,
-              ),
-              IconButton(
-                icon: Icon(Icons.last_page, size: 20),
-                onPressed: _currentPage < _totalPages ? _goToLastPage : null,
-                color: _currentPage < _totalPages
-                    ? colorScheme.primary
-                    : colorScheme.outline,
-              ),
-              SizedBox(width: 16),
-              Text(
-                localizedStrings.tipJumpPage,
-                style: textTheme.bodySmall,
-              ),
-              SizedBox(width: 8),
-              SizedBox(
-                width: 60,
-                height: 32,
-                child: TextField(
-                  textAlign: TextAlign.center,
-                  keyboardType: TextInputType.number,
-                  decoration: InputDecoration(
-                    contentPadding:
-                        EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    border: OutlineInputBorder(),
-                  ),
-                  onSubmitted: (value) {
-                    final page = int.tryParse(value);
-                    if (page != null) {
-                      _goToPage(page);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          SizedBox(
-            width: regularPadding,
-          ),
-          Text(
-            '${localizedStrings.tipPageTotal}: ${widget.searchDarfFmaInfoList.length} ${localizedStrings.tipPageItems}',
-            style: textTheme.bodySmall,
-          ),
-        ],
-      ),
-    );
-  }
-
   @override
   void didUpdateWidget(covariant DarftFmaTable oldWidget) {
     super.didUpdateWidget(oldWidget);
@@ -258,110 +167,16 @@ class _DarftFmaTableState extends State<DarftFmaTable> {
     _dataSource.updateSelection({});
   }
 
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
-
-    return Column(
-      children: [
-        Expanded(
-          child: Container(
-            padding: const EdgeInsets.only(left: 20, right: 20),
-            color: colorScheme.surface,
-            child: SfDataGrid(
-              controller: _dataGridController,
-              source: _dataSource,
-              headerRowHeight: 48.0,
-              frozenColumnsCount: 2,
-              footerFrozenColumnsCount: 1,
-              columnWidthMode: ColumnWidthMode.fill,
-              gridLinesVisibility: GridLinesVisibility.horizontal,
-              headerGridLinesVisibility: GridLinesVisibility.none,
-              selectionMode: SelectionMode.none,
-              columnResizeMode: ColumnResizeMode.onResize,
-              allowSorting: false,
-              rowHeight: 44,
-              columns: _buildColumns(textTheme, colorScheme),
-            ),
-          ),
-        ),
-        _buildPaginationControls(),
-      ],
-    );
-  }
-
-  GridColumn getColumnWidget(double width, String columnName, String title,
-      TextTheme textTheme, ColorScheme colorScheme) {
-    return GridColumn(
-      width: width,
-      allowSorting: true,
-      columnName: columnName,
-      label: InkWell(
-        onTap: () {
-          setState(() {
-            if (_sortField == columnName) {
-              _sortAscending = !_sortAscending;
-            } else {
-              _sortField = columnName;
-              _sortAscending = true;
-            }
-            _sortData();
-          });
-        },
-        child: Container(
-          color: colorScheme.surfaceDim,
-          padding: EdgeInsets.symmetric(horizontal: 8),
-          alignment: Alignment.centerLeft,
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style:
-                      textTheme.bodyMedium!.apply(color: colorScheme.onSurface),
-                  overflow: TextOverflow.ellipsis,
-                  maxLines: 1,
-                ),
-              ),
-              if (_sortField == columnName)
-                Icon(
-                    _sortAscending
-                        ? Icons.arrow_drop_up_outlined
-                        : Icons.arrow_drop_down_outlined,
-                    size: 22),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  GridColumn getColumnWidgetNoSort(double width, String columnName,
-      String title, TextTheme textTheme, ColorScheme colorScheme) {
-    return GridColumn(
-      width: width,
-      allowSorting: false,
-      columnName: columnName,
-      label: Container(
-        color: colorScheme.surfaceDim,
-        padding: EdgeInsets.symmetric(horizontal: 8),
-        alignment: Alignment.centerLeft,
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                title,
-                style:
-                    textTheme.bodyMedium!.apply(color: colorScheme.onSurface),
-                overflow: TextOverflow.ellipsis,
-                maxLines: 1,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+  void _handleSort(String columnName) {
+    setState(() {
+      if (_sortField == columnName) {
+        _sortAscending = !_sortAscending;
+      } else {
+        _sortField = columnName;
+        _sortAscending = true;
+      }
+      _sortData();
+    });
   }
 
   void _sortData() {
@@ -373,37 +188,33 @@ class _DarftFmaTableState extends State<DarftFmaTable> {
         dynamic valueB;
 
         switch (_sortField) {
+          case 'orderId':
+            valueA = a.fmaRec?.header?.orderId;
+            valueB = b.fmaRec?.header?.orderId;
+            break;
           case 'formulaId':
-            valueA = a.fmaInfo?.header?.formulaId ?? '';
-            valueB = b.fmaInfo?.header?.formulaId ?? '';
+            valueA = a.fmaInfo?.header?.formulaId;
+            valueB = b.fmaInfo?.header?.formulaId;
             break;
           case 'formulaName':
-            valueA = a.fmaInfo?.header?.formulaName ?? '';
-            valueB = b.fmaInfo?.header?.formulaName ?? '';
+            valueA = a.fmaInfo?.header?.formulaName;
+            valueB = b.fmaInfo?.header?.formulaName;
             break;
-          case 'orderId':
-            valueA = a.fmaRec?.header?.orderId ?? '';
-            valueB = b.fmaRec?.header?.orderId ?? '';
-            break;
-          case 'confidential':
-            valueA = a.fmaInfo?.header?.isEncrypted ?? false;
-            valueB = b.fmaInfo?.header?.isEncrypted ?? false;
-            break;
-          case 'mode':
-            valueA = a.fmaInfo?.header?.formulaMode ?? '';
-            valueB = b.fmaInfo?.header?.formulaMode ?? '';
+          case 'fmaBarcode':
+            valueA = a.fmaInfo?.header?.formulaBarcode;
+            valueB = b.fmaInfo?.header?.formulaBarcode;
             break;
           case 'materialCount':
             valueA = a.fmaInfo?.header?.materialCount ?? 0;
             valueB = b.fmaInfo?.header?.materialCount ?? 0;
             break;
           case 'createdAt':
-            valueA = a.fmaRec?.header?.createdAt ?? DateTime.now();
-            valueB = b.fmaRec?.header?.createdAt ?? DateTime.now();
+            valueA = a.fmaRec?.header?.createdAt;
+            valueB = b.fmaRec?.header?.createdAt;
             break;
-          case 'remark':
-            valueA = a.fmaInfo?.header?.remark ?? '';
-            valueB = b.fmaInfo?.header?.remark ?? '';
+          case 'updatedAt':
+            valueA = a.fmaRec?.header?.updatedAt;
+            valueB = b.fmaRec?.header?.updatedAt;
             break;
           default:
             valueA = 0;
@@ -437,25 +248,132 @@ class _DarftFmaTableState extends State<DarftFmaTable> {
           ),
         ),
       ),
-      getColumnWidget(150, 'formulaId', localizedStrings.fFmaIdLabel, textTheme,
-          colorScheme),
-      getColumnWidget(200, 'formulaName', localizedStrings.fFmaNameLabel,
-          textTheme, colorScheme),
-      getColumnWidget(
-          200, 'orderId', localizedStrings.fOrderNo, textTheme, colorScheme),
-      getColumnWidget(150, 'confidential', localizedStrings.fConfidential,
-          textTheme, colorScheme),
-      getColumnWidget(
-          120, 'mode', localizedStrings.fFmaModeCol, textTheme, colorScheme),
-      getColumnWidget(120, 'materialCount',
-          localizedStrings.fIngredientCountLabel, textTheme, colorScheme),
-      getColumnWidget(200, 'createdAt', localizedStrings.fCreatedAtCol,
-          textTheme, colorScheme),
-      getColumnWidget(
-          500, 'remark', localizedStrings.fRemarkCol, textTheme, colorScheme),
-      getColumnWidgetNoSort(
-          80, 'delete', localizedStrings.gBtnDelete, textTheme, colorScheme),
+      buildSortableGridColumn(
+          width: 250,
+          columnName: 'orderId',
+          title: localizedStrings.fOrderNo,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 150,
+          columnName: 'formulaId',
+          title: localizedStrings.fFmaIdLabel,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 300,
+          columnName: 'formulaName',
+          title: localizedStrings.fFmaNameLabel,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 150,
+          columnName: 'fmaBarcode',
+          title: localizedStrings.fFmaBarcode,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 120,
+          columnName: 'mode',
+          title: localizedStrings.fFmaModeCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 120,
+          columnName: 'materialCount',
+          title: localizedStrings.fIngredientCountLabel,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 200,
+          columnName: 'createdAt',
+          title: localizedStrings.fCreatedAtCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 200,
+          columnName: 'updatedAt',
+          title: localizedStrings.fUpdatedAtCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildSortableGridColumn(
+          width: 300,
+          columnName: 'remark',
+          title: localizedStrings.fRemarkCol,
+          sortField: _sortField,
+          sortAscending: _sortAscending,
+          onSort: _handleSort,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
+      buildGridColumnNoSort(
+          width: 80,
+          columnName: 'operation',
+          title: localizedStrings.fTipOperation,
+          textTheme: textTheme,
+          colorScheme: colorScheme),
     ];
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final textTheme = Theme.of(context).textTheme;
+
+    return Column(
+      children: [
+        Expanded(
+          child: Container(
+            padding: const EdgeInsets.only(left: 20, right: 20),
+            color: colorScheme.surfaceContainerHigh,
+            child: SfDataGrid(
+              controller: _dataGridController,
+              source: _dataSource,
+              headerRowHeight: 48.0,
+              frozenColumnsCount: 2,
+              footerFrozenColumnsCount: 1,
+              columnWidthMode: ColumnWidthMode.fill,
+              gridLinesVisibility: GridLinesVisibility.horizontal,
+              headerGridLinesVisibility: GridLinesVisibility.none,
+              selectionMode: SelectionMode.none,
+              columnResizeMode: ColumnResizeMode.onResize,
+              allowSorting: false,
+              rowHeight: 44,
+              columns: _buildColumns(textTheme, colorScheme),
+            ),
+          ),
+        ),
+        TablePaginationControl(
+          currentPage: _currentPage,
+          totalPages: _totalPages,
+          totalItems: widget.searchDarfFmaInfoList.length,
+          onPageChanged: _goToPage,
+        ),
+      ],
+    );
   }
 }
 
@@ -508,7 +426,11 @@ class DarftFmaDataSource extends DataGridSource {
   void buildDataGridRows() {
     _dataGridRows = currentPageData.map<DataGridRow>((darftFma) {
       return DataGridRow(cells: [
-        DataGridCell<bool>(columnName: 'select', value: false),
+        const DataGridCell<bool>(columnName: 'select', value: false),
+        DataGridCell<String>(
+          columnName: 'orderId',
+          value: darftFma.fmaRec?.header?.orderId ?? '',
+        ),
         DataGridCell<String>(
           columnName: 'formulaId',
           value: darftFma.fmaInfo?.header?.formulaId ?? '',
@@ -518,14 +440,8 @@ class DarftFmaDataSource extends DataGridSource {
           value: darftFma.fmaInfo?.header?.formulaName ?? '',
         ),
         DataGridCell<String>(
-          columnName: 'orderId',
-          value: darftFma.fmaRec?.header?.orderId ?? '',
-        ),
-        DataGridCell<String>(
-          columnName: 'confidential',
-          value: (darftFma.fmaInfo?.header?.isEncrypted ?? false)
-              ? localizedStrings.fConfidential
-              : localizedStrings.fPublic,
+          columnName: 'fmaBarcode',
+          value: darftFma.fmaInfo?.header?.formulaBarcode ?? '',
         ),
         DataGridCell<String>(
           columnName: 'mode',
@@ -543,10 +459,15 @@ class DarftFmaDataSource extends DataGridSource {
               .format(darftFma.fmaRec?.header?.createdAt ?? DateTime.now()),
         ),
         DataGridCell<String>(
-          columnName: 'remark',
-          value: darftFma.fmaInfo?.header?.remark ?? '',
+          columnName: 'updatedAt',
+          value: DateFormat('yyyy-MM-dd HH:mm:ss')
+              .format(darftFma.fmaRec?.header?.updatedAt ?? DateTime.now()),
         ),
-        DataGridCell<Widget>(columnName: 'delete', value: null),
+        DataGridCell<String>(
+          columnName: 'remark',
+          value: darftFma.fmaRec?.header?.remark ?? '',
+        ),
+        const DataGridCell<Widget>(columnName: 'operation', value: null),
       ]);
     }).toList();
   }
@@ -569,10 +490,10 @@ class DarftFmaDataSource extends DataGridSource {
           ? colorScheme.primary.withAlpha(20)
           : isMultiSelected
               ? colorScheme.secondary.withAlpha(20)
-              : colorScheme.surface,
+              : colorScheme.surfaceContainerHigh,
       cells: row.getCells().map<Widget>((dataGridCell) {
         return Container(
-          padding: EdgeInsets.symmetric(horizontal: 8),
+          padding: const EdgeInsets.symmetric(horizontal: 8),
           alignment: dataGridCell.columnName == 'select'
               ? Alignment.center
               : Alignment.centerLeft,
@@ -586,7 +507,6 @@ class DarftFmaDataSource extends DataGridSource {
   Widget _buildCellContent(DataGridCell dataGridCell, DarfFmaInfo darftFma,
       int rowIndex, bool isMultiSelected) {
     final colorScheme = Theme.of(context).colorScheme;
-    final textTheme = Theme.of(context).textTheme;
 
     switch (dataGridCell.columnName) {
       case 'select':
@@ -604,22 +524,21 @@ class DarftFmaDataSource extends DataGridSource {
           },
         );
 
-      case 'delete':
-        return IconButton(
-          icon: Icon(Icons.delete_forever_outlined,
-              size: 20, color: colorScheme.error),
-          onPressed: () => _deleteDarftFma(darftFma),
-        );
-
-      case 'confidential':
-        return Text(
-          dataGridCell.value.toString(),
-          style: textTheme.bodySmall?.copyWith(
-            color: (darftFma.fmaInfo?.header?.isEncrypted ?? false)
-                ? colorScheme.error
-                : colorScheme.onTertiaryFixedVariant,
-          ),
-          overflow: TextOverflow.ellipsis,
+      case 'operation':
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            IconButton(
+              icon: Icon(Icons.delete_forever_outlined,
+                  size: 20,
+                  color: mySysUser.roleId != operatorRoleId
+                      ? colorScheme.error
+                      : colorScheme.outline),
+              onPressed: mySysUser.roleId != operatorRoleId
+                  ? () => _deleteDarftFma(darftFma)
+                  : null,
+            ),
+          ],
         );
 
       default:
@@ -636,7 +555,7 @@ class DarftFmaDataSource extends DataGridSource {
                 Expanded(
                   child: Text(
                     dataGridCell.value.toString(),
-                    style: textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall,
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
@@ -659,8 +578,8 @@ class DarftFmaDataSource extends DataGridSource {
       },
     ).then((value) {
       if (value == true) {
-        PublicFunctions.deleteDraftRecord(
-            darftFma.fmaRec?.header?.orderId ?? '');
+        PublicFunctions.deleteAllDraftRecord(
+            [darftFma.fmaRec?.header?.orderId ?? '']);
         onDataChanged();
       }
     });

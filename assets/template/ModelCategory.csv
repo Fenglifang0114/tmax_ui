@@ -15,34 +15,34 @@ AHC,Counting Scale
 QHC,Counting Scale
 ZHC,Counting Scale
 UTC,Counting Scale
-RW,Instrument
-RWP,Instrument
-RWS,Instrument
-BW,Instrument
-BWS,Instrument
-CW,Instrument
-CWS,Instrument
-NTW,Instrument
-NSW,Instrument
-VW,Instrument
-VC,Instrument
-VW-L,Instrument
-PDS,Instrument
-HW,Instrument
-HWS,Instrument
-T2200P,Instrument
-NHB,Balance Scale
-EHB,Balance Scale
-IHB,Balance Scale
-NHB24,Balance Scale
-EHB24,Balance Scale
-IHB24,Balance Scale
-QHW24,Balance Scale
-DHB,Balance Scale
-TB-L,Balance Scale
-T-Max,Pricing Scale
+RW,Indicator
+RWP,Indicator
+RWS,Indicator
+BW,Indicator
+BWS,Indicator
+CW,Indicator
+CWS,Indicator
+NTW,Indicator
+NSW,Indicator
+VW,Indicator
+VC,Indicator
+VW-L,Indicator
+PDS,Indicator
+HW,Indicator
+HWS,Indicator
+T2200P,Indicator
+NHB,Balance
+EHB,Balance
+IHB,Balance
+NHB24,Balance
+EHB24,Balance
+IHB24,Balance
+QHW24,Balance
+DHB,Balance
+TB-L,Balance
+T-Max,Price Computing Scale
 T-Max,Weighing Scale
 T-Max,Counting Scale
-APP,Pricing Scale
-LPP,Pricing Scale
-S15,Instrument
+APP,Price Computing Scale
+LPP,Price Computing Scale
+S15,Indicator
