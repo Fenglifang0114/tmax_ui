@@ -69,9 +69,18 @@ class CalibrationSealPageState extends State<CalibrationSealPage> {
               myOnlineInfo.factInfo!.scaleSn == "") {
             return;
           }
-          ReqGetSealLog reqGetSealLog = ReqGetSealLog(
-              myOnlineInfo.factInfo!.modelName!,
-              myOnlineInfo.factInfo!.scaleSn!);
+          Scale? currentScale;
+          for (var scale in myAllScalesList) {
+            if (scale.scaleId == selScaleId) {
+              currentScale = scale;
+              break;
+            }
+          }
+          String modelName =
+              currentScale?.scaleModel ?? myOnlineInfo.factInfo!.modelName!;
+
+          ReqGetSealLog reqGetSealLog =
+              ReqGetSealLog(modelName, myOnlineInfo.factInfo!.scaleSn!);
           String jsonStr = jsonEncode(reqGetSealLog);
 
           PublicFunctions.getSealLog(jsonStr);

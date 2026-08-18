@@ -81,8 +81,8 @@ class AddFormulaHeaderForm extends StatelessWidget {
       );
     }
 
-    Widget showModeDropDownButton(
-        List<FormulaMode> items, String hintText, TextEditingController valueCtl) {
+    Widget showModeDropDownButton(List<FormulaMode> items, String hintText,
+        TextEditingController valueCtl) {
       return Container(
         height: 48,
         padding: const EdgeInsets.only(left: 16, right: 20),
@@ -140,8 +140,8 @@ class AddFormulaHeaderForm extends StatelessWidget {
       );
     }
 
-    Widget showUnitDropDownButton(
-        List<FormulaWgtUnit> items, String hintText, TextEditingController valueCtl) {
+    Widget showUnitDropDownButton(List<FormulaWgtUnit> items, String hintText,
+        TextEditingController valueCtl) {
       return Container(
         height: 48,
         padding: const EdgeInsets.only(left: 16, right: 20),
@@ -262,10 +262,8 @@ class AddFormulaHeaderForm extends StatelessWidget {
               child: Column(children: [
                 showItemNameWithStar(
                     context, "${localizedStrings.fFmaModeCol} ", true),
-                showModeDropDownButton(
-                    [FormulaMode.wgt, FormulaMode.pct],
-                    localizedStrings.fSelectFormulaModeHint,
-                    formulaModeCtl)
+                showModeDropDownButton([FormulaMode.wgt, FormulaMode.pct],
+                    localizedStrings.fSelectFormulaModeHint, formulaModeCtl)
               ]),
             ),
           ]),
@@ -296,14 +294,11 @@ class AddFormulaHeaderForm extends StatelessWidget {
               child: Column(children: [
                 showItemNameWithStar(context, localizedStrings.fWgtUnit, true),
                 formulaModeCtl.text == FormulaMode.wgt.name
-                    ? showUnitDropDownButton(
-                        [
-                          FormulaWgtUnit.g,
-                          FormulaWgtUnit.kg,
-                          FormulaWgtUnit.lb
-                        ],
-                        localizedStrings.fSelectUnitHint,
-                        formulaUnitCtl)
+                    ? showUnitDropDownButton([
+                        FormulaWgtUnit.g,
+                        FormulaWgtUnit.kg,
+                        FormulaWgtUnit.lb
+                      ], localizedStrings.fSelectUnitHint, formulaUnitCtl)
                     : Container(
                         height: 48,
                         padding: const EdgeInsets.only(left: 16, right: 20),
@@ -434,8 +429,7 @@ class AddFormulaHeaderForm extends StatelessWidget {
               child: Column(children: [
                 showItemNameWithStar(
                     context, "${localizedStrings.fFmaBarcode} ", false),
-                showInputBox(
-                    formulaBarcodeCtl, localizedStrings.fFmaBarcode),
+                showInputBox(formulaBarcodeCtl, localizedStrings.fFmaBarcode),
               ]),
             ),
           ]),
