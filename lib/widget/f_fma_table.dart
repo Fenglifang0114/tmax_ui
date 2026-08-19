@@ -420,8 +420,10 @@ class FormulaDataSource extends DataGridSource {
   }
 
   void updateData(List<FormulaInfoDb> newData) {
-    allFormulaData.clear();
-    allFormulaData.addAll(newData);
+    if (!identical(allFormulaData, newData)) {
+      allFormulaData.clear();
+      allFormulaData.addAll(newData);
+    }
     updateCurrentPage(1, 20);
   }
 

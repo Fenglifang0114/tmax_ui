@@ -400,8 +400,10 @@ class DarftFmaDataSource extends DataGridSource {
   }
 
   void updateData(List<DarfFmaInfo> newData) {
-    allDarftFmaData.clear();
-    allDarftFmaData.addAll(newData);
+    if (!identical(allDarftFmaData, newData)) {
+      allDarftFmaData.clear();
+      allDarftFmaData.addAll(newData);
+    }
     updateCurrentPage(1, 20);
   }
 

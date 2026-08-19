@@ -415,8 +415,10 @@ class RawMaterialDataSource extends DataGridSource {
   }
 
   void updateData(List<RawDataInfo> newData) {
-    allRawData.clear();
-    allRawData.addAll(newData);
+    if (!identical(allRawData, newData)) {
+      allRawData.clear();
+      allRawData.addAll(newData);
+    }
     updateCurrentPage(1, 20);
   }
 
