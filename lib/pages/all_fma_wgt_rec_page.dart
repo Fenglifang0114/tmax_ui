@@ -57,6 +57,7 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
   bool _selectAll = false;
   dynamic _eventBus1;
   dynamic _eventbus2;
+  dynamic _eventbus3;
 
   @override
   void initState() {
@@ -106,12 +107,43 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
         }
       }
     });
+
+    _eventbus3 = eventBus.on<EventRespDelFormulaWgtRecBatch>().listen((event) {
+      if (mounted) {
+        String dataStr = event.obj;
+        if (dataStr != '' && dataStr != 'null') {
+          try {
+            List<dynamic> deletedIdsDynamic = jsonDecode(dataStr);
+            List<String> deletedIds =
+                deletedIdsDynamic.map((e) => e.toString()).toList();
+            setState(() {
+              _fmaRecsList.removeWhere((item) =>
+                  item.header?.recordId != null &&
+                  deletedIds.contains(item.header!.recordId));
+              _filteredList.removeWhere((item) =>
+                  item.header?.recordId != null &&
+                  deletedIds.contains(item.header!.recordId));
+              for (var id in deletedIds) {
+                _selectedOrders.remove(id);
+                _expandedOrders.remove(id);
+              }
+              _selectAll = false;
+              totalItems = _filteredList.length;
+            });
+            _updateDisplayData();
+          } catch (e) {
+            debugPrint('Error parsing deleted IDs: $e');
+          }
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _eventBus1?.cancel();
     _eventbus2?.cancel();
+    _eventbus3?.cancel();
     _searchCtl.dispose();
     super.dispose();
   }
@@ -1005,8 +1037,48 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
           ),
         ),
         const SizedBox(width: 20),
+        // 红色批量删除按钮
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: getExportStatus()
+                ? Theme.of(context).colorScheme.error
+                : Theme.of(context).colorScheme.surfaceContainerHighest,
+            borderRadius: BorderRadius.circular(0),
+          ),
+          child: IconButton(
+            icon:
+                const Icon(Icons.delete_outline, size: 20, color: Colors.white),
+            onPressed: getExportStatus() ? _handleBatchDelete : null,
+          ),
+        ),
+        const SizedBox(width: 20),
       ]),
     );
+  }
+
+  void _handleBatchDelete() {
+    List<String> selectedRecordIds = [];
+    _selectedOrders.forEach((key, isSelected) {
+      if (isSelected) {
+        selectedRecordIds.add(key);
+      }
+    });
+
+    if (selectedRecordIds.isEmpty) return;
+
+    showDialog<bool>(
+      context: context,
+      builder: (context) => ShowDeleteTipDialog(
+        title: localizedStrings.fTipTitle,
+        msg: localizedStrings.fConfirmDelete,
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        PublicFunctions.delFormulaWgtRecBatch(selectedRecordIds);
+      }
+    });
   }
 
   // 构建分页控件

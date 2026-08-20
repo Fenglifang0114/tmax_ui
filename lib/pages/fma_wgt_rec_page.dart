@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
@@ -55,6 +56,7 @@ class OneFmaWgtRecPageState extends State<OneFmaWgtRecPage> {
   // 全选状态
   bool _selectAll = false;
   dynamic _eventBus1;
+  dynamic _eventbus2;
 
   @override
   void initState() {
@@ -89,12 +91,42 @@ class OneFmaWgtRecPageState extends State<OneFmaWgtRecPage> {
         }
       }
     });
+
+    _eventbus2 = eventBus.on<EventRespDelFormulaWgtRecBatch>().listen((event) {
+      if (mounted) {
+        String dataStr = event.obj;
+        if (dataStr != '' && dataStr != 'null') {
+          try {
+            List<dynamic> deletedIdsDynamic = jsonDecode(dataStr);
+            List<String> deletedIds =
+                deletedIdsDynamic.map((e) => e.toString()).toList();
+            setState(() {
+              _fmaRecsList.removeWhere((item) =>
+                  item.header?.recordId != null &&
+                  deletedIds.contains(item.header!.recordId));
+              _filteredList.removeWhere((item) =>
+                  item.header?.recordId != null &&
+                  deletedIds.contains(item.header!.recordId));
+              for (var id in deletedIds) {
+                _selectedOrders.remove(id);
+                _expandedOrders.remove(id);
+              }
+              _selectAll = false;
+              totalItems = _filteredList.length;
+            });
+            _updateDisplayData();
+          } catch (e) {
+            debugPrint('Error parsing deleted IDs: $e');
+          }
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     _eventBus1?.cancel();
-
+    _eventbus2?.cancel();
     _searchCtl.dispose();
     super.dispose();
   }

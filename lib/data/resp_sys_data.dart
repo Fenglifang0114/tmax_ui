@@ -124,6 +124,7 @@ class RespSysMsgType {
   static const String respCheckFmaIdAndBarcode =
       'resp_check_fma_id_and_barcode';
   static const String respFormulaRecByOrder = 'resp_formula_rec_by_order';
+  static const String respDelFormulaWgtRecBatch = 'resp_del_formula_wgt_rec_batch';
   static const String respUploadServerGet = 'resp_upload_server_get';
   static const String respUploadServerEdit = 'resp_upload_server_edit';
   static const String respGetReportPrint = 'resp_get_set_report_print';
@@ -195,6 +196,7 @@ class RespSysMsgType {
     RespSysMsgType.respFormulaDelete: handleFormulaDelete,
     RespSysMsgType.respFormulaRecList: handleFormulaRecList,
     RespSysMsgType.respOneFmaRecList: handleOneFmaRecList,
+    RespSysMsgType.respDelFormulaWgtRecBatch: handleDelFormulaWgtRecBatch,
     RespSysMsgType.respFormulaRecAdd: handleFormulaRecAdd,
     RespSysMsgType.respRawTypeAdd: handleRawTypeAdd,
     RespSysMsgType.respRawTypeEdit: handleRawTypeEdit,
@@ -686,6 +688,11 @@ class RespSysMsgType {
   static void handleOneFmaRecList(dynamic jsonData) {
     String dataString = jsonData['MsgBody'];
     eventBus.fire(EventRespOneFmaRecList(dataString));
+  }
+
+  static void handleDelFormulaWgtRecBatch(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespDelFormulaWgtRecBatch(dataString));
   }
 
   static void handleFormulaRecAdd(dynamic jsonData) {

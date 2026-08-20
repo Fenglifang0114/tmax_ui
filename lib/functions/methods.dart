@@ -716,6 +716,13 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
+  // 批量删除配方称重记录
+  static void delFormulaWgtRecBatch(List<String> recordIds) {
+    myScaleCmd.cmdMode = "del_formula_wgt_rec_batch";
+    myScaleCmd.cmdData = jsonEncode({'recordIds': recordIds});
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
   //创建暂存的称重记录
   static void createDraftRecord(String jsonStr) {
     myScaleCmd.cmdMode = "create_draft_fma_wgt_rec";

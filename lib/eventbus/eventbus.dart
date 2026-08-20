@@ -805,6 +805,11 @@ class EventRespOneFmaRecList {
   EventRespOneFmaRecList(this.obj);
 }
 
+class EventRespDelFormulaWgtRecBatch {
+  dynamic obj;
+  EventRespDelFormulaWgtRecBatch(this.obj);
+}
+
 /// 配方记录写入成功后触发的回调事件通知。
 class EventRespFormulaRecAdd {
   dynamic obj;
