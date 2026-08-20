@@ -1656,6 +1656,10 @@
     "@fExportRecordsBtn": {
         "description": "Button to export selected weighing records"
     },
+    "fExportAllRecordsBtn": "导出全部",
+    "@fExportAllRecordsBtn": {
+        "description": "Button to export all formula weighing records in database"
+    },
     "fOrderNo": "单号",
     "@fOrderNo": {
         "description": "Table column title for record number"
@@ -1763,6 +1767,14 @@
     "fClearBtn": "清空",
     "@fClearBtn": {
         "description": "Text on the clear button"
+    },
+    "fClearAll": "清空全部",
+    "@fClearAll": {
+        "description": "Button to clear all formula weighing records"
+    },
+    "fConfirmClearAllFmaRecsMsg": "全库所有配方称重记录将被永久清空且无法恢复，确认清空吗？",
+    "@fConfirmClearAllFmaRecsMsg": {
+        "description": "Confirmation message for clearing all formula weighing records"
     },
     "fInputRemarkHint": "请输入备注",
     "@fInputRemarkHint": {

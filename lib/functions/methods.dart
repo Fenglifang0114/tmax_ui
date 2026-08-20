@@ -648,6 +648,14 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
+  // 分页与全局排序获取配方称重记录
+  static void getFormulaRecByPage(String jsonStr) {
+    myScaleCmd.cmdMode = "get_formula_rec_by_page";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+
   //根据配方ID获取配方称重记录
   static void getOneFmaRecsById(String fmaId) {
     myScaleCmd.cmdMode = "get_fma_rec_by_id";
@@ -722,6 +730,22 @@ class PublicFunctions {
     myScaleCmd.cmdData = jsonEncode({'recordIds': recordIds});
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
+
+  // 清空所有配方称重记录
+  static void delAllFormulaWgtRec() {
+    myScaleCmd.cmdMode = "del_all_formula_wgt_rec";
+    myScaleCmd.cmdData = '';
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  // 导出获取全库所有配方称重记录（带搜索过滤与排序）
+  static void getAllFormulaRecForExport(String jsonStr) {
+    myScaleCmd.cmdMode = "get_all_formula_rec_for_export";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+
 
   //创建暂存的称重记录
   static void createDraftRecord(String jsonStr) {

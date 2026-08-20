@@ -3886,6 +3886,17 @@ class S {
     );
   }
 
+  /// `Export All`
+  String get fExportAllRecordsBtn {
+    return Intl.message(
+      'Export All',
+      name: 'fExportAllRecordsBtn',
+      desc: 'Button to export all formula weighing records in database',
+      args: [],
+    );
+  }
+
+
   /// `No.`
   String get fOrderNo {
     return Intl.message(
@@ -4155,6 +4166,27 @@ class S {
       args: [],
     );
   }
+
+  /// `Clear All`
+  String get fClearAll {
+    return Intl.message(
+      'Clear All',
+      name: 'fClearAll',
+      desc: 'Button to clear all formula weighing records',
+      args: [],
+    );
+  }
+
+  /// `All formula weighing records in the database will be permanently cleared. Continue?`
+  String get fConfirmClearAllFmaRecsMsg {
+    return Intl.message(
+      'All formula weighing records in the database will be permanently cleared. Continue?',
+      name: 'fConfirmClearAllFmaRecsMsg',
+      desc: 'Confirmation message for clearing all formula weighing records',
+      args: [],
+    );
+  }
+
 
   /// `Please enter the notes.`
   String get fInputRemarkHint {

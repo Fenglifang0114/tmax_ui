@@ -64,6 +64,7 @@ class RespSysMsgType {
   static const String respFormulaUpdate = 'resp_formula_update';
   static const String respFormulaDelete = 'resp_formula_delete';
   static const String respFormulaRecList = 'resp_formula_rec_list';
+  static const String respFormulaRecByPage = 'resp_formula_rec_by_page';
   static const String respOneFmaRecList = 'resp_one_fma_rec_list';
   static const String respFormulaRecAdd = 'resp_formula_rec_add';
   static const String respRawTypeAdd = 'resp_raw_type_add';
@@ -125,6 +126,8 @@ class RespSysMsgType {
       'resp_check_fma_id_and_barcode';
   static const String respFormulaRecByOrder = 'resp_formula_rec_by_order';
   static const String respDelFormulaWgtRecBatch = 'resp_del_formula_wgt_rec_batch';
+  static const String respDelAllFormulaWgtRec = 'resp_del_all_formula_wgt_rec';
+  static const String respAllFormulaRecForExport = 'resp_all_formula_rec_for_export';
   static const String respUploadServerGet = 'resp_upload_server_get';
   static const String respUploadServerEdit = 'resp_upload_server_edit';
   static const String respGetReportPrint = 'resp_get_set_report_print';
@@ -195,8 +198,11 @@ class RespSysMsgType {
     RespSysMsgType.respFormulaUpdate: handleFormulaUpdate,
     RespSysMsgType.respFormulaDelete: handleFormulaDelete,
     RespSysMsgType.respFormulaRecList: handleFormulaRecList,
+    RespSysMsgType.respFormulaRecByPage: handleFormulaRecByPage,
     RespSysMsgType.respOneFmaRecList: handleOneFmaRecList,
     RespSysMsgType.respDelFormulaWgtRecBatch: handleDelFormulaWgtRecBatch,
+    RespSysMsgType.respDelAllFormulaWgtRec: handleDelAllFormulaWgtRec,
+    RespSysMsgType.respAllFormulaRecForExport: handleAllFormulaRecForExport,
     RespSysMsgType.respFormulaRecAdd: handleFormulaRecAdd,
     RespSysMsgType.respRawTypeAdd: handleRawTypeAdd,
     RespSysMsgType.respRawTypeEdit: handleRawTypeEdit,
@@ -685,6 +691,12 @@ class RespSysMsgType {
     eventBus.fire(EventRespFormulaRecList(dataString));
   }
 
+  static void handleFormulaRecByPage(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespFormulaRecByPage(dataString));
+  }
+
+
   static void handleOneFmaRecList(dynamic jsonData) {
     String dataString = jsonData['MsgBody'];
     eventBus.fire(EventRespOneFmaRecList(dataString));
@@ -694,6 +706,18 @@ class RespSysMsgType {
     String dataString = jsonData['MsgBody'];
     eventBus.fire(EventRespDelFormulaWgtRecBatch(dataString));
   }
+
+  static void handleDelAllFormulaWgtRec(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespDelAllFormulaWgtRec(dataString));
+  }
+
+  static void handleAllFormulaRecForExport(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespAllFormulaRecForExport(dataString));
+  }
+
+
 
   static void handleFormulaRecAdd(dynamic jsonData) {
     eventBus.fire(EventRespFormulaRecAdd(''));

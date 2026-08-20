@@ -800,6 +800,12 @@ class EventRespFormulaRecList {
   EventRespFormulaRecList(this.obj);
 }
 
+class EventRespFormulaRecByPage {
+  dynamic obj;
+  EventRespFormulaRecByPage(this.obj);
+}
+
+
 class EventRespOneFmaRecList {
   dynamic obj;
   EventRespOneFmaRecList(this.obj);
@@ -809,6 +815,18 @@ class EventRespDelFormulaWgtRecBatch {
   dynamic obj;
   EventRespDelFormulaWgtRecBatch(this.obj);
 }
+
+class EventRespDelAllFormulaWgtRec {
+  dynamic obj;
+  EventRespDelAllFormulaWgtRec(this.obj);
+}
+
+class EventRespAllFormulaRecForExport {
+  dynamic obj;
+  EventRespAllFormulaRecForExport(this.obj);
+}
+
+
 
 /// 配方记录写入成功后触发的回调事件通知。
 class EventRespFormulaRecAdd {

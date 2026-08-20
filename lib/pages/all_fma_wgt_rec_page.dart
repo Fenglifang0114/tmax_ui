@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';
@@ -58,11 +59,26 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
   dynamic _eventBus1;
   dynamic _eventbus2;
   dynamic _eventbus3;
+  dynamic _eventbus4;
+  dynamic _eventbus5;
+  String? _exportAllPendingPath;
+  Timer? _searchDebounce;
+
+  void _fetchDataFromBackend() {
+    Map<String, dynamic> reqMap = {
+      'page': _currentPage,
+      'pageSize': _pageSize,
+      'searchText': _searchCtl.text.trim(),
+      'sortColumn': _sortColumn,
+      'sortAsc': _sortAscending,
+    };
+    PublicFunctions.getFormulaRecByPage(jsonEncode(reqMap));
+  }
 
   @override
   void initState() {
     super.initState();
-    PublicFunctions.getFormulaRecList();
+    _fetchDataFromBackend();
 
     PublicFunctions.getUploadServerConfig();
     _dataGridController = DataGridController();
@@ -81,59 +97,79 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
         }
       }
     });
-    _eventbus2 = eventBus.on<EventRespFormulaRecList>().listen((event) {
+
+    _eventbus2 = eventBus.on<EventRespFormulaRecByPage>().listen((event) {
       if (mounted) {
         String dataStr = event.obj;
         if (dataStr != '' && dataStr != 'null') {
-          setState(() {
-            List<FmaRecFromDb> tempFmaRecList = fmaRecFromDbFromJson(dataStr);
-            _fmaRecsList.addAll(tempFmaRecList);
-            _expandedOrders.clear();
-            _selectedOrders.clear();
-            _selectAll = false;
-            _searchCtl.text = '';
-            _filteredList = List.from(_fmaRecsList);
+          try {
+            var jsonData = jsonDecode(dataStr);
+            int total = jsonData['total'] ?? 0;
+            List<dynamic> listDynamic = jsonData['list'] ?? [];
+            List<FmaRecFromDb> tempFmaRecList =
+                fmaRecFromDbFromJson(jsonEncode(listDynamic));
 
-            for (var order in _filteredList) {
-              _expandedOrders[order.header!.recordId!] = false;
-              _selectedOrders[order.header!.recordId!] = false;
-            }
-            totalItems = _filteredList.length;
+            setState(() {
+              _fmaRecsList.clear();
+              _fmaRecsList.addAll(tempFmaRecList);
+              _filteredList = List.from(_fmaRecsList);
+              totalItems = total;
+
+              _expandedOrders.clear();
+              _selectedOrders.clear();
+              _selectAll = false;
+
+              for (var order in _filteredList) {
+                if (order.header?.recordId != null) {
+                  _expandedOrders[order.header!.recordId!] = false;
+                  _selectedOrders[order.header!.recordId!] = false;
+                }
+              }
+            });
+            _updateDisplayData();
+          } catch (e) {
+            debugPrint('Error parsing formula rec page: $e');
+          }
+        } else {
+          setState(() {
+            _fmaRecsList = [];
+            _filteredList = [];
+            totalItems = 0;
           });
           _updateDisplayData();
-        } else {
-          _fmaRecsList = [];
-          _filteredList = [];
         }
       }
     });
 
     _eventbus3 = eventBus.on<EventRespDelFormulaWgtRecBatch>().listen((event) {
       if (mounted) {
+        _fetchDataFromBackend();
+      }
+    });
+
+    _eventbus4 = eventBus.on<EventRespDelAllFormulaWgtRec>().listen((event) {
+      if (mounted) {
+        _fetchDataFromBackend();
+      }
+    });
+
+    _eventbus5 =
+        eventBus.on<EventRespAllFormulaRecForExport>().listen((event) {
+      if (mounted && _exportAllPendingPath != null) {
+        String path = _exportAllPendingPath!;
+        _exportAllPendingPath = null;
         String dataStr = event.obj;
         if (dataStr != '' && dataStr != 'null') {
           try {
-            List<dynamic> deletedIdsDynamic = jsonDecode(dataStr);
-            List<String> deletedIds =
-                deletedIdsDynamic.map((e) => e.toString()).toList();
-            setState(() {
-              _fmaRecsList.removeWhere((item) =>
-                  item.header?.recordId != null &&
-                  deletedIds.contains(item.header!.recordId));
-              _filteredList.removeWhere((item) =>
-                  item.header?.recordId != null &&
-                  deletedIds.contains(item.header!.recordId));
-              for (var id in deletedIds) {
-                _selectedOrders.remove(id);
-                _expandedOrders.remove(id);
-              }
-              _selectAll = false;
-              totalItems = _filteredList.length;
-            });
-            _updateDisplayData();
+            List<dynamic> listDynamic = jsonDecode(dataStr);
+            List<FmaRecFromDb> allRecs =
+                fmaRecFromDbFromJson(jsonEncode(listDynamic));
+            _writeCsvToFile(path, allRecs);
           } catch (e) {
-            debugPrint('Error parsing deleted IDs: $e');
+            showTipInfo(e.toString(), context);
           }
+        } else {
+          showTipInfo(localizedStrings.fNoRecordTip, context);
         }
       }
     });
@@ -141,9 +177,12 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
 
   @override
   void dispose() {
+    _searchDebounce?.cancel();
     _eventBus1?.cancel();
     _eventbus2?.cancel();
     _eventbus3?.cancel();
+    _eventbus4?.cancel();
+    _eventbus5?.cancel();
     _searchCtl.dispose();
     super.dispose();
   }
@@ -151,94 +190,30 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
   // 初始化模拟数据
   void _initializeData() {
     _fmaRecsList.clear();
-
-    totalItems = _fmaRecsList.length;
+    totalItems = 0;
   }
 
-  // 搜索文本变化处理
+  // 搜索文本变化处理（增加300ms防抖）
   void _onSearchTextChanged() {
-    final searchText = _searchCtl.text.toLowerCase();
-
-    setState(() {
-      if (searchText.isEmpty) {
-        _filteredList = List.from(_fmaRecsList);
-      } else {
-        _filteredList = _fmaRecsList.where((item) {
-          return (item.header?.recordId?.toLowerCase().contains(searchText) ??
-                  false) ||
-              (item.header?.formulaId?.toLowerCase().contains(searchText) ??
-                  false) ||
-              (item.header?.formulaName?.toLowerCase().contains(searchText) ??
-                  false);
-        }).toList();
-      }
-      _selectedOrders.clear();
-      _expandedOrders.clear();
-      for (var order in _filteredList) {
-        _selectedOrders[order.header!.recordId!] = false;
-        _expandedOrders[order.header!.recordId!] = false;
-      }
-
-      _selectAll = false;
-      _currentPage = 1;
-      totalItems = _filteredList.length;
+    _searchDebounce?.cancel();
+    _searchDebounce = Timer(const Duration(milliseconds: 300), () {
+      setState(() {
+        _currentPage = 1;
+      });
+      _fetchDataFromBackend();
     });
-    _updateDisplayData();
   }
 
-  // 更新显示数据（包括分页、排序、展开状态）
+  // 更新显示数据（构建数据表格行）
   void _updateDisplayData() {
-    // 1. 对头行进行排序
-    List<FmaRecFromDb> sortedHeaders = List.from(_filteredList);
-
-    sortedHeaders.sort((a, b) {
-      int comparison = 0;
-      switch (_sortColumn) {
-        case 'orderId':
-          comparison = a.header!.recordId!.compareTo(b.header!.recordId!);
-          break;
-        case 'fmaId':
-          comparison = a.header!.formulaId!.compareTo(b.header!.formulaId!);
-          break;
-        case 'fmaName':
-          comparison = a.header!.formulaName!.compareTo(b.header!.formulaName!);
-          break;
-        case 'barcode':
-          comparison =
-              a.header!.formulaBarcode!.compareTo(b.header!.formulaBarcode!);
-          break;
-        case 'fmaTotalWeight':
-          comparison = a.header!.totalWeight!.compareTo(b.header!.totalWeight!);
-          break;
-        case 'actualTotalWeight':
-          comparison = a.header!.actualTotalWeight!
-              .compareTo(b.header!.actualTotalWeight!);
-          break;
-      }
-
-      return _sortAscending ? comparison : -comparison;
-    });
-
-    totalItems = _filteredList.length;
-
-    // 2. 应用分页（只对头行分页）
-    final startIndex = (_currentPage - 1) * _pageSize;
-    final endIndex = startIndex + _pageSize;
-    final paginatedHeaders = sortedHeaders.sublist(
-      startIndex.clamp(0, sortedHeaders.length),
-      endIndex.clamp(0, sortedHeaders.length),
-    );
-
-    // 3. 构建显示数据（明细始终跟随头行）
     _orderDataList = [];
 
-    for (final fmaRec in paginatedHeaders) {
-      // 添加头行
+    for (final fmaRec in _filteredList) {
+      if (fmaRec.header?.recordId == null) continue;
 
       _orderDataList.add(OrderData(header: fmaRec.header, isHeader: true));
 
-      // 如果展开，添加明细行
-      if (_expandedOrders[fmaRec.header!.recordId!] == true) {
+      if (_expandedOrders[fmaRec.header!.recordId!] == true && fmaRec.details != null) {
         for (final detail in fmaRec.details!) {
           _orderDataList.add(
             OrderData(
@@ -251,13 +226,13 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
       }
     }
 
-    _selectAll = _selectedOrders.values.every((value) => value == true);
+    _selectAll = _selectedOrders.isNotEmpty &&
+        _selectedOrders.values.every((value) => value == true);
 
     if (_orderDataList.isEmpty) {
       _selectAll = false;
     }
 
-    // 4. 更新数据源
     _dataSource?.updateData(
         _orderDataList, _expandedOrders, _selectedOrders, _selectAll);
     setState(() {});
@@ -293,7 +268,7 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
     );
   }
 
-  // 处理排序 - 只排序头行
+  // 处理排序 - 数据库全量排序并重新拉取第1页
   void _handleSort(String columnName) {
     setState(() {
       if (_sortColumn == columnName) {
@@ -302,21 +277,25 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
         _sortColumn = columnName;
         _sortAscending = true;
       }
-      _currentPage = 1; // 排序后回到第一页
-      _updateDisplayData();
+      _currentPage = 1;
     });
+    _fetchDataFromBackend();
   }
 
   // 切换页码
   void _goToPage(int page) {
+    int maxPage = _totalPages > 0 ? _totalPages : 1;
+    int targetPage = page.clamp(1, maxPage);
+    if (targetPage == _currentPage && page != 1) return;
     setState(() {
-      _currentPage = page.clamp(1, _totalPages);
-      _updateDisplayData();
+      _currentPage = targetPage;
     });
+    _fetchDataFromBackend();
   }
 
-  // 计算总页数（基于头行数量）
-  int get _totalPages => (_filteredList.length / _pageSize).ceil();
+  // 计算总页数
+  int get _totalPages => totalItems > 0 ? (totalItems / _pageSize).ceil() : 1;
+
 
   // 数据源实例
   OrderDataSource? _dataSource;
@@ -748,132 +727,122 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
     return _getSelectedCount() > 0;
   }
 
-  Future<void> exportWgtRecords(String path) async {
-    try {
-      final header = [
-        'No.',
-        localizedStrings.fFmaIdLabel,
-        localizedStrings.fFmaNameLabel,
-        localizedStrings.fFmaBarcode,
-        localizedStrings.fMaterialNameCol,
-        localizedStrings.fMaterialIdCol,
-        localizedStrings.fFmaModeCol,
-        localizedStrings.fConfidential,
-        localizedStrings.fFormulaTotalWeight,
-        localizedStrings.fActualTotalWeight,
-        localizedStrings.fMaterialSingleWeight,
-        localizedStrings.fActualSingleWeight,
-        localizedStrings.fAllowableError,
-        localizedStrings.fActualError,
-        localizedStrings.fWgtUnit,
-        localizedStrings.fQualificationStatus,
-        localizedStrings.fCreatedAtCol,
-        localizedStrings.operator,
+  List<List<dynamic>> buildCsvDataFromFmaRecs(List<FmaRecFromDb> records) {
+    final header = [
+      'No.',
+      localizedStrings.fFmaIdLabel,
+      localizedStrings.fFmaNameLabel,
+      localizedStrings.fFmaBarcode,
+      localizedStrings.fMaterialNameCol,
+      localizedStrings.fMaterialIdCol,
+      localizedStrings.fFmaModeCol,
+      localizedStrings.fConfidential,
+      localizedStrings.fFormulaTotalWeight,
+      localizedStrings.fActualTotalWeight,
+      localizedStrings.fMaterialSingleWeight,
+      localizedStrings.fActualSingleWeight,
+      localizedStrings.fAllowableError,
+      localizedStrings.fActualError,
+      localizedStrings.fWgtUnit,
+      localizedStrings.fQualificationStatus,
+      localizedStrings.fCreatedAtCol,
+      localizedStrings.operator,
+    ];
+
+    List<List<dynamic>> csvData = [header];
+
+    for (var rowData in records) {
+      if (rowData.header == null) continue;
+      final headerData = rowData.header;
+
+      final headerRow = [
+        headerData?.recordId ?? "",
+        headerData?.formulaId ?? "",
+        headerData?.formulaName ?? "",
+        headerData?.formulaBarcode ?? "",
+        "",
+        "",
+        headerData?.formulaMode == 'wgt'
+            ? localizedStrings.fWeightMode
+            : localizedStrings.fPctMode,
+        headerData?.isEncrypted.toString() == "true"
+            ? localizedStrings.fConfidential
+            : localizedStrings.fPublic,
+        headerData?.actualFmaTotalWgt,
+        (headerData?.actualTotalWeight != null
+            ? headerData?.actualTotalWeight!.toStringAsFixed(3)
+            : ''),
+        "",
+        "",
+        "",
+        "",
+        headerData?.totalWeightUnit,
+        headerData?.isQualified.toString() == "yes" ? "Pass" : "Fail",
+        headerData?.recordSaveTime != null
+            ? DateFormat('yyyy-MM-dd HH:mm:ss')
+                .format(headerData!.recordSaveTime!)
+            : '',
+        headerData?.headerOperator ?? ''
       ];
+      csvData.add(headerRow);
 
-      List<List<dynamic>> csvData = [header];
-
-      // 遍历所有选中的行
-      for (var key in _selectedOrders.keys) {
-        if (_selectedOrders[key] == false) {
-          continue;
-        }
-        FmaRecFromDb tempFmaRec = FmaRecFromDb();
-        for (int j = 0; j < _fmaRecsList.length; j++) {
-          if (_fmaRecsList[j].header!.recordId == key) {
-            tempFmaRec = _fmaRecsList[j];
-            break;
-          }
-        }
-        if (tempFmaRec.header == null) {
-          continue;
-        }
-
-        FmaRecFromDb rowData = tempFmaRec;
-        final headerData = rowData.header;
-
-        final headerRow = [
-          headerData?.recordId ?? "",
-          headerData?.formulaId ?? "",
-          headerData?.formulaName ?? "",
-          headerData?.formulaBarcode ?? "",
-          "",
-          "",
-          headerData?.formulaMode == 'wgt'
-              ? localizedStrings.fWeightMode
-              : localizedStrings.fPctMode,
-          headerData?.isEncrypted.toString() == "true"
-              ? localizedStrings.fConfidential
-              : localizedStrings.fPublic,
-          headerData?.actualFmaTotalWgt,
-          (headerData?.actualTotalWeight != null
-              ? headerData?.actualTotalWeight!.toStringAsFixed(3)
-              : ''),
-          "",
-          "",
-          "",
-          "",
-          headerData?.totalWeightUnit,
-          headerData?.isQualified.toString() == "yes" ? "Pass" : "Fail",
-          headerData?.recordSaveTime != null
-              ? DateFormat('yyyy-MM-dd HH:mm:ss')
-                  .format(headerData!.recordSaveTime!)
-              : '',
-          headerData?.headerOperator ?? ''
-        ];
-        csvData.add(headerRow);
-
-        if (rowData.details != null) {
-          for (var detail in rowData.details!) {
-            final detailRow = [
-              "",
-              "",
-              "",
-              "",
-              detail.sequence == 0
-                  ? localizedStrings.fFmaContainer
-                  : detail.materialName ?? "",
-              detail.materialId ?? "",
-              "",
-              "",
-              "",
-              "",
-              detail.sequence == 0 ||
-                      headerData!.isEncrypted.toString() == "true"
-                  ? '-'
-                  : detail.targetWgt.toString(),
-              (detail.sequence == 0 ||
-                      headerData!.isEncrypted.toString() != "true")
-                  ? detail.actualWeight.toString()
-                  : "-",
-              detail.sequence == 0 ||
-                      headerData!.isEncrypted.toString() == "true"
-                  ? '-'
-                  : headerData.formulaMode! == "pct"
-                      ? (detail.allowableError! *
-                              headerData.actualFmaTotalWgt! /
-                              100)
-                          .toStringAsFixed(3)
-                      : detail.allowableError!.toString(),
-              detail.sequence == 0 ||
-                      headerData!.isEncrypted.toString() == "true"
-                  ? '-'
-                  : detail.actualErrorWgt.toString(),
-              headerData!.totalWeightUnit!,
-              detail.sequence == 0 ||
-                      headerData.isEncrypted.toString() == "true"
-                  ? '-'
-                  : detail.isQualified.toString() == "ok"
-                      ? "Pass"
-                      : "Fail",
-              "",
-              ""
-            ];
-            csvData.add(detailRow);
-          }
+      if (rowData.details != null) {
+        for (var detail in rowData.details!) {
+          final detailRow = [
+            "",
+            "",
+            "",
+            "",
+            detail.sequence == 0
+                ? localizedStrings.fFmaContainer
+                : detail.materialName ?? "",
+            detail.materialId ?? "",
+            "",
+            "",
+            "",
+            "",
+            detail.sequence == 0 ||
+                    headerData!.isEncrypted.toString() == "true"
+                ? '-'
+                : detail.targetWgt.toString(),
+            (detail.sequence == 0 ||
+                    headerData!.isEncrypted.toString() != "true")
+                ? detail.actualWeight.toString()
+                : "-",
+            detail.sequence == 0 ||
+                    headerData!.isEncrypted.toString() == "true"
+                ? '-'
+                : headerData.formulaMode! == "pct"
+                    ? (detail.allowableError! *
+                            headerData.actualFmaTotalWgt! /
+                            100)
+                        .toStringAsFixed(3)
+                    : detail.allowableError!.toString(),
+            detail.sequence == 0 ||
+                    headerData!.isEncrypted.toString() == "true"
+                ? '-'
+                : detail.actualErrorWgt.toString(),
+            headerData!.totalWeightUnit!,
+            detail.sequence == 0 ||
+                    headerData.isEncrypted.toString() == "true"
+                ? '-'
+                : detail.isQualified.toString() == "ok"
+                    ? "Pass"
+                    : "Fail",
+            "",
+            ""
+          ];
+          csvData.add(detailRow);
         }
       }
+    }
 
+    return csvData;
+  }
+
+  Future<void> _writeCsvToFile(String path, List<FmaRecFromDb> records) async {
+    try {
+      final csvData = buildCsvDataFromFmaRecs(records);
       final csv = const ListToCsvConverter().convert(csvData);
       final file = File(path);
       await file.writeAsString(csv);
@@ -884,6 +853,21 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
         showTipInfo(e.toString(), context);
       }
     }
+  }
+
+  Future<void> exportWgtRecords(String path) async {
+    List<FmaRecFromDb> selectedRecs = [];
+    for (var key in _selectedOrders.keys) {
+      if (_selectedOrders[key] == true) {
+        for (var rec in _fmaRecsList) {
+          if (rec.header?.recordId == key) {
+            selectedRecs.add(rec);
+            break;
+          }
+        }
+      }
+    }
+    await _writeCsvToFile(path, selectedRecs);
   }
 
   Future<void> exportSelectedDataToCSV() async {
@@ -902,6 +886,30 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
       exportWgtRecords(outputFile);
     }
   }
+
+  Future<void> exportAllDataToCSV() async {
+    final directory = Directory.current.path;
+    String? outputFile = (await FilePicker.platform.saveFile(
+      initialDirectory: directory,
+      type: FileType.custom,
+      dialogTitle: 'Output file:',
+      allowedExtensions: ["csv"],
+      fileName: 'formulaWgt_all.csv',
+    ));
+    if (outputFile != null) {
+      if (!outputFile.contains(".csv")) {
+        outputFile = "$outputFile.csv";
+      }
+      _exportAllPendingPath = outputFile;
+      Map<String, dynamic> reqMap = {
+        'searchText': _searchCtl.text.trim(),
+        'sortColumn': _sortColumn,
+        'sortAsc': _sortAscending,
+      };
+      PublicFunctions.getAllFormulaRecForExport(jsonEncode(reqMap));
+    }
+  }
+
 
   showFormulaSearch() {
     return Container(
@@ -931,15 +939,18 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
         ),
 
         const Spacer(),
-        SizedBox(
-          width: 160,
-          height: 40,
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 160,
+            minHeight: 40,
+            maxHeight: 40,
+          ),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
               backgroundColor: Theme.of(context).colorScheme.primary,
-              fixedSize: const Size(double.infinity, 40),
-              shape: RoundedRectangleBorder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
             ),
@@ -968,23 +979,28 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
             },
             child: Text(
               localizedStrings.printSettings,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall!.apply(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
         const SizedBox(width: 20),
-        SizedBox(
-          width: 160,
-          height: 40,
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 160,
+            minHeight: 40,
+            maxHeight: 40,
+          ),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
               backgroundColor: Theme.of(context).colorScheme.primary,
-              fixedSize: const Size(double.infinity, 40),
-              shape: RoundedRectangleBorder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
             ),
@@ -1001,24 +1017,29 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
             },
             child: Text(
               localizedStrings.autoSync, //Sync Settings
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall!.apply(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
         const SizedBox(width: 20),
-        SizedBox(
-          width: 200,
-          height: 40,
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 200,
+            minHeight: 40,
+            maxHeight: 40,
+          ),
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
               foregroundColor: Theme.of(context).colorScheme.onPrimary,
               backgroundColor:
                   Theme.of(context).colorScheme.onTertiaryFixedVariant,
-              fixedSize: const Size(double.infinity, 40),
-              shape: RoundedRectangleBorder(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: const RoundedRectangleBorder(
                 borderRadius: BorderRadius.zero,
               ),
             ),
@@ -1029,15 +1050,80 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
                   },
             child: Text(
               localizedStrings.fExportRecordsBtn,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.bodySmall!.apply(
                     color: Theme.of(context).colorScheme.onPrimary,
                   ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ),
         const SizedBox(width: 20),
-        // 红色批量删除按钮
+        // 导出全部按钮 (Export All) - 纯文字，有记录亮绿、无记录灰色，宽度自适应上限 160
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 160,
+            minHeight: 40,
+            maxHeight: 40,
+          ),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: totalItems > 0
+                  ? Theme.of(context).colorScheme.onTertiaryFixedVariant
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+            ),
+            onPressed: totalItems > 0 ? exportAllDataToCSV : null,
+            child: Text(
+              localizedStrings.fExportAllRecordsBtn ?? 'Export All',
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall!.apply(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+            ),
+          ),
+        ),
+        const SizedBox(width: 20),
+        // 清空全部按钮 (Clear All) - 全库无记录时灰色禁用，有记录时红色可点击，宽度自适应上限 140
+        ConstrainedBox(
+          constraints: const BoxConstraints(
+            maxWidth: 140,
+            minHeight: 40,
+            maxHeight: 40,
+          ),
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              backgroundColor: totalItems > 0
+                  ? Theme.of(context).colorScheme.error
+                  : Theme.of(context).colorScheme.surfaceContainerHighest,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: const RoundedRectangleBorder(
+                borderRadius: BorderRadius.zero,
+              ),
+            ),
+            onPressed: totalItems > 0 ? _handleClearAll : null,
+            child: Text(
+              localizedStrings.fClearAll ?? 'Clear All',
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.bodySmall!.apply(
+                    color: Theme.of(context).colorScheme.onPrimary,
+                  ),
+            ),
+          ),
+        ),
+
+        const SizedBox(width: 20),
+        // 红色批量删除按钮（针对当前页选中的记录）
         Container(
           width: 40,
           height: 40,
@@ -1058,7 +1144,25 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
     );
   }
 
+  void _handleClearAll() {
+    if (totalItems <= 0) return;
+
+    showDialog<bool>(
+      context: context,
+      builder: (context) => ShowDeleteTipDialog(
+        title: localizedStrings.fTipTitle,
+        msg: localizedStrings.fConfirmClearAllFmaRecsMsg ??
+            '全库所有配方称重记录将被永久清空且无法恢复，确认清空吗？',
+      ),
+    ).then((confirmed) {
+      if (confirmed == true) {
+        PublicFunctions.delAllFormulaWgtRec();
+      }
+    });
+  }
+
   void _handleBatchDelete() {
+
     List<String> selectedRecordIds = [];
     _selectedOrders.forEach((key, isSelected) {
       if (isSelected) {

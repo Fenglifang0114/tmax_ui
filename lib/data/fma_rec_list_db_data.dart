@@ -254,7 +254,7 @@ class HeaderRec {
         recordId: json["RecordID"],
         recordSaveTime: json["RecordSaveTime"] == null
             ? null
-            : DateTime.parse(json["RecordSaveTime"]).toLocal(),
+            : DateTime.parse(json["RecordSaveTime"].toString().replaceAll("Z", "")),
         headerOperator: json["Operator"],
         formulaKey: json["FormulaKey"],
         formulaId: json["FormulaID"],
@@ -272,10 +272,10 @@ class HeaderRec {
         isEncrypted: json["IsEncrypted"],
         formulaCreatedAt: json["FormulaCreatedAt"] == null
             ? null
-            : DateTime.parse(json["FormulaCreatedAt"]).toLocal(),
+            : DateTime.parse(json["FormulaCreatedAt"].toString().replaceAll("Z", "")),
         formulaUpdatedAt: json["FormulaUpdatedAt"] == null
             ? null
-            : DateTime.parse(json["FormulaUpdatedAt"]).toLocal(),
+            : DateTime.parse(json["FormulaUpdatedAt"].toString().replaceAll("Z", "")),
         formulaCreatedBy: json["FormulaCreatedBy"],
         formulaUpdatedBy: json["FormulaUpdatedBy"],
         formulaRemark: json["FormulaRemark"],

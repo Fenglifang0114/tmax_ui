@@ -1656,6 +1656,10 @@
     "@fExportRecordsBtn": {
         "description": "Button to export selected weighing records"
     },
+    "fExportAllRecordsBtn": "Export All",
+    "@fExportAllRecordsBtn": {
+        "description": "Button to export all formula weighing records in database"
+    },
     "fOrderNo": "No.",
     "@fOrderNo": {
         "description": "Table column title for record number"
@@ -1763,6 +1767,14 @@
     "fClearBtn": "Clear",
     "@fClearBtn": {
         "description": "Text on the clear button"
+    },
+    "fClearAll": "Clear All",
+    "@fClearAll": {
+        "description": "Button to clear all formula weighing records"
+    },
+    "fConfirmClearAllFmaRecsMsg": "All formula weighing records in the database will be permanently cleared. Continue?",
+    "@fConfirmClearAllFmaRecsMsg": {
+        "description": "Confirmation message for clearing all formula weighing records"
     },
     "fInputRemarkHint": "Please enter the notes.",
     "@fInputRemarkHint": {
