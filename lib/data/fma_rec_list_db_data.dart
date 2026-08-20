@@ -386,3 +386,36 @@ class UploadServerInfo {
         "UpdatedBy": updatedBy,
       };
 }
+
+// 流式分批导出数据包结构
+class RespExportChunkMsg {
+  final int chunkIndex;
+  final int totalChunk;
+  final int totalCount;
+  final bool isFirst;
+  final bool isLast;
+  final List<FmaRecFromDb> list;
+
+  RespExportChunkMsg({
+    required this.chunkIndex,
+    required this.totalChunk,
+    required this.totalCount,
+    required this.isFirst,
+    required this.isLast,
+    required this.list,
+  });
+
+  factory RespExportChunkMsg.fromJson(Map<String, dynamic> json) =>
+      RespExportChunkMsg(
+        chunkIndex: json["chunkIndex"] ?? 0,
+        totalChunk: json["totalChunk"] ?? 0,
+        totalCount: json["totalCount"] ?? 0,
+        isFirst: json["isFirst"] ?? false,
+        isLast: json["isLast"] ?? false,
+        list: json["list"] == null
+            ? []
+            : List<FmaRecFromDb>.from(
+                json["list"].map((x) => FmaRecFromDb.fromJson(x))),
+      );
+}
+

@@ -62,6 +62,7 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
   dynamic _eventbus4;
   dynamic _eventbus5;
   String? _exportAllPendingPath;
+  IOSink? _exportAllSink;
   Timer? _searchDebounce;
 
   void _fetchDataFromBackend() {
@@ -154,22 +155,83 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
     });
 
     _eventbus5 =
-        eventBus.on<EventRespAllFormulaRecForExport>().listen((event) {
+        eventBus.on<EventRespAllFormulaRecForExport>().listen((event) async {
       if (mounted && _exportAllPendingPath != null) {
-        String path = _exportAllPendingPath!;
-        _exportAllPendingPath = null;
         String dataStr = event.obj;
         if (dataStr != '' && dataStr != 'null') {
           try {
-            List<dynamic> listDynamic = jsonDecode(dataStr);
-            List<FmaRecFromDb> allRecs =
-                fmaRecFromDbFromJson(jsonEncode(listDynamic));
-            _writeCsvToFile(path, allRecs);
+            var chunkJson = jsonDecode(dataStr);
+            var chunkMsg = RespExportChunkMsg.fromJson(chunkJson);
+
+            // 首批数据包：创建 IOSink 文件流并写入 18 列 CSV 表头
+            if (chunkMsg.isFirst) {
+              final file = File(_exportAllPendingPath!);
+              _exportAllSink = file.openWrite(mode: FileMode.write);
+
+              final headerRow = [
+                'No.',
+                localizedStrings.fFmaIdLabel,
+                localizedStrings.fFmaNameLabel,
+                localizedStrings.fFmaBarcode,
+                localizedStrings.fMaterialNameCol,
+                localizedStrings.fMaterialIdCol,
+                localizedStrings.fFmaModeCol,
+                localizedStrings.fConfidential,
+                localizedStrings.fFormulaTotalWeight,
+                localizedStrings.fActualTotalWeight,
+                localizedStrings.fMaterialSingleWeight,
+                localizedStrings.fActualSingleWeight,
+                localizedStrings.fAllowableError,
+                localizedStrings.fActualError,
+                localizedStrings.fWgtUnit,
+                localizedStrings.fQualificationStatus,
+                localizedStrings.fCreatedAtCol,
+                localizedStrings.operator,
+              ];
+              final headerCsv =
+                  "${const ListToCsvConverter().convert([headerRow])}\n";
+              _exportAllSink!.write(headerCsv);
+            }
+
+            // 写入当前批次的数据（不重复写表头）
+            if (chunkMsg.list.isNotEmpty && _exportAllSink != null) {
+              List<List<dynamic>> chunkData =
+                  buildCsvDataFromFmaRecs(chunkMsg.list, includeHeader: false);
+              if (chunkData.isNotEmpty) {
+                final chunkCsv =
+                    "${const ListToCsvConverter().convert(chunkData)}\n";
+                _exportAllSink!.write(chunkCsv);
+              }
+            }
+
+            // 最后一批数据包：关闭文件句柄并弹出完成提示
+            if (chunkMsg.isLast) {
+              await _exportAllSink?.flush();
+              await _exportAllSink?.close();
+              _exportAllSink = null;
+
+              String path = _exportAllPendingPath!;
+              _exportAllPendingPath = null;
+
+              if (mounted) {
+                showExportDialog(path, context);
+              }
+            }
           } catch (e) {
-            showTipInfo(e.toString(), context);
+            _exportAllSink?.close();
+            _exportAllSink = null;
+            _exportAllPendingPath = null;
+            if (mounted) {
+              showTipInfo(e.toString(), context);
+            }
           }
         } else {
-          showTipInfo(localizedStrings.fNoRecordTip, context);
+          _exportAllSink?.close();
+          _exportAllSink = null;
+          _exportAllPendingPath = null;
+          if (mounted) {
+            showTipInfo(localizedStrings.fNoRecordTip, context);
+          }
         }
       }
     });
@@ -183,6 +245,7 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
     _eventbus3?.cancel();
     _eventbus4?.cancel();
     _eventbus5?.cancel();
+    _exportAllSink?.close();
     _searchCtl.dispose();
     super.dispose();
   }
@@ -727,29 +790,32 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
     return _getSelectedCount() > 0;
   }
 
-  List<List<dynamic>> buildCsvDataFromFmaRecs(List<FmaRecFromDb> records) {
-    final header = [
-      'No.',
-      localizedStrings.fFmaIdLabel,
-      localizedStrings.fFmaNameLabel,
-      localizedStrings.fFmaBarcode,
-      localizedStrings.fMaterialNameCol,
-      localizedStrings.fMaterialIdCol,
-      localizedStrings.fFmaModeCol,
-      localizedStrings.fConfidential,
-      localizedStrings.fFormulaTotalWeight,
-      localizedStrings.fActualTotalWeight,
-      localizedStrings.fMaterialSingleWeight,
-      localizedStrings.fActualSingleWeight,
-      localizedStrings.fAllowableError,
-      localizedStrings.fActualError,
-      localizedStrings.fWgtUnit,
-      localizedStrings.fQualificationStatus,
-      localizedStrings.fCreatedAtCol,
-      localizedStrings.operator,
-    ];
-
-    List<List<dynamic>> csvData = [header];
+  List<List<dynamic>> buildCsvDataFromFmaRecs(List<FmaRecFromDb> records,
+      {bool includeHeader = true}) {
+    List<List<dynamic>> csvData = [];
+    if (includeHeader) {
+      final header = [
+        'No.',
+        localizedStrings.fFmaIdLabel,
+        localizedStrings.fFmaNameLabel,
+        localizedStrings.fFmaBarcode,
+        localizedStrings.fMaterialNameCol,
+        localizedStrings.fMaterialIdCol,
+        localizedStrings.fFmaModeCol,
+        localizedStrings.fConfidential,
+        localizedStrings.fFormulaTotalWeight,
+        localizedStrings.fActualTotalWeight,
+        localizedStrings.fMaterialSingleWeight,
+        localizedStrings.fActualSingleWeight,
+        localizedStrings.fAllowableError,
+        localizedStrings.fActualError,
+        localizedStrings.fWgtUnit,
+        localizedStrings.fQualificationStatus,
+        localizedStrings.fCreatedAtCol,
+        localizedStrings.operator,
+      ];
+      csvData.add(header);
+    }
 
     for (var rowData in records) {
       if (rowData.header == null) continue;
