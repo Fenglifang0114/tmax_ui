@@ -299,16 +299,6 @@ class _PluEidtPageState extends State<PluEidtPage> {
       disableTitle: localizedStrings.gBtnDisable,
     );
 
-    allSelectedNotifier.addListener(() {
-      if (shouldToggleAll) {
-        shouldToggleAll = false;
-        if (allSelectedNotifier.value) {
-          _selectAll();
-        } else {
-          _deselectAll();
-        }
-      } else {}
-    });
     for (var key in _columnVisibility.keys) {
       if (_columnVisibility[key] == true) {
         fieldOrder.add(key);
@@ -320,9 +310,22 @@ class _PluEidtPageState extends State<PluEidtPage> {
     PublicFunctions.getPluSetting();
   }
 
+  void _onAllSelectedNotifierChanged() {
+    if (shouldToggleAll) {
+      shouldToggleAll = false;
+      if (allSelectedNotifier.value) {
+        _selectAll();
+      } else {
+        _deselectAll();
+      }
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+
+    allSelectedNotifier.addListener(_onAllSelectedNotifierChanged);
 
     _eventbus1 = eventBus.on<EventPLuDataSavedOK>().listen((event) {
       if (mounted) {
@@ -447,6 +450,7 @@ class _PluEidtPageState extends State<PluEidtPage> {
     _eventbus6.cancel();
     _eventbus7.cancel();
     _eventbus8.cancel();
+    allSelectedNotifier.removeListener(_onAllSelectedNotifierChanged);
     allSelectedNotifier.dispose();
     gettingDataTimer?.cancel();
     dataModels.clear();

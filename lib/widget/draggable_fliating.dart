@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
@@ -82,13 +83,16 @@ class _DraggableFloatingActionButtonState
   final List<int> _sameX1XValueYList = []; //X1X相同时Y集合
   final List<int> _sameY1YValueXList = []; //Y1Y相同时X集合
 
+  StreamSubscription? _subPageSize;
+  StreamSubscription? _subPrinter;
+
   @override
   void initState() {
     super.initState();
     //_offset   当前位置坐标
     _offset = widget.initialOffset;
     WidgetsBinding.instance.addPostFrameCallback(_setBoundary);
-    eventBus.on<EventPageSize>().listen((event) {
+    _subPageSize = eventBus.on<EventPageSize>().listen((event) {
       if (mounted) {
         setState(() {
           myPageSize = event.obj;
@@ -96,7 +100,7 @@ class _DraggableFloatingActionButtonState
         });
       }
     });
-    eventBus.on<EventPrinter>().listen((event) {
+    _subPrinter = eventBus.on<EventPrinter>().listen((event) {
       if (mounted) {
         setState(() {
           myPrinter = event.obj;
@@ -107,6 +111,8 @@ class _DraggableFloatingActionButtonState
 
   @override
   void dispose() {
+    _subPageSize?.cancel();
+    _subPrinter?.cancel();
     super.dispose();
   }
 
