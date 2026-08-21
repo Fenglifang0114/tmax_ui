@@ -84,6 +84,9 @@ class _ScaleWgtTakeInWidgetState extends State<ScaleWgtTakeInWidget> {
 
   GetScaleRecords currGetScaleRecords = GetScaleRecords(weightRecords: []);
 
+  final ValueNotifier<ReceiveWgtInfo?> _wgtInfoNotifier = ValueNotifier(null);
+  final ValueNotifier<double> _takeInWgtNotifier = ValueNotifier(0.0);
+
   bool _isCntAliveTiming = false;
   bool get isCntAliveTiming => _isCntAliveTiming;
   bool _hasPassedZero = false; // 标记是否经过 0 点
@@ -168,35 +171,42 @@ class _ScaleWgtTakeInWidgetState extends State<ScaleWgtTakeInWidget> {
       if (tempWeight.scaleId == widget.scaleId &&
           mounted &&
           tempWeight.msgBody != null) {
-        setState(() {
-          isCnting = true;
-          isStart = true;
-          weightInfo = ReceiveWgtInfo(
-            weightVal: tempWeight.msgBody!.weightVal,
-            weightUnit: tempWeight.msgBody!.weightUnit,
-            isNet: tempWeight.msgBody!.isNet,
-            isStable: tempWeight.msgBody!.isStable,
-            isZero: tempWeight.msgBody!.isZero,
-          );
-          double? nowWeightVal = double.tryParse(weightInfo!.weightVal!);
-          if (nowWeightVal == null) {
-            takeInWgtvalue = 0.000;
-          } else {
-            takeInWgtvalue = nowWeightVal - lastWgtValue;
-          }
-          if (!startTakeIn) {
-            return;
-          }
-          if (mySettingParam.wgtMode == 1) {
-            // 记录每台秤的增量
-            scaleWeightMapCommon[widget.scaleId] = WeightInfo(
-                weight: takeInWgtvalue.toString(),
-                unit: weightInfo!.weightUnit!,
-                stable: weightInfo!.isStable!);
-            return;
-          }
-          _checkStableStatus();
-        });
+        isCnting = true;
+        weightInfo = ReceiveWgtInfo(
+          weightVal: tempWeight.msgBody!.weightVal,
+          weightUnit: tempWeight.msgBody!.weightUnit,
+          isNet: tempWeight.msgBody!.isNet,
+          isStable: tempWeight.msgBody!.isStable,
+          isZero: tempWeight.msgBody!.isZero,
+        );
+        double? nowWeightVal = double.tryParse(weightInfo!.weightVal!);
+        if (nowWeightVal == null) {
+          takeInWgtvalue = 0.000;
+        } else {
+          takeInWgtvalue = nowWeightVal - lastWgtValue;
+        }
+
+        _wgtInfoNotifier.value = weightInfo;
+        _takeInWgtNotifier.value = takeInWgtvalue;
+
+        if (!isStart) {
+          setState(() {
+            isStart = true;
+          });
+        }
+
+        if (!startTakeIn) {
+          return;
+        }
+        if (mySettingParam.wgtMode == 1) {
+          // 记录每台秤的增量
+          scaleWeightMapCommon[widget.scaleId] = WeightInfo(
+              weight: takeInWgtvalue.toString(),
+              unit: weightInfo!.weightUnit!,
+              stable: weightInfo!.isStable!);
+          return;
+        }
+        _checkStableStatus();
       } else {}
       if (mounted) {
         for (var scale in myAllScalesList) {
@@ -322,6 +332,8 @@ class _ScaleWgtTakeInWidgetState extends State<ScaleWgtTakeInWidget> {
     innerTimer?.cancel();
     _stableTimer?.cancel();
     stopCntAliveTimer();
+    _wgtInfoNotifier.dispose();
+    _takeInWgtNotifier.dispose();
     super.dispose();
   }
 
@@ -462,163 +474,178 @@ class _ScaleWgtTakeInWidgetState extends State<ScaleWgtTakeInWidget> {
                   height: 1,
                   color: Theme.of(context).colorScheme.surfaceContainerLow,
                 ),
-                Container(
-                    height: 52,
-                    color: Theme.of(context).colorScheme.surface,
-                    child: Row(
+                ValueListenableBuilder<ReceiveWgtInfo?>(
+                  valueListenable: _wgtInfoNotifier,
+                  builder: (context, info, child) {
+                    final currentInfo = info ?? weightInfo;
+                    return Column(
                       children: [
+                        Container(
+                            height: 52,
+                            color: Theme.of(context).colorScheme.surface,
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 104,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      _buildIconAndText(
+                                        context,
+                                        localizedStrings.iStable,
+                                        currentInfo?.isStable,
+                                        1,
+                                      ),
+                                      _buildIconAndText(
+                                        context,
+                                        localizedStrings.iTextNet,
+                                        currentInfo?.isNet,
+                                        2,
+                                      ),
+                                      _buildIconAndText(
+                                        context,
+                                        localizedStrings.iTextZero,
+                                        currentInfo?.isZero,
+                                        3,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                Spacer(),
+                                if (widget.isS15)
+                                  SizedBox(
+                                    height: 40,
+                                    child: IconButton(
+                                        icon: Icon(
+                                          Icons.cleaning_services_outlined,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                        tooltip: localizedStrings.btnForceClearTare,
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (BuildContext context) {
+                                              return ShowNormalTipDialog(
+                                                title: localizedStrings.fTipTitle,
+                                                msg: localizedStrings.tipForceClearTare,
+                                              );
+                                            },
+                                          ).then((value) {
+                                            if (value == null) {
+                                              return;
+                                            }
+                                            if (value) {
+                                              PublicFunctions.forceUntare(
+                                                  widget.scaleId);
+                                            }
+                                          });
+                                        }),
+                                  ),
+                                showBtnWidget()
+                              ],
+                            )),
+                        Divider(
+                          height: 1,
+                          color: Theme.of(context).colorScheme.surfaceContainerLow,
+                        ),
                         SizedBox(
-                          width: 104,
+                          height: 50,
                           child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              _buildIconAndText(
-                                context,
-                                localizedStrings.iStable,
-                                weightInfo?.isStable,
-                                1,
-                              ),
-                              _buildIconAndText(
-                                context,
-                                localizedStrings.iTextNet,
-                                weightInfo?.isNet,
-                                2,
-                              ),
-                              _buildIconAndText(
-                                context,
-                                localizedStrings.iTextZero,
-                                weightInfo?.isZero,
-                                3,
-                              ),
+                              Expanded(
+                                  child: Container(
+                                alignment: Alignment.centerRight,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown, // 当文字溢出时缩小字体
+                                  alignment: Alignment.centerRight,
+                                  child: Text(currentInfo?.weightVal ?? '---------',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.right,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .headlineLarge!
+                                          .copyWith(
+                                            fontSize: 40,
+                                            color: isStart
+                                                ? Theme.of(context).colorScheme.primary
+                                                : Theme.of(context).colorScheme.error,
+                                          )),
+                                ),
+                              )),
+                              Container(
+                                width: 60,
+                                height: 50,
+                                alignment: Alignment.bottomLeft,
+                                child: Text(currentInfo?.weightUnit ?? '----',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.bodyLarge!.apply(
+                                          color:
+                                              Theme.of(context).colorScheme.onSurface,
+                                        )),
+                              )
                             ],
                           ),
                         ),
-                        Spacer(),
-                        if (widget.isS15)
-                          SizedBox(
-                            height: 40,
-                            child: IconButton(
-                                icon: Icon(
-                                  Icons.cleaning_services_outlined,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                tooltip: localizedStrings.btnForceClearTare,
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (BuildContext context) {
-                                      return ShowNormalTipDialog(
-                                        title: localizedStrings.fTipTitle,
-                                        msg: localizedStrings.tipForceClearTare,
-                                      );
+                        SizedBox(
+                          height: 48,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                  child: Container(
+                                alignment: Alignment.centerRight,
+                                child: FittedBox(
+                                  fit: BoxFit.scaleDown, // 当文字溢出时缩小字体
+                                  alignment: Alignment.centerRight,
+                                  child: ValueListenableBuilder<double>(
+                                    valueListenable: _takeInWgtNotifier,
+                                    builder: (context, takeInVal, child) {
+                                      return Text(
+                                          !isStart
+                                              ? '---------'
+                                              : startTakeIn
+                                                  ? takeInVal.toStringAsFixed(3)
+                                                  : currentInfo?.weightVal ?? '---------',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                          textAlign: TextAlign.right,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .headlineLarge!
+                                              .copyWith(
+                                                fontSize: 28,
+                                                color: isStart
+                                                    ? Theme.of(context)
+                                                        .colorScheme
+                                                        .onTertiaryFixedVariant
+                                                    : Theme.of(context).colorScheme.error,
+                                              ));
                                     },
-                                  ).then((value) {
-                                    if (value == null) {
-                                      return;
-                                    }
-                                    if (value) {
-                                      PublicFunctions.forceUntare(
-                                          widget.scaleId);
-                                    }
-                                  });
-                                }),
+                                  ),
+                                ),
+                              )),
+                              Container(
+                                width: 60,
+                                height: 48,
+                                alignment: Alignment.bottomLeft,
+                                child: Text(currentInfo?.weightUnit ?? '----',
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context).textTheme.bodyLarge!.apply(
+                                          color:
+                                              Theme.of(context).colorScheme.onSurface,
+                                        )),
+                              )
+                            ],
                           ),
-                        showBtnWidget()
+                        ),
                       ],
-                    )),
-                Divider(
-                  height: 1,
-                  color: Theme.of(context).colorScheme.surfaceContainerLow,
-                ),
-                SizedBox(
-                  height: 50,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                          child: Container(
-                        alignment: Alignment.centerRight,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown, // 当文字溢出时缩小字体
-                          alignment: Alignment.centerRight,
-                          child: Text(weightInfo?.weightVal ?? '---------',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.right,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge!
-                                  .copyWith(
-                                    fontSize: 40,
-                                    color: isStart
-                                        ? Theme.of(context).colorScheme.primary
-                                        : Theme.of(context).colorScheme.error,
-                                  )),
-                        ),
-                      )),
-                      Container(
-                        width: 60,
-                        height: 50,
-                        alignment: Alignment.bottomLeft,
-                        child: Text(weightInfo?.weightUnit ?? '----',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodyLarge!.apply(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                )),
-                      )
-                    ],
-                  ),
-                ),
-                SizedBox(
-                  height: 48,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                          child: Container(
-                        alignment: Alignment.centerRight,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown, // 当文字溢出时缩小字体
-                          alignment: Alignment.centerRight,
-                          child: Text(
-                              !isStart
-                                  ? '---------'
-                                  : startTakeIn
-                                      ? takeInWgtvalue.toStringAsFixed(3)
-                                      : weightInfo?.weightVal ?? '---------',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.right,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge!
-                                  .copyWith(
-                                    fontSize: 28,
-                                    color: isStart
-                                        ? Theme.of(context)
-                                            .colorScheme
-                                            .onTertiaryFixedVariant
-                                        : Theme.of(context).colorScheme.error,
-                                  )),
-                        ),
-                      )),
-                      Container(
-                        width: 60,
-                        height: 48,
-                        alignment: Alignment.bottomLeft,
-                        child: Text(weightInfo?.weightUnit ?? '----',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodyLarge!.apply(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                )),
-                      )
-                    ],
-                  ),
+                    );
+                  },
                 ),
               ],
             ),

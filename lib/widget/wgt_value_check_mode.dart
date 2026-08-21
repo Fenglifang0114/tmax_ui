@@ -85,6 +85,11 @@ class _ScaleWgtCheckModeWidgetState extends State<ScaleWgtCheckModeWidget> {
 
   GetScaleRecords currGetScaleRecords = GetScaleRecords(weightRecords: []);
 
+  final ValueNotifier<ReceiveWgtInfo?> _wgtInfoNotifier = ValueNotifier(null);
+  final ValueNotifier<bool> _isLowNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> _isOKNotifier = ValueNotifier(false);
+  final ValueNotifier<bool> _isHighNotifier = ValueNotifier(false);
+
   //定时发送秤还活着
   Timer? _cntAliveTimer;
   bool _isCntAliveTiming = false;
@@ -170,61 +175,45 @@ class _ScaleWgtCheckModeWidgetState extends State<ScaleWgtCheckModeWidget> {
       if (tempWeight.scaleId == widget.scaleId &&
           mounted &&
           tempWeight.msgBody != null) {
-        setState(() {
-          isCnting = true;
-          isStart = true;
-          weightInfo = ReceiveWgtInfo(
-            weightVal: tempWeight.msgBody!.weightVal,
-            weightUnit: tempWeight.msgBody!.weightUnit,
-            isNet: tempWeight.msgBody!.isNet,
-            isStable: tempWeight.msgBody!.isStable,
-            isZero: tempWeight.msgBody!.isZero,
-          );
-          _checkStableStatus();
-        });
-      } else {}
-      if (mounted) {
-        for (var scale in myAllScalesList) {
-          if (scale.scaleId == tempWeight.scaleId && scale.isOnline == false) {
-            setState(() {
-              scale.isOnline = true;
-            });
-          }
-        }
-      }
-    });
+        isCnting = true;
+        weightInfo = ReceiveWgtInfo(
+          weightVal: tempWeight.msgBody!.weightVal,
+          weightUnit: tempWeight.msgBody!.weightUnit,
+          isNet: tempWeight.msgBody!.isNet,
+          isStable: tempWeight.msgBody!.isStable,
+          isZero: tempWeight.msgBody!.isZero,
+        );
 
-    eventBus1 = eventBus.on<EventReqWeightCountine>().listen((event) {
-      tempWeight = event.obj;
-      if (tempWeight.scaleId == widget.scaleId &&
-          mounted &&
-          tempWeight.msgBody != null) {
-        _isLow = false;
-        _isOK = false;
-        _isHigh = false;
-        setState(() {
-          isCnting = true;
-          isStart = true;
-          weightInfo = ReceiveWgtInfo(
-            weightVal: tempWeight.msgBody!.weightVal,
-            weightUnit: tempWeight.msgBody!.weightUnit,
-            isNet: tempWeight.msgBody!.isNet,
-            isStable: tempWeight.msgBody!.isStable,
-            isZero: tempWeight.msgBody!.isZero,
-          );
-        });
+        bool low = false;
+        bool ok = false;
+        bool high = false;
 
         var weight = double.tryParse(weightInfo!.weightVal!);
         if (weight != null) {
           if (weight >= 0) {
             if (weight < lowValue) {
-              _isLow = true;
+              low = true;
             } else if (weight >= lowValue && weight <= highValue) {
-              _isOK = true;
+              ok = true;
             } else if (weight > highValue) {
-              _isHigh = true;
+              high = true;
             }
           }
+        }
+
+        _isLow = low;
+        _isOK = ok;
+        _isHigh = high;
+
+        _wgtInfoNotifier.value = weightInfo;
+        _isLowNotifier.value = low;
+        _isOKNotifier.value = ok;
+        _isHighNotifier.value = high;
+
+        if (!isStart) {
+          setState(() {
+            isStart = true;
+          });
         }
 
         switch (weightMode) {
@@ -298,6 +287,10 @@ class _ScaleWgtCheckModeWidgetState extends State<ScaleWgtCheckModeWidget> {
     _stableTimer?.cancel();
     stopCntAliveTimer();
     _cntAliveTimer?.cancel();
+    _wgtInfoNotifier.dispose();
+    _isLowNotifier.dispose();
+    _isOKNotifier.dispose();
+    _isHighNotifier.dispose();
     super.dispose();
   }
 
@@ -453,227 +446,253 @@ class _ScaleWgtCheckModeWidgetState extends State<ScaleWgtCheckModeWidget> {
                   height: 1,
                   color: Theme.of(context).colorScheme.surfaceContainerLow,
                 ),
-                Container(
-                    height: 52,
-                    color: Theme.of(context).colorScheme.surface,
-                    child: Row(
+                ValueListenableBuilder<ReceiveWgtInfo?>(
+                  valueListenable: _wgtInfoNotifier,
+                  builder: (context, info, child) {
+                    final currentInfo = info ?? weightInfo;
+                    return Column(
                       children: [
-                        SizedBox(
-                          width: 104,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceAround,
-                            children: [
-                              _buildIconAndText(
-                                context,
-                                localizedStrings.iStable,
-                                weightInfo?.isStable,
-                                1,
-                              ),
-                              _buildIconAndText(
-                                context,
-                                localizedStrings.iTextNet,
-                                weightInfo?.isNet,
-                                2,
-                              ),
-                              _buildIconAndText(
-                                context,
-                                localizedStrings.iTextZero,
-                                weightInfo?.isZero,
-                                3,
-                              )
-                            ],
-                          ),
-                        ),
-                        Spacer(),
-                        if (widget.isS15)
-                          SizedBox(
-                            height: 40,
-                            child: IconButton(
-                                icon: Icon(
-                                  Icons.cleaning_services_outlined,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                                tooltip: localizedStrings.btnForceClearTare,
-                                onPressed: () {
-                                  showDialog(
-                                    context: context,
-                                    barrierDismissible: false,
-                                    builder: (BuildContext context) {
-                                      return ShowNormalTipDialog(
-                                        title: localizedStrings.fTipTitle,
-                                        msg: localizedStrings.tipForceClearTare,
-                                      );
-                                    },
-                                  ).then((value) {
-                                    if (value == null) {
-                                      return;
-                                    }
-                                    if (value) {
-                                      PublicFunctions.forceUntare(
-                                          widget.scaleId);
-                                    }
-                                  });
-                                }),
-                          ),
-                        SizedBox(
-                          width: 190,
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              showPerformIconBtn(
-                                  highLowSettingSvgIcon(),
-                                  localizedStrings.iTitleHLSetting,
-                                  isStart
-                                      ? () {
-                                          highLowSettingDialog(context);
-                                        }
-                                      : null),
-                              SizedBox(
-                                width: smallPadding,
-                              ),
-                              showPerformIconBtn(
-                                  performTareSvgIcon(),
-                                  localizedStrings.gBtnTare,
-                                  isStart
-                                      ? () {
-                                          tareByScaleId(widget.scaleId);
-                                        }
-                                      : null),
-                              SizedBox(
-                                width: smallPadding,
-                              ),
-                              showPerformIconBtn(
-                                  performZeroSvgIcon(),
-                                  localizedStrings.iBtnZero,
-                                  isStart
-                                      ? () {
-                                          zeroByScaleId(widget.scaleId);
-                                        }
-                                      : null),
-                              SizedBox(
-                                width: smallPadding,
-                              ),
-                              Tooltip(
-                                  message: localizedStrings.gBtnSave,
-                                  child: IconButton(
-                                      iconSize: 28,
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .onTertiaryFixedVariant,
-                                      focusColor:
-                                          Theme.of(context).colorScheme.outline,
-                                      hoverColor: Theme.of(context)
-                                          .colorScheme
-                                          .onPrimary
-                                          .withValues(alpha: 0.1),
-                                      style: IconButton.styleFrom(
-                                        disabledBackgroundColor:
-                                            Theme.of(context)
-                                                .colorScheme
-                                                .surfaceContainerLow,
-                                        backgroundColor: Theme.of(context)
-                                            .colorScheme
-                                            .onTertiaryFixedVariant,
-                                        shape: RoundedRectangleBorder(
-                                          // 设置为矩形形状
-                                          borderRadius:
-                                              BorderRadius.zero, // 没有圆角，即正方形
-                                        ),
-                                        fixedSize: const Size(28, 28), // 设置固定大小
+                        Container(
+                            height: 52,
+                            color: Theme.of(context).colorScheme.surface,
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: 104,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                    children: [
+                                      _buildIconAndText(
+                                        context,
+                                        localizedStrings.iStable,
+                                        currentInfo?.isStable,
+                                        1,
                                       ),
-                                      onPressed: isStart &&
-                                              _isSaveBtnEnable &&
-                                              weightInfo!.isStable!
-                                          ? () {
-                                              _changeSaveButton();
+                                      _buildIconAndText(
+                                        context,
+                                        localizedStrings.iTextNet,
+                                        currentInfo?.isNet,
+                                        2,
+                                      ),
+                                      _buildIconAndText(
+                                        context,
+                                        localizedStrings.iTextZero,
+                                        currentInfo?.isZero,
+                                        3,
+                                      )
+                                    ],
+                                  ),
+                                ),
+                                Spacer(),
+                                if (widget.isS15)
+                                  SizedBox(
+                                    height: 40,
+                                    child: IconButton(
+                                        icon: Icon(
+                                          Icons.cleaning_services_outlined,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
+                                        tooltip: localizedStrings.btnForceClearTare,
+                                        onPressed: () {
+                                          showDialog(
+                                            context: context,
+                                            barrierDismissible: false,
+                                            builder: (BuildContext context) {
+                                              return ShowNormalTipDialog(
+                                                title: localizedStrings.fTipTitle,
+                                                msg: localizedStrings.tipForceClearTare,
+                                              );
+                                            },
+                                          ).then((value) {
+                                            if (value == null) {
+                                              return;
                                             }
-                                          : null,
-                                      icon: getSvgIcon(
-                                          saveSvgIcon(),
-                                          28,
-                                          28,
-                                          isStart &&
-                                                  _isSaveBtnEnable &&
-                                                  weightInfo!.isStable!
-                                              ? Theme.of(context)
+                                            if (value) {
+                                              PublicFunctions.forceUntare(
+                                                  widget.scaleId);
+                                            }
+                                          });
+                                        }),
+                                  ),
+                                SizedBox(
+                                  width: 190,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      showPerformIconBtn(
+                                          highLowSettingSvgIcon(),
+                                          localizedStrings.iTitleHLSetting,
+                                          isStart
+                                              ? () {
+                                                  highLowSettingDialog(context);
+                                                }
+                                              : null),
+                                      SizedBox(
+                                        width: smallPadding,
+                                      ),
+                                      showPerformIconBtn(
+                                          performTareSvgIcon(),
+                                          localizedStrings.gBtnTare,
+                                          isStart
+                                              ? () {
+                                                  tareByScaleId(widget.scaleId);
+                                                }
+                                              : null),
+                                      SizedBox(
+                                        width: smallPadding,
+                                      ),
+                                      showPerformIconBtn(
+                                          performZeroSvgIcon(),
+                                          localizedStrings.iBtnZero,
+                                          isStart
+                                              ? () {
+                                                  zeroByScaleId(widget.scaleId);
+                                                }
+                                              : null),
+                                      SizedBox(
+                                        width: smallPadding,
+                                      ),
+                                      Tooltip(
+                                          message: localizedStrings.gBtnSave,
+                                          child: IconButton(
+                                              iconSize: 28,
+                                              color: Theme.of(context)
+                                                  .colorScheme
+                                                  .onTertiaryFixedVariant,
+                                              focusColor:
+                                                  Theme.of(context).colorScheme.outline,
+                                              hoverColor: Theme.of(context)
                                                   .colorScheme
                                                   .onPrimary
-                                              : Theme.of(context)
-                                                  .colorScheme
-                                                  .surfaceContainerHighest))),
-                            ],
-                          ),
-                        )
-                      ],
-                    )),
-                Divider(
-                  height: 1,
-                  color: Theme.of(context).colorScheme.surfaceContainerLow,
-                ),
-                Container(
-                  height: 60,
-                  color: (lowValue == 0 && highValue == 0 ||
-                          !isStart ||
-                          (!_isHigh && !_isOK && !_isLow))
-                      ? Colors.transparent
-                      : (_isHigh
-                          ? Theme.of(context).colorScheme.error
-                          : (_isOK
-                              ? Theme.of(context)
-                                  .colorScheme
-                                  .onTertiaryFixedVariant
-                              : Theme.of(context)
-                                  .colorScheme
-                                  .onTertiaryContainer)),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      Expanded(
-                          child: Container(
-                        alignment: Alignment.centerRight,
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown, // 当文字溢出时缩小字体
-                          alignment: Alignment.centerRight,
-                          child: Text(weightInfo?.weightVal ?? '---------',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.right,
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .headlineLarge!
-                                  .copyWith(
-                                    fontSize: 40,
-                                    color: (lowValue == 0 && highValue == 0 ||
-                                            !isStart ||
-                                            (!_isHigh && !_isOK && !_isLow))
-                                        ? (isStart
-                                            ? Theme.of(context)
-                                                .colorScheme
-                                                .onTertiaryFixedVariant
-                                            : Theme.of(context)
-                                                .colorScheme
-                                                .error)
-                                        : Colors.white,
-                                  )),
+                                                  .withValues(alpha: 0.1),
+                                              style: IconButton.styleFrom(
+                                                disabledBackgroundColor:
+                                                    Theme.of(context)
+                                                        .colorScheme
+                                                        .surfaceContainerLow,
+                                                backgroundColor: Theme.of(context)
+                                                    .colorScheme
+                                                    .onTertiaryFixedVariant,
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius:
+                                                      BorderRadius.zero,
+                                                ),
+                                                fixedSize: const Size(28, 28),
+                                              ),
+                                              onPressed: isStart &&
+                                                      _isSaveBtnEnable &&
+                                                      currentInfo != null &&
+                                                      currentInfo.isStable == true
+                                                  ? () {
+                                                      _changeSaveButton();
+                                                    }
+                                                  : null,
+                                              icon: getSvgIcon(
+                                                  saveSvgIcon(),
+                                                  28,
+                                                  28,
+                                                  isStart &&
+                                                          _isSaveBtnEnable &&
+                                                          currentInfo != null &&
+                                                          currentInfo.isStable == true
+                                                      ? Theme.of(context)
+                                                          .colorScheme
+                                                          .onPrimary
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .surfaceContainerHighest))),
+                                    ],
+                                  ),
+                                )
+                              ],
+                            )),
+                        Divider(
+                          height: 1,
+                          color: Theme.of(context).colorScheme.surfaceContainerLow,
                         ),
-                      )),
-                      Container(
-                        width: 60,
-                        height: 60,
-                        alignment: Alignment.bottomLeft,
-                        child: Text(weightInfo?.weightUnit ?? '----',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodyLarge!.apply(
-                                  color: (lowValue == 0 && highValue == 0 ||
-                                          !isStart ||
-                                          (!_isHigh && !_isOK && !_isLow))
-                                      ? Theme.of(context).colorScheme.onSurface
-                                      : Colors.white,
-                                )),
-                      )
-                    ],
-                  ),
+                        ValueListenableBuilder<bool>(
+                          valueListenable: _isHighNotifier,
+                          builder: (context, isHigh, child) {
+                            return ValueListenableBuilder<bool>(
+                              valueListenable: _isOKNotifier,
+                              builder: (context, isOK, child) {
+                                return ValueListenableBuilder<bool>(
+                                  valueListenable: _isLowNotifier,
+                                  builder: (context, isLow, child) {
+                                    return Container(
+                                      height: 60,
+                                      color: (lowValue == 0 && highValue == 0 ||
+                                              !isStart ||
+                                              (!isHigh && !isOK && !isLow))
+                                          ? Colors.transparent
+                                          : (isHigh
+                                              ? Theme.of(context).colorScheme.error
+                                              : (isOK
+                                                  ? Theme.of(context)
+                                                      .colorScheme
+                                                      .onTertiaryFixedVariant
+                                                  : Theme.of(context)
+                                                      .colorScheme
+                                                      .onTertiaryContainer)),
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: [
+                                          Expanded(
+                                              child: Container(
+                                            alignment: Alignment.centerRight,
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              alignment: Alignment.centerRight,
+                                              child: Text(currentInfo?.weightVal ?? '---------',
+                                                  maxLines: 1,
+                                                  overflow: TextOverflow.ellipsis,
+                                                  textAlign: TextAlign.right,
+                                                  style: Theme.of(context)
+                                                      .textTheme
+                                                      .headlineLarge!
+                                                      .copyWith(
+                                                        fontSize: 40,
+                                                        color: (lowValue == 0 && highValue == 0 ||
+                                                                !isStart ||
+                                                                (!isHigh && !isOK && !isLow))
+                                                            ? (isStart
+                                                                ? Theme.of(context)
+                                                                    .colorScheme
+                                                                    .onTertiaryFixedVariant
+                                                                : Theme.of(context)
+                                                                    .colorScheme
+                                                                    .error)
+                                                            : Colors.white,
+                                                      )),
+                                            ),
+                                          )),
+                                          Container(
+                                            width: 60,
+                                            height: 60,
+                                            alignment: Alignment.bottomLeft,
+                                            child: Text(currentInfo?.weightUnit ?? '----',
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                                style: Theme.of(context).textTheme.bodyLarge!.apply(
+                                                      color: (lowValue == 0 && highValue == 0 ||
+                                                              !isStart ||
+                                                              (!isHigh && !isOK && !isLow))
+                                                          ? Theme.of(context).colorScheme.onSurface
+                                                          : Colors.white,
+                                                    )),
+                                          )
+                                        ],
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                            );
+                          },
+                        ),
+                      ],
+                    );
+                  },
                 ),
               ],
             ),
