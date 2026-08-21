@@ -7,6 +7,7 @@ import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/icons.dart';
 import 'package:t_max/data/language.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
+import 'package:t_max/eventbus/eventbus.dart';
 import 'package:t_max/widget/no_device_widget.dart';
 
 // 封装成 StatefulWidget
@@ -515,6 +516,27 @@ class NewAllScaleListWidget extends StatefulWidget {
 }
 
 class _NewAllScaleListWidgetState extends State<NewAllScaleListWidget> {
+  StreamSubscription? _eventbusNet;
+  StreamSubscription? _eventbusOnline;
+
+  @override
+  void initState() {
+    super.initState();
+    _eventbusNet = eventBus.on<EventRespCheckNetScale>().listen((event) {
+      if (mounted) setState(() {});
+    });
+    _eventbusOnline = eventBus.on<EventRespScaleOnline>().listen((event) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _eventbusNet?.cancel();
+    _eventbusOnline?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -706,6 +728,27 @@ class NewComScaleListWidget extends StatefulWidget {
 
 class _NewComScaleListWidgetState extends State<NewComScaleListWidget> {
   List<Scale> comScalesList = [];
+  StreamSubscription? _eventbusNet;
+  StreamSubscription? _eventbusOnline;
+
+  @override
+  void initState() {
+    super.initState();
+    _eventbusNet = eventBus.on<EventRespCheckNetScale>().listen((event) {
+      if (mounted) setState(() {});
+    });
+    _eventbusOnline = eventBus.on<EventRespScaleOnline>().listen((event) {
+      if (mounted) setState(() {});
+    });
+  }
+
+  @override
+  void dispose() {
+    _eventbusNet?.cancel();
+    _eventbusOnline?.cancel();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     comScalesList.clear();

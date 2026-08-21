@@ -210,29 +210,35 @@ class FormulaIOService {
     int currentIndex = 0;
 
     timerController.stream.listen((Timer timer) {
-      debugPrint('Sending batch ${currentIndex + 1}...');
-      if (currentIndex < totalItems) {
-        int endIndex = currentIndex + batchSize;
-        endIndex = endIndex < totalItems ? endIndex : totalItems;
-        List<ImportFmaInfo> batch = [];
+      try {
+        debugPrint('Sending batch ${currentIndex + 1}...');
+        if (currentIndex < totalItems) {
+          int endIndex = currentIndex + batchSize;
+          endIndex = endIndex < totalItems ? endIndex : totalItems;
+          List<ImportFmaInfo> batch = [];
 
-        for (int i = currentIndex; i < endIndex; i++) {
-          batch.add(dataList[i]);
+          for (int i = currentIndex; i < endIndex; i++) {
+            batch.add(dataList[i]);
+          }
+
+          FmaImportFmt importFmaList = FmaImportFmt(
+            fmaInfo: batch,
+            createBy: mySysUser.nickName!,
+          );
+
+          String jsonStr = importFmaInfoToJson(importFmaList);
+          PublicFunctions.importFmaList(jsonStr);
+
+          currentIndex += batchSize;
+        } else {
+          timerController.close();
+          timer.cancel();
+          eventBus.fire(EventImportFmaOK(''));
         }
-
-        FmaImportFmt importFmaList = FmaImportFmt(
-          fmaInfo: batch,
-          createBy: mySysUser.nickName!,
-        );
-
-        String jsonStr = importFmaInfoToJson(importFmaList);
-        PublicFunctions.importFmaList(jsonStr);
-
-        currentIndex += batchSize;
-      } else {
+      } catch (e) {
         timerController.close();
         timer.cancel();
-        eventBus.fire(EventImportFmaOK(''));
+        debugPrint("sendFmaListInBatches error: $e");
       }
     });
   }

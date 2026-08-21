@@ -187,3 +187,53 @@ class DarfFmaInfo {
 typedef DraftFmaInfo = DarfFmaInfo;
 typedef DraftFmaInfoListFromDb = DarfFmaInfoListFromDb;
 
+class ReqGetDraftFormulaRecByPage {
+  int page;
+  int pageSize;
+  String searchText;
+  String sortColumn;
+  bool sortAsc;
+
+  ReqGetDraftFormulaRecByPage({
+    this.page = 1,
+    this.pageSize = 20,
+    this.searchText = '',
+    this.sortColumn = '',
+    this.sortAsc = true,
+  });
+
+  Map<String, dynamic> toJson() => {
+        'page': page,
+        'pageSize': pageSize,
+        'searchText': searchText,
+        'sortColumn': sortColumn,
+        'sortAsc': sortAsc,
+      };
+}
+
+class RespDraftFormulaRecByPage {
+  int page;
+  int pageSize;
+  int totalCount;
+  List<DarfFmaInfoListFromDb> list;
+
+  RespDraftFormulaRecByPage({
+    required this.page,
+    required this.pageSize,
+    required this.totalCount,
+    required this.list,
+  });
+
+  factory RespDraftFormulaRecByPage.fromJson(Map<String, dynamic> json) {
+    return RespDraftFormulaRecByPage(
+      page: json['page'] ?? 1,
+      pageSize: json['pageSize'] ?? 20,
+      totalCount: json['totalCount'] ?? 0,
+      list: json['list'] == null
+          ? []
+          : List<DarfFmaInfoListFromDb>.from(
+              json['list'].map((x) => DarfFmaInfoListFromDb.fromJson(x))),
+    );
+  }
+}
+

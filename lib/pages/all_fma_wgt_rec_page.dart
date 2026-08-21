@@ -239,6 +239,7 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
 
   @override
   void dispose() {
+    _dataGridController.dispose();
     _searchDebounce?.cancel();
     _eventBus1?.cancel();
     _eventbus2?.cancel();

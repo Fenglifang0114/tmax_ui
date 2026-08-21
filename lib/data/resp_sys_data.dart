@@ -65,6 +65,19 @@ class RespSysMsgType {
   static const String respFormulaDelete = 'resp_formula_delete';
   static const String respFormulaRecList = 'resp_formula_rec_list';
   static const String respFormulaRecByPage = 'resp_formula_rec_by_page';
+  static const String respDraftFormulaRecByPage =
+      'resp_draft_formula_rec_by_page';
+  static const String respAllDraftFormulaRecForExport =
+      'resp_all_draft_formula_rec_for_export';
+  static const String respRawMaterialByPage = 'resp_raw_material_by_page';
+  static const String respRawMaterialDict = 'resp_raw_material_dict';
+  static const String respAllRawMaterialsForExport =
+      'resp_all_raw_materials_for_export';
+  static const String respFormulaByPage = 'resp_formula_by_page';
+  static const String respFormulaDetailsByRecId =
+      'resp_formula_details_by_rec_id';
+  static const String respAllFormulasForExport =
+      'resp_all_formulas_for_export';
   static const String respOneFmaRecList = 'resp_one_fma_rec_list';
   static const String respFormulaRecAdd = 'resp_formula_rec_add';
   static const String respRawTypeAdd = 'resp_raw_type_add';
@@ -199,6 +212,15 @@ class RespSysMsgType {
     RespSysMsgType.respFormulaDelete: handleFormulaDelete,
     RespSysMsgType.respFormulaRecList: handleFormulaRecList,
     RespSysMsgType.respFormulaRecByPage: handleFormulaRecByPage,
+    RespSysMsgType.respDraftFormulaRecByPage: handleDraftFormulaRecByPage,
+    RespSysMsgType.respAllDraftFormulaRecForExport:
+        handleAllDraftFormulaRecForExport,
+    RespSysMsgType.respRawMaterialByPage: handleRawMaterialByPage,
+    RespSysMsgType.respRawMaterialDict: handleRawMaterialDict,
+    RespSysMsgType.respAllRawMaterialsForExport: handleAllRawMaterialsForExport,
+    RespSysMsgType.respFormulaByPage: handleFormulaByPage,
+    RespSysMsgType.respFormulaDetailsByRecId: handleFormulaDetailsByRecId,
+    RespSysMsgType.respAllFormulasForExport: handleAllFormulasForExport,
     RespSysMsgType.respOneFmaRecList: handleOneFmaRecList,
     RespSysMsgType.respDelFormulaWgtRecBatch: handleDelFormulaWgtRecBatch,
     RespSysMsgType.respDelAllFormulaWgtRec: handleDelAllFormulaWgtRec,
@@ -798,6 +820,46 @@ class RespSysMsgType {
 
   static void handleRawTypeDelete(dynamic jsonData) {
     eventBus.fire(EventRespRawTypeAdd(''));
+  }
+
+  static void handleDraftFormulaRecByPage(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespDraftFormulaRecByPage(dataString));
+  }
+
+  static void handleAllDraftFormulaRecForExport(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespAllDraftFormulaRecForExport(dataString));
+  }
+
+  static void handleRawMaterialByPage(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespRawMaterialByPage(dataString));
+  }
+
+  static void handleRawMaterialDict(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespRawMaterialDict(dataString));
+  }
+
+  static void handleAllRawMaterialsForExport(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespAllRawMaterialsForExport(dataString));
+  }
+
+  static void handleFormulaByPage(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespFormulaByPage(dataString));
+  }
+
+  static void handleFormulaDetailsByRecId(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespFormulaDetailsByRecId(dataString));
+  }
+
+  static void handleAllFormulasForExport(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespAllFormulasForExport(dataString));
   }
 
   static void handleGetUIConf(String data) {

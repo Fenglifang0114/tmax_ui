@@ -12,6 +12,7 @@ class ScaleLiveStreamService {
   int selScaleId = -1;
   Timer? _cntAliveTimer;
   Timer? checkWgtStartTimer;
+  Timer? _checkDataRevTimer;
   StreamSubscription? _eventbusSubscription;
 
   final ValueNotifier<bool> isWgtStartNotifier = ValueNotifier(false);
@@ -100,7 +101,7 @@ class ScaleLiveStreamService {
 
   /// 1s 超时检测，超过2s没收到数据重置并重新请求
   void checkDataRevTimer() {
-    checkWgtStartTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    _checkDataRevTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (selScaleId != -1) {
         if (lastDataReceivedTime != null) {
           final timeDifference =
@@ -142,6 +143,7 @@ class ScaleLiveStreamService {
   void dispose() {
     _eventbusSubscription?.cancel();
     checkWgtStartTimer?.cancel();
+    _checkDataRevTimer?.cancel();
     stopCntAliveTimer();
     if (selScaleId != -1) {
       PublicFunctions.stopWeight(selScaleId);

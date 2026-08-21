@@ -61,6 +61,9 @@ class FormulationScalePageState extends State<FormulationScalePage>
   DarfFmaInfo? selectedDarfFma;
   List<DarfFmaInfo> selDarftFmaList = [];
   Timer? _onlineTimer;
+  Timer? _fmaSearchDebouncer;
+  Timer? _rawSearchDebouncer;
+  final Map<String, List<FormulaInfoDb>> _rawToFormulasMap = {};
 
   bool sendNext = false;
   bool isExit = false;
@@ -213,6 +216,7 @@ class FormulationScalePageState extends State<FormulationScalePage>
                 formulaInfoDbFromJson(dataStr);
             formulaDataList = List.from(tempFmaDataList);
             searchFmaList = List.from(formulaDataList);
+            _buildRawToFormulasMap();
           });
         } else {
           setState(() {
@@ -221,6 +225,7 @@ class FormulationScalePageState extends State<FormulationScalePage>
             selectedDetail = Detail();
             formulaDataList = [];
             searchFmaList = [];
+            _buildRawToFormulasMap();
           });
         }
         PublicFunctions.getDraftRecords();
@@ -300,11 +305,11 @@ class FormulationScalePageState extends State<FormulationScalePage>
     });
 
     _eventbus13 = eventBus.on<EventRespCheckNetScale>().listen((event) {
-      if (mounted) setState(() {});
+      // 秤网络状态由 NewAllScaleListWidget 局部监听并渲染，避免顶层全页重绘
     });
 
     _eventbus14 = eventBus.on<EventRespScaleOnline>().listen((event) {
-      if (mounted) setState(() {});
+      // 秤在线状态由 NewAllScaleListWidget 局部监听并渲染，避免顶层全页重绘
     });
 
     _eventbus15 = eventBus.on<EventImportRawOK>().listen((event) {
@@ -440,20 +445,27 @@ class FormulationScalePageState extends State<FormulationScalePage>
           setState(() {
             _selectedRawIndex = -1;
             List<FormulaInfoDb> tempFmaData = formulaInfoDbFromJson(dataStr);
-            bool findFma = false;
-            for (int i = 0; i < formulaDataList.length; i++) {
-              if (formulaDataList[i].header?.recId ==
-                  tempFmaData.first.header?.recId) {
-                formulaDataList[i] = tempFmaData.first;
-                findFma = true;
-                getDarftFmaInfo(tempFmaData.first.header?.recId ?? 0);
-                break;
+            if (tempFmaData.isNotEmpty) {
+              final newFma = tempFmaData.first;
+              bool findFma = false;
+              for (int i = 0; i < formulaDataList.length; i++) {
+                final existingHeader = formulaDataList[i].header;
+                if ((existingHeader?.recId != null &&
+                        existingHeader?.recId == newFma.header?.recId) ||
+                    (existingHeader?.formulaId != null &&
+                        existingHeader?.formulaId == newFma.header?.formulaId)) {
+                  formulaDataList[i] = newFma;
+                  findFma = true;
+                  getDarftFmaInfo(newFma.header?.recId ?? 0);
+                  break;
+                }
               }
+              if (!findFma) {
+                formulaDataList.add(newFma);
+              }
+              searchFmaList = List.from(formulaDataList);
+              _buildRawToFormulasMap();
             }
-            if (!findFma) {
-              formulaDataList.add(tempFmaData.first);
-            }
-            searchFmaList = List.from(formulaDataList);
           });
         } else {
           setState(() {
@@ -526,9 +538,9 @@ class FormulationScalePageState extends State<FormulationScalePage>
     formulaDataList.clear();
     darfFmaInfoList.clear();
 
-    searchFmaList.clear();
-    searchRawList.clear();
-    searchDarfFmaInfoList.clear();
+    _fmaSearchDebouncer?.cancel();
+    _rawSearchDebouncer?.cancel();
+    _rawToFormulasMap.clear();
 
     selectedDetail = Detail();
     stopTestScaleOnline();
@@ -575,6 +587,33 @@ class FormulationScalePageState extends State<FormulationScalePage>
   void stopTestScaleOnline() {
     _onlineTimer?.cancel();
     _onlineTimer = null;
+  }
+
+  void _buildRawToFormulasMap() {
+    _rawToFormulasMap.clear();
+    for (var formula in formulaDataList) {
+      if (formula.details == null) continue;
+      for (var detail in formula.details!) {
+        final matId = detail.materialId;
+        if (matId != null && matId.isNotEmpty) {
+          _rawToFormulasMap.putIfAbsent(matId, () => []).add(formula);
+        }
+      }
+    }
+  }
+
+  void performFmaSearchDebounced() {
+    _fmaSearchDebouncer?.cancel();
+    _fmaSearchDebouncer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) performFmaSearch();
+    });
+  }
+
+  void performRawSearchDebounced() {
+    _rawSearchDebouncer?.cancel();
+    _rawSearchDebouncer = Timer(const Duration(milliseconds: 300), () {
+      if (mounted) performRawSearch();
+    });
   }
 
   void clearFmaSearch() {
@@ -849,17 +888,10 @@ class FormulationScalePageState extends State<FormulationScalePage>
                                 rawDataList: rawDataList,
                                 searchRawList: searchRawList,
                                 onRawSelected: (raw) {
-                                  if (raw != null) {
+                                  if (raw != null && raw.materialId != null) {
                                     setState(() {
-                                      rawFormulaList = [];
-                                      for (var formula in formulaDataList) {
-                                        for (var detail in formula.details!) {
-                                          if (detail.materialId == raw.materialId) {
-                                            rawFormulaList.add(formula);
-                                            break;
-                                          }
-                                        }
-                                      }
+                                      rawFormulaList =
+                                          List.from(_rawToFormulasMap[raw.materialId!] ?? []);
                                     });
                                   } else {
                                     setState(() {

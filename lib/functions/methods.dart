@@ -655,6 +655,62 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
+  // 分页获取暂存配方称重记录
+  static void getDraftFormulaRecByPage(String jsonStr) {
+    myScaleCmd.cmdMode = "get_draft_formula_rec_by_page";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  // 导出获取所有暂存配方称重记录
+  static void getAllDraftFormulaRecForExport(String jsonStr) {
+    myScaleCmd.cmdMode = "get_all_draft_formula_rec_for_export";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  // 分页与全局排序获取原料列表
+  static void getRawMaterialByPage(String jsonStr) {
+    myScaleCmd.cmdMode = "get_raw_material_by_page";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  // 获取原料轻量字典（ID + 名称）
+  static void getRawMaterialDict() {
+    myScaleCmd.cmdMode = "get_raw_material_dict";
+    myScaleCmd.cmdData = '';
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  // 导出获取所有原料列表
+  static void getAllRawMaterialsForExport(String jsonStr) {
+    myScaleCmd.cmdMode = "get_all_raw_materials_for_export";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  // 分页与全局排序获取配方列表
+  static void getFormulaByPage(String jsonStr) {
+    myScaleCmd.cmdMode = "get_formula_by_page";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  // 懒加载获取单条配方工序明细
+  static void getFormulaDetailsByRecId(String recId) {
+    myScaleCmd.cmdMode = "get_formula_details_by_rec_id";
+    myScaleCmd.cmdData = recId;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
+  // 导出获取所有配方列表
+  static void getAllFormulasForExport(String jsonStr) {
+    myScaleCmd.cmdMode = "get_all_formulas_for_export";
+    myScaleCmd.cmdData = jsonStr;
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
 
   //根据配方ID获取配方称重记录
   static void getOneFmaRecsById(String fmaId) {

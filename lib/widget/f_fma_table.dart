@@ -47,6 +47,12 @@ class _FormulaTableState extends State<FormulaTable> {
     _initializeDataSource();
   }
 
+  @override
+  void dispose() {
+    _dataGridController.dispose();
+    super.dispose();
+  }
+
   void _initializeDataSource() {
     _dataSource = FormulaDataSource(
       context: context,

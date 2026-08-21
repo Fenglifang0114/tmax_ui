@@ -125,6 +125,7 @@ class OneFmaWgtRecPageState extends State<OneFmaWgtRecPage> {
 
   @override
   void dispose() {
+    _dataGridController.dispose();
     _eventBus1?.cancel();
     _eventbus2?.cancel();
     _searchCtl.dispose();

@@ -9,6 +9,7 @@ List<CategoryTypeList> rawTypeList = [];
 List<CategoryTypeList> formulaTypeList = [];
 
 List<RawDataInfo> rawDataList = [];
+Map<String, String> rawDictCache = {};
 
 List<FormulaInfoDb> formulaDataList = [];
 List<FormulaInfoDb> searchFmaList = [];

@@ -46,6 +46,12 @@ class _RawMaterialTableState extends State<RawMaterialTable> {
     _initializeDataSource();
   }
 
+  @override
+  void dispose() {
+    _dataGridController.dispose();
+    super.dispose();
+  }
+
   void _initializeDataSource() {
     _dataSource = RawMaterialDataSource(
       context: context,

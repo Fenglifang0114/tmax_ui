@@ -26,6 +26,9 @@ String getRawCategoryName(String rawId) {
 }
 
 String getRawName(String rawId) {
+  if (rawDictCache.containsKey(rawId)) {
+    return rawDictCache[rawId]!;
+  }
   for (var item in rawDataList) {
     if (item.materialId == rawId) {
       return item.materialName!;

@@ -826,6 +826,46 @@ class EventRespAllFormulaRecForExport {
   EventRespAllFormulaRecForExport(this.obj);
 }
 
+class EventRespDraftFormulaRecByPage {
+  dynamic obj;
+  EventRespDraftFormulaRecByPage(this.obj);
+}
+
+class EventRespAllDraftFormulaRecForExport {
+  dynamic obj;
+  EventRespAllDraftFormulaRecForExport(this.obj);
+}
+
+class EventRespRawMaterialByPage {
+  dynamic obj;
+  EventRespRawMaterialByPage(this.obj);
+}
+
+class EventRespRawMaterialDict {
+  dynamic obj;
+  EventRespRawMaterialDict(this.obj);
+}
+
+class EventRespAllRawMaterialsForExport {
+  dynamic obj;
+  EventRespAllRawMaterialsForExport(this.obj);
+}
+
+class EventRespFormulaByPage {
+  dynamic obj;
+  EventRespFormulaByPage(this.obj);
+}
+
+class EventRespFormulaDetailsByRecId {
+  dynamic obj;
+  EventRespFormulaDetailsByRecId(this.obj);
+}
+
+class EventRespAllFormulasForExport {
+  dynamic obj;
+  EventRespAllFormulasForExport(this.obj);
+}
+
 
 
 /// 配方记录写入成功后触发的回调事件通知。

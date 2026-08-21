@@ -45,6 +45,12 @@ class _DarftFmaTableState extends State<DarftFmaTable> {
     _initializeDataSource();
   }
 
+  @override
+  void dispose() {
+    _dataGridController.dispose();
+    super.dispose();
+  }
+
   void _initializeDataSource() {
     _dataSource = DarftFmaDataSource(
       context: context,
