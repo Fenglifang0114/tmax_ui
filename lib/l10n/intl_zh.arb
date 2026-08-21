@@ -3831,5 +3831,17 @@
     "printPreview": "打印预览",
     "@printPreview": {
         "description": ""
+    },
+    "fPageSizeAndTotal": "每页: {pageSize}    共 {total} 条",
+    "@fPageSizeAndTotal": {
+        "description": "分页组件每页数量与总数提示",
+        "placeholders": {
+            "pageSize": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
     }
 }

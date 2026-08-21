@@ -3831,5 +3831,17 @@
     "printPreview": "Preview",
     "@printPreview": {
         "description": ""
+    },
+    "fPageSizeAndTotal": "Page size: {pageSize}    Total {total}",
+    "@fPageSizeAndTotal": {
+        "description": "Pagination info displaying page size and total records count",
+        "placeholders": {
+            "pageSize": {
+                "type": "int"
+            },
+            "total": {
+                "type": "int"
+            }
+        }
     }
 }

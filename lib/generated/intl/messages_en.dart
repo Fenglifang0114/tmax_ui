@@ -20,6 +20,9 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
+  static String m0(pageSize, total) =>
+      "Page size: ${pageSize}    Total ${total}";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "addFormula": MessageLookupByLibrary.simpleMessage("Add Formula"),
@@ -260,6 +263,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "fAverageSpeed": MessageLookupByLibrary.simpleMessage("Avg.Speed"),
     "fBackBtn": MessageLookupByLibrary.simpleMessage("Back"),
+    "fClearAll": MessageLookupByLibrary.simpleMessage("Clear All"),
     "fClearBtn": MessageLookupByLibrary.simpleMessage("Clear"),
     "fClearDataBtn": MessageLookupByLibrary.simpleMessage(
       "All data will be cleared. Please confirm ...",
@@ -272,6 +276,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "fCompleteIngredientsBtn": MessageLookupByLibrary.simpleMessage("Complete"),
     "fConfidential": MessageLookupByLibrary.simpleMessage("Confidential"),
+    "fConfirmClearAllFmaRecsMsg": MessageLookupByLibrary.simpleMessage(
+      "All formula weighing records in the database will be permanently cleared. Continue?",
+    ),
     "fConfirmClearAndEnterFreeModeMsg": MessageLookupByLibrary.simpleMessage(
       "The current data is not saved. Confirm to clear and enable the free formula mode?",
     ),
@@ -304,6 +311,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fEditRawMaterialTypeBtn": MessageLookupByLibrary.simpleMessage(
       "Edit Ingredient Category",
     ),
+    "fExportAllRecordsBtn": MessageLookupByLibrary.simpleMessage("Export All"),
     "fExportRecordsBtn": MessageLookupByLibrary.simpleMessage("Export Records"),
     "fFlowRate": MessageLookupByLibrary.simpleMessage("Liquid Filling Speed"),
     "fFmaBarcode": MessageLookupByLibrary.simpleMessage("Barcode"),
@@ -423,6 +431,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fNoFmaFound": MessageLookupByLibrary.simpleMessage("No formula found"),
     "fNoRecordTip": MessageLookupByLibrary.simpleMessage("No records"),
     "fOrderNo": MessageLookupByLibrary.simpleMessage("No."),
+    "fPageSizeAndTotal": m0,
     "fPctMode": MessageLookupByLibrary.simpleMessage("Percentage"),
     "fPleaseSelectCategory": MessageLookupByLibrary.simpleMessage("Category"),
     "fPluExist": MessageLookupByLibrary.simpleMessage("PLU already exists"),

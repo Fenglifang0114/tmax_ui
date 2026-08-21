@@ -20,6 +20,8 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'zh';
 
+  static String m0(pageSize, total) => "每页: ${pageSize}    共 ${total} 条";
+
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
     "addFormula": MessageLookupByLibrary.simpleMessage("新增配方"),
@@ -184,6 +186,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "fAverageSpeed": MessageLookupByLibrary.simpleMessage("平均速度"),
     "fBackBtn": MessageLookupByLibrary.simpleMessage("返回"),
+    "fClearAll": MessageLookupByLibrary.simpleMessage("清空全部"),
     "fClearBtn": MessageLookupByLibrary.simpleMessage("清空"),
     "fClearDataBtn": MessageLookupByLibrary.simpleMessage("即将清空所有数据，请确认！"),
     "fClearSearchConditionBtn": MessageLookupByLibrary.simpleMessage("清除搜索条件"),
@@ -192,6 +195,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "fCompleteIngredientsBtn": MessageLookupByLibrary.simpleMessage("完成配料"),
     "fConfidential": MessageLookupByLibrary.simpleMessage("保密"),
+    "fConfirmClearAllFmaRecsMsg": MessageLookupByLibrary.simpleMessage(
+      "全库所有配方称重记录将被永久清空且无法恢复，确认清空吗？",
+    ),
     "fConfirmClearAndEnterFreeModeMsg": MessageLookupByLibrary.simpleMessage(
       "当前数据未保存，确认清空并开启自由配料模式吗？",
     ),
@@ -212,6 +218,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fEditFormulaTypeBtn": MessageLookupByLibrary.simpleMessage("编辑配方类型"),
     "fEditMaterial": MessageLookupByLibrary.simpleMessage("编辑原料"),
     "fEditRawMaterialTypeBtn": MessageLookupByLibrary.simpleMessage("编辑原料类型"),
+    "fExportAllRecordsBtn": MessageLookupByLibrary.simpleMessage("导出全部"),
     "fExportRecordsBtn": MessageLookupByLibrary.simpleMessage("导出记录"),
     "fFlowRate": MessageLookupByLibrary.simpleMessage("流速"),
     "fFmaBarcode": MessageLookupByLibrary.simpleMessage("验证条码"),
@@ -287,6 +294,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fNoFmaFound": MessageLookupByLibrary.simpleMessage("未查询到配方"),
     "fNoRecordTip": MessageLookupByLibrary.simpleMessage("没有记录"),
     "fOrderNo": MessageLookupByLibrary.simpleMessage("单号"),
+    "fPageSizeAndTotal": m0,
     "fPctMode": MessageLookupByLibrary.simpleMessage("百分比"),
     "fPleaseSelectCategory": MessageLookupByLibrary.simpleMessage("类别"),
     "fPluExist": MessageLookupByLibrary.simpleMessage("PLU已存在"),

@@ -277,7 +277,8 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
 
       _orderDataList.add(OrderData(header: fmaRec.header, isHeader: true));
 
-      if (_expandedOrders[fmaRec.header!.recordId!] == true && fmaRec.details != null) {
+      if (_expandedOrders[fmaRec.header!.recordId!] == true &&
+          fmaRec.details != null) {
         for (final detail in fmaRec.details!) {
           _orderDataList.add(
             OrderData(
@@ -359,7 +360,6 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
 
   // 计算总页数
   int get _totalPages => totalItems > 0 ? (totalItems / _pageSize).ceil() : 1;
-
 
   // 数据源实例
   OrderDataSource? _dataSource;
@@ -868,16 +868,14 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
             "",
             "",
             "",
-            detail.sequence == 0 ||
-                    headerData!.isEncrypted.toString() == "true"
+            detail.sequence == 0 || headerData!.isEncrypted.toString() == "true"
                 ? '-'
                 : detail.targetWgt.toString(),
             (detail.sequence == 0 ||
                     headerData!.isEncrypted.toString() != "true")
                 ? detail.actualWeight.toString()
                 : "-",
-            detail.sequence == 0 ||
-                    headerData!.isEncrypted.toString() == "true"
+            detail.sequence == 0 || headerData!.isEncrypted.toString() == "true"
                 ? '-'
                 : headerData.formulaMode! == "pct"
                     ? (detail.allowableError! *
@@ -885,13 +883,11 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
                             100)
                         .toStringAsFixed(3)
                     : detail.allowableError!.toString(),
-            detail.sequence == 0 ||
-                    headerData!.isEncrypted.toString() == "true"
+            detail.sequence == 0 || headerData!.isEncrypted.toString() == "true"
                 ? '-'
                 : detail.actualErrorWgt.toString(),
             headerData!.totalWeightUnit!,
-            detail.sequence == 0 ||
-                    headerData.isEncrypted.toString() == "true"
+            detail.sequence == 0 || headerData.isEncrypted.toString() == "true"
                 ? '-'
                 : detail.isQualified.toString() == "ok"
                     ? "Pass"
@@ -976,7 +972,6 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
       PublicFunctions.getAllFormulaRecForExport(jsonEncode(reqMap));
     }
   }
-
 
   showFormulaSearch() {
     return Container(
@@ -1218,8 +1213,7 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
       context: context,
       builder: (context) => ShowDeleteTipDialog(
         title: localizedStrings.fTipTitle,
-        msg: localizedStrings.fConfirmClearAllFmaRecsMsg ??
-            '全库所有配方称重记录将被永久清空且无法恢复，确认清空吗？',
+        msg: localizedStrings.fConfirmClearAllFmaRecsMsg ?? '',
       ),
     ).then((confirmed) {
       if (confirmed == true) {
@@ -1229,7 +1223,6 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
   }
 
   void _handleBatchDelete() {
-
     List<String> selectedRecordIds = [];
     _selectedOrders.forEach((key, isSelected) {
       if (isSelected) {
@@ -1289,7 +1282,7 @@ class _AllFmaWgtRecPageState extends State<AllFmaWgtRecPage> {
             tooltip: '',
           ),
           const SizedBox(width: 20),
-          titleText('Page size: $_pageSize    Total ${_filteredList.length}  ')
+          titleText(localizedStrings.fPageSizeAndTotal(_pageSize, totalItems))
         ],
       ),
     );

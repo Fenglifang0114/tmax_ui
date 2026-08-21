@@ -1083,7 +1083,7 @@ class OneFmaWgtRecPageState extends State<OneFmaWgtRecPage> {
             tooltip: '',
           ),
           const SizedBox(width: 20),
-          titleText('Page size: $_pageSize    Total $totalItems  ')
+          titleText(localizedStrings.fPageSizeAndTotal(_pageSize, totalItems))
         ],
       ),
     );

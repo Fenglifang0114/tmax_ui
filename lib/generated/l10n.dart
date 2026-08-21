@@ -3896,7 +3896,6 @@ class S {
     );
   }
 
-
   /// `No.`
   String get fOrderNo {
     return Intl.message(
@@ -4186,7 +4185,6 @@ class S {
       args: [],
     );
   }
-
 
   /// `Please enter the notes.`
   String get fInputRemarkHint {
@@ -9257,6 +9255,16 @@ class S {
   /// `Preview`
   String get printPreview {
     return Intl.message('Preview', name: 'printPreview', desc: '', args: []);
+  }
+
+  /// `Page size: {pageSize}    Total {total}`
+  String fPageSizeAndTotal(int pageSize, int total) {
+    return Intl.message(
+      'Page size: $pageSize    Total $total',
+      name: 'fPageSizeAndTotal',
+      desc: 'Pagination info displaying page size and total records count',
+      args: [pageSize, total],
+    );
   }
 }
 
