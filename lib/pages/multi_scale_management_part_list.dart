@@ -222,7 +222,7 @@ extension MultiScaleManagementListExt on MultiScaleManagementState {
                               scale.mediaConfig as NetworkMediaConfig;
                           ipCtl.text = netConfig.ipAddress;
                           portCtl.text = netConfig.port.toString();
-                          if (scale.scaleModel == "S15") {
+                          if (isS15Model(scale.scaleModel)) {
                             comPortCtl.text = '';
                             baudRateCtl.text = '';
                             PublicFunctions.getSerialPort(scale.scaleId);

@@ -22,7 +22,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
             showItemNameWithStar(context, localizedStrings.gIpAddress, false),
             showInputBox(context, ipCtl, '', (value) {
               setState(() {});
-            }, scaleModelCtl.text != "S15"),
+            }, !isS15Model(scaleModelCtl.text)),
             showItemNameWithStar(context, localizedStrings.gTipPort, false),
             Container(
               height: inputHeight,
@@ -34,7 +34,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
                 borderRadius: BorderRadius.circular(0), // 设置圆角
               ),
               child: TextField(
-                enabled: scaleModelCtl.text != "S15",
+                enabled: !isS15Model(scaleModelCtl.text),
                 controller: portCtl,
                 decoration: InputDecoration(
                   hintStyle: TextStyle(
@@ -60,7 +60,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
           height: regularPadding,
         ),
 
-        if (scaleModelCtl.text == "S15")
+        if (isS15Model(scaleModelCtl.text))
           buildItemInfo(
             showItemNameWithStar(context, localizedStrings.gSerialPort, false),
             showDropDownButton(
@@ -100,7 +100,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
               },
             ),
           ),
-        if (scaleModelCtl.text == "S15")
+        if (isS15Model(scaleModelCtl.text))
           SizedBox(
             height: regularPadding,
           ),
@@ -132,7 +132,7 @@ extension MultiScaleManagementEditExt on MultiScaleManagementState {
                 context,
                 btnHeight,
                 localizedStrings.gBtnConfirm,
-                portCtl.text.isNotEmpty && _isValidIP && !isModifyingSerialPort && (scaleModelCtl.text != 'S15' || comPortCtl.text.isNotEmpty)
+                portCtl.text.isNotEmpty && _isValidIP && !isModifyingSerialPort && (!isS15Model(scaleModelCtl.text) || comPortCtl.text.isNotEmpty)
                     ? () {
                         editNetScale();
                       }

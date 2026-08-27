@@ -212,7 +212,7 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                       Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            scaleModelCtl.text == "S15"
+                            isS15Model(scaleModelCtl.text)
                                 ? SizedBox(
                                     width: inputWidth,
                                     child: showItemNameWithStar(context,
@@ -220,7 +220,7 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                                 : SizedBox(
                                     width: inputWidth,
                                   ),
-                            scaleModelCtl.text == "S15"
+                            isS15Model(scaleModelCtl.text)
                                 ? SizedBox(
                                     width: inputWidth,
                                     child: showInputBox(
@@ -233,11 +233,11 @@ extension MultiScaleManagementInfoExt on MultiScaleManagementState {
                           ])
                     ],
                   ),
-                  if (scaleModelCtl.text == "S15")
+                  if (isS15Model(scaleModelCtl.text))
                     const SizedBox(
                       height: regularPadding,
                     ),
-                  if (scaleModelCtl.text == "S15")
+                  if (isS15Model(scaleModelCtl.text))
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [

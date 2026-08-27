@@ -10,6 +10,7 @@ import 'package:t_max/data/log_data.dart';
 import 'package:t_max/data/received_wgt_value.dart';
 import 'package:t_max/data/reqweightdata_data.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/eventbus/eventbus.dart';
 import 'package:t_max/widget/common_widget.dart';
@@ -654,7 +655,7 @@ class CalibrationPageState extends State<CalibrationPage> {
                                   bool isS15 = false;
                                   for (var item in myAllScalesList) {
                                     if (item.scaleId == scale.scaleId) {
-                                      if (item.scaleModel != "S15") {
+                                      if (!isS15Model(item.scaleModel)) {
                                         showTipInfo(
                                             "Please select S15 scale", context);
                                       } else {

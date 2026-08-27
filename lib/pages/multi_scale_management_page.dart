@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:t_max/data/btinfodata.dart';
 import 'package:t_max/data/comscaleinfo_data.dart';
 import 'package:t_max/data/g_data.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/icons.dart';
 import 'package:t_max/data/modbus_data.dart';
@@ -264,7 +265,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
             if (isTesting) {
               showTipInfo(localizedStrings.fSuccessMsg, context);
             }
-            if (myFactoryInfoFromScale.modelName == "S15") {
+            if (isS15Model(myFactoryInfoFromScale.modelName) || isS15Model(scaleModelCtl.text)) {
               PublicFunctions.getSerialPort(myOnlineInfo.scaleId!);
             }
           } else {
@@ -660,7 +661,7 @@ class MultiScaleManagementState extends State<MultiScaleManagement> {
   }
 
   void editNetScale() {
-    if (scaleModelCtl.text == "S15") {
+    if (isS15Model(scaleModelCtl.text)) {
       String sendStr = comPortCtl.text;
       if (baudRateCtl.text.isNotEmpty) {
         sendStr += ",${baudRateCtl.text}";

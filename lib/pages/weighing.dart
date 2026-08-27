@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:t_max/data/home_page_common_data.dart';
 import 'package:t_max/data/received_wgt_value.dart';
 import 'package:t_max/data/scale_info_from_db.dart';
+import 'package:t_max/data/s15_tare_zero.dart';
 import 'package:t_max/data/sel_scales_in_app.dart';
 import 'package:t_max/dialog/custom_dialog_tip.dart';
 import 'package:t_max/widget/scale_list.dart';
@@ -251,11 +252,7 @@ class WeightModePageState extends State<WeightModePage> {
   bool getIsS15(int scaleId) {
     for (var item in myAllScalesList) {
       if (item.scaleId == scaleId) {
-        if (item.scaleModel == "S15") {
-          return true;
-        } else {
-          return false;
-        }
+        return isS15Model(item.scaleModel);
       }
     }
 
