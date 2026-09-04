@@ -1054,7 +1054,14 @@ class LabelDesignPageState extends State<LabelDesignPage> {
     return widgets;
   }
 
-  final List<String> _printers = ['EPM205', 'ZEBRA', 'LP50', 'TSC', 'SATO'];
+  final List<String> _printers = [
+    'EPM205',
+    'ZEBRA',
+    'LP50',
+    'TSC',
+    'SATO',
+    "BIXOLON"
+  ];
 
   void getLanguageVarMap() {
     if (langVarMap.isNotEmpty) {
