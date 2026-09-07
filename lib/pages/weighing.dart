@@ -233,6 +233,7 @@ class WeightModePageState extends State<WeightModePage> {
       mySelScaleIdList.add(scaleId);
       PublicFunctions.getWeight(scaleId);
     }
+    setSelScaleInApp();
     setState(() {}); // 强制刷新界面
     checkSameScale();
   }

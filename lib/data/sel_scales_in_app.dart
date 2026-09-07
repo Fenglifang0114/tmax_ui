@@ -2,13 +2,9 @@
 
 import 'package:shared_preferences/shared_preferences.dart';
 
-// 应用名称常量
+// 应用名称常量（称重、重量收集、检重秤、加法秤、减法秤统一共用一个 Key）
 class AppNames {
   static const String weighing = "weighing";
-  static const String weda = "weda";
-  static const String chwe = "chwe";
-  static const String insc = "insc";
-  static const String taou = "taou";
 }
 
 class AppSelScalesManager {

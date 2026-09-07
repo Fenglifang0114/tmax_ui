@@ -310,11 +310,11 @@ class TakeInPageState extends State<TakeInPage> {
   }
 
   setSelScaleInApp() async {
-    await AppSelScalesManager.setIntList(AppNames.insc, mySelScaleIdList);
+    await AppSelScalesManager.setIntList(AppNames.weighing, mySelScaleIdList);
   }
 
   getSelScaleInApp() async {
-    List<int> savedScales = await AppSelScalesManager.getIntList(AppNames.insc);
+    List<int> savedScales = await AppSelScalesManager.getIntList(AppNames.weighing);
     for (var item in myAllScalesList) {
       if (savedScales.contains(item.scaleId)) {
         addOrRemoveSelScale(item.scaleId);
@@ -581,6 +581,7 @@ class TakeInPageState extends State<TakeInPage> {
       mySelScaleIdList.add(scaleId);
       PublicFunctions.getWeight(scaleId);
     }
+    setSelScaleInApp();
     setState(() {}); // 强制刷新界面
     checkSameScale();
   }

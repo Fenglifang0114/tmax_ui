@@ -280,11 +280,11 @@ class CheckWeighersPageState extends State<CheckWeighersPage> {
   }
 
   setSelScaleInApp() async {
-    await AppSelScalesManager.setIntList(AppNames.chwe, mySelScaleIdList);
+    await AppSelScalesManager.setIntList(AppNames.weighing, mySelScaleIdList);
   }
 
   getSelScaleInApp() async {
-    List<int> savedScales = await AppSelScalesManager.getIntList(AppNames.chwe);
+    List<int> savedScales = await AppSelScalesManager.getIntList(AppNames.weighing);
     for (var item in myAllScalesList) {
       if (savedScales.contains(item.scaleId)) {
         addOrRemoveSelScale(item.scaleId);
@@ -531,6 +531,7 @@ class CheckWeighersPageState extends State<CheckWeighersPage> {
       mySelScaleIdList.add(scaleId);
       PublicFunctions.getWeight(scaleId);
     }
+    setSelScaleInApp();
     setState(() {}); // 强制刷新界面
     checkSameScale();
   }

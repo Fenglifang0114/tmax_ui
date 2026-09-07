@@ -316,11 +316,12 @@ class WeightDataCollectionPageState extends State<WeightDataCollectionPage> {
   }
 
   setSelScaleInApp(mySelScaleIdList) async {
-    await AppSelScalesManager.setIntList(AppNames.weda, mySelScaleIdList);
+    await AppSelScalesManager.setIntList(AppNames.weighing, mySelScaleIdList);
   }
 
   getSelScaleInApp() async {
-    List<int> savedScales = await AppSelScalesManager.getIntList(AppNames.weda);
+    List<int> savedScales =
+        await AppSelScalesManager.getIntList(AppNames.weighing);
     for (var item in myAllScalesList) {
       if (savedScales.contains(item.scaleId)) {
         addOrRemoveSelScale(item.scaleId);
@@ -583,6 +584,7 @@ class WeightDataCollectionPageState extends State<WeightDataCollectionPage> {
       mySelScaleIdList.add(scaleId);
       PublicFunctions.getWeight(scaleId);
     }
+    setSelScaleInApp(mySelScaleIdList);
     setState(() {});
     checkSameScale();
   }
