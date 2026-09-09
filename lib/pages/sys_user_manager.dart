@@ -113,15 +113,29 @@ class SysUserManagerPageState extends State<SysUserManagerPage>
 
     _eventbus3 = eventBus.on<EventRespAddSysUser>().listen((event) {
       if (mounted) {
-        showTipInfo(localizedStrings.fSuccessMsg, context);
-        PublicFunctions.getAllSysUsers();
+        String dataString = (event.obj ?? '').toString();
+        if (dataString.contains('rfid duplicate')) {
+          showTipInfo(localizedStrings.tipRfidBoundOther, context);
+        } else if (dataString.contains('fail')) {
+          showTipInfo(localizedStrings.tipAddUserFailed, context);
+        } else {
+          showTipInfo(localizedStrings.fSuccessMsg, context);
+          PublicFunctions.getAllSysUsers();
+        }
       }
     });
 
-    _eventbus3 = eventBus.on<EventRespUpdateSysUser>().listen((event) {
+    _eventbus4 = eventBus.on<EventRespUpdateSysUser>().listen((event) {
       if (mounted) {
-        showTipInfo(localizedStrings.fSuccessMsg, context);
-        PublicFunctions.getAllSysUsers();
+        String dataString = (event.obj ?? '').toString();
+        if (dataString.contains('rfid duplicate')) {
+          showTipInfo(localizedStrings.tipRfidBoundOther, context);
+        } else if (dataString.contains('fail')) {
+          showTipInfo(localizedStrings.tipUpdateUserFailed, context);
+        } else {
+          showTipInfo(localizedStrings.fSuccessMsg, context);
+          PublicFunctions.getAllSysUsers();
+        }
       }
     });
   }

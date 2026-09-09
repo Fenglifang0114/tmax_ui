@@ -91,21 +91,22 @@ class ReqAddSysUser {
   int? createdBy;
   int? updatedBy;
   List<int>? pagesId;
+  String? rfid;
 
-  ReqAddSysUser({
-    this.userName,
-    this.nickName,
-    this.roleId,
-    this.password,
-    this.isEnabled,
-    this.email,
-    this.phone,
-    this.initialPageId,
-    this.remark,
-    this.createdBy,
-    this.updatedBy,
-    this.pagesId,
-  });
+  ReqAddSysUser(
+      {this.userName,
+      this.nickName,
+      this.roleId,
+      this.password,
+      this.isEnabled,
+      this.email,
+      this.phone,
+      this.initialPageId,
+      this.remark,
+      this.createdBy,
+      this.updatedBy,
+      this.pagesId,
+      this.rfid});
 
   factory ReqAddSysUser.fromJson(Map<String, dynamic> json) => ReqAddSysUser(
         userName: json["Username"],
@@ -122,6 +123,7 @@ class ReqAddSysUser {
         pagesId: json["PagesId"] == null
             ? []
             : List<int>.from(json["PagesId"]!.map((x) => x)),
+        rfid: json["Rfid"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -138,6 +140,7 @@ class ReqAddSysUser {
         "UpdatedBy": updatedBy,
         "PagesId":
             pagesId == null ? [] : List<dynamic>.from(pagesId!.map((x) => x)),
+        "Rfid": rfid,
       };
 }
 
@@ -245,6 +248,7 @@ class UpdateUser {
   DateTime? updatedTime;
   int? createdBy;
   int? updatedBy;
+  String? rfid;
 
   UpdateUser({
     this.userId,
@@ -261,6 +265,7 @@ class UpdateUser {
     this.updatedTime,
     this.createdBy,
     this.updatedBy,
+    this.rfid,
   });
 
   factory UpdateUser.fromJson(Map<String, dynamic> json) => UpdateUser(
@@ -282,6 +287,7 @@ class UpdateUser {
             : DateTime.parse(json["updatedTime"]).toLocal(),
         createdBy: json["createdBy"],
         updatedBy: json["updatedBy"],
+        rfid: json["Rfid"] ?? json["rfid"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -299,5 +305,25 @@ class UpdateUser {
         "updatedTime": updatedTime?.toIso8601String(),
         "createdBy": createdBy,
         "updatedBy": updatedBy,
+        "Rfid": rfid,
+      };
+}
+
+ReqRfidLogin reqRfidLoginFromJson(String str) =>
+    ReqRfidLogin.fromJson(json.decode(str));
+
+String reqRfidLoginToJson(ReqRfidLogin data) => json.encode(data.toJson());
+
+class ReqRfidLogin {
+  String? rfid;
+
+  ReqRfidLogin({this.rfid});
+
+  factory ReqRfidLogin.fromJson(Map<String, dynamic> json) => ReqRfidLogin(
+        rfid: json["Rfid"],
+      );
+
+  Map<String, dynamic> toJson() => {
+        "Rfid": rfid,
       };
 }

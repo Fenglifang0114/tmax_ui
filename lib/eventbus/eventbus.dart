@@ -800,6 +800,11 @@ class EventRespFormulaRecList {
   EventRespFormulaRecList(this.obj);
 }
 
+class EventRespRfidLogin {
+  dynamic obj;
+  EventRespRfidLogin(this.obj);
+}
+
 class EventRespFormulaRecByPage {
   dynamic obj;
   EventRespFormulaRecByPage(this.obj);

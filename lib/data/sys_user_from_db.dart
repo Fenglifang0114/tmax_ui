@@ -23,6 +23,7 @@ class SysUserDetailFromDb {
   int? initialPageId;
   bool? isChanged;
   List<int>? pageIdList;
+  String? rfid;
 
   SysUserDetailFromDb({
     this.userId,
@@ -37,6 +38,7 @@ class SysUserDetailFromDb {
     this.initialPageId,
     this.isChanged,
     this.pageIdList,
+    this.rfid,
   });
 
   factory SysUserDetailFromDb.fromJson(Map<String, dynamic> json) =>
@@ -55,6 +57,7 @@ class SysUserDetailFromDb {
         pageIdList: json["pageIdList"] == null
             ? []
             : List<int>.from(json["pageIdList"]!.map((x) => x)),
+        rfid: json["rfid"] ?? json["Rfid"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -72,6 +75,7 @@ class SysUserDetailFromDb {
         "pageIdList": pageIdList == null
             ? []
             : List<dynamic>.from(pageIdList!.map((x) => x)),
+        "rfid": rfid,
       };
 }
 
@@ -104,6 +108,7 @@ class SysUserFromDb {
   int? createdBy;
   int? updatedBy;
   bool? isChanged;
+  String? rfid;
 
   SysUserFromDb({
     this.userId,
@@ -121,6 +126,7 @@ class SysUserFromDb {
     this.createdBy,
     this.updatedBy,
     this.isChanged,
+    this.rfid,
   });
 
   factory SysUserFromDb.fromJson(Map<String, dynamic> json) => SysUserFromDb(
@@ -143,6 +149,7 @@ class SysUserFromDb {
         createdBy: json["CreatedBy"],
         updatedBy: json["UpdatedBy"],
         isChanged: json["IsChanged"] ?? false,
+        rfid: json["Rfid"] ?? json["rfid"],
       );
 
   Map<String, dynamic> toJson() => {
@@ -161,5 +168,6 @@ class SysUserFromDb {
         "CreatedBy": createdBy,
         "UpdatedBy": updatedBy,
         "IsChanged": isChanged,
+        "Rfid": rfid,
       };
 }

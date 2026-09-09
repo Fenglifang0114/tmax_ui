@@ -437,6 +437,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "fPluExist": MessageLookupByLibrary.simpleMessage("PLU already exists"),
     "fPrintFmaBtn": MessageLookupByLibrary.simpleMessage("Print Formula"),
     "fPublic": MessageLookupByLibrary.simpleMessage("Public"),
+    "fQrCodeRecognition": MessageLookupByLibrary.simpleMessage(
+      "QR Code Recognition",
+    ),
     "fQualificationStatus": MessageLookupByLibrary.simpleMessage("Pass"),
     "fQualified": MessageLookupByLibrary.simpleMessage("√"),
     "fRawCategoryManagement": MessageLookupByLibrary.simpleMessage(
@@ -1676,8 +1679,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "superAdmin": MessageLookupByLibrary.simpleMessage("Super Admin"),
     "systemOperation": MessageLookupByLibrary.simpleMessage("System Operation"),
     "systemRecords": MessageLookupByLibrary.simpleMessage("System Records"),
+    "tipAccountDisabled": MessageLookupByLibrary.simpleMessage(
+      "This account is disabled",
+    ),
     "tipAccountExist": MessageLookupByLibrary.simpleMessage(
       "Account already exists",
+    ),
+    "tipAddUserFailed": MessageLookupByLibrary.simpleMessage(
+      "Failed to add user",
     ),
     "tipBluetoothDisconnect": MessageLookupByLibrary.simpleMessage(
       "Note: This setting requires Bluetooth to be disconnected from other devices!",
@@ -1724,12 +1733,21 @@ class MessageLookup extends MessageLookupByLibrary {
     "tipPasswordNotSame": MessageLookupByLibrary.simpleMessage(
       "Password not same",
     ),
+    "tipRfidBoundOther": MessageLookupByLibrary.simpleMessage(
+      "This RFID card is already bound to another account",
+    ),
+    "tipRfidNotFound": MessageLookupByLibrary.simpleMessage(
+      "This RFID card is not bound to any account",
+    ),
     "tipRow": MessageLookupByLibrary.simpleMessage("row"),
     "tipSameScale": MessageLookupByLibrary.simpleMessage(
       "Same scale can\'t connect simultaneously.",
     ),
     "tipTemporarySaveFormulaRecord": MessageLookupByLibrary.simpleMessage(
       "Temporary Storage Record",
+    ),
+    "tipUpdateUserFailed": MessageLookupByLibrary.simpleMessage(
+      "Failed to update user",
     ),
     "tipValidating": MessageLookupByLibrary.simpleMessage("Validating data..."),
     "titleChangePassword": MessageLookupByLibrary.simpleMessage(

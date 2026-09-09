@@ -4286,6 +4286,16 @@ class S {
     );
   }
 
+  /// `QR Code Recognition`
+  String get fQrCodeRecognition {
+    return Intl.message(
+      'QR Code Recognition',
+      name: 'fQrCodeRecognition',
+      desc: 'Label for QR code recognition',
+      args: [],
+    );
+  }
+
   /// `Please enter the ingredient ID.`
   String get fInputRawMaterialIdHint {
     return Intl.message(
@@ -9264,6 +9274,56 @@ class S {
       name: 'fPageSizeAndTotal',
       desc: 'Pagination info displaying page size and total records count',
       args: [pageSize, total],
+    );
+  }
+
+  /// `This RFID card is already bound to another account`
+  String get tipRfidBoundOther {
+    return Intl.message(
+      'This RFID card is already bound to another account',
+      name: 'tipRfidBoundOther',
+      desc: 'Tip for RFID card already bound to another account',
+      args: [],
+    );
+  }
+
+  /// `This RFID card is not bound to any account`
+  String get tipRfidNotFound {
+    return Intl.message(
+      'This RFID card is not bound to any account',
+      name: 'tipRfidNotFound',
+      desc: 'Tip for RFID card not found',
+      args: [],
+    );
+  }
+
+  /// `This account is disabled`
+  String get tipAccountDisabled {
+    return Intl.message(
+      'This account is disabled',
+      name: 'tipAccountDisabled',
+      desc: 'Tip for account disabled',
+      args: [],
+    );
+  }
+
+  /// `Failed to add user`
+  String get tipAddUserFailed {
+    return Intl.message(
+      'Failed to add user',
+      name: 'tipAddUserFailed',
+      desc: 'Tip for add user failed',
+      args: [],
+    );
+  }
+
+  /// `Failed to update user`
+  String get tipUpdateUserFailed {
+    return Intl.message(
+      'Failed to update user',
+      name: 'tipUpdateUserFailed',
+      desc: 'Tip for update user failed',
+      args: [],
     );
   }
 }

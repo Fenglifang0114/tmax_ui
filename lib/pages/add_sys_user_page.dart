@@ -36,6 +36,7 @@ class AddSysUserPageState extends State<AddSysUserPage> {
   TextEditingController emailCtl = TextEditingController();
   TextEditingController pwd1Ctl = TextEditingController();
   TextEditingController pwd2Ctl = TextEditingController();
+  TextEditingController rfidCtl = TextEditingController();
 
   List<bool> seePwdList = [false, false];
 
@@ -70,6 +71,7 @@ class AddSysUserPageState extends State<AddSysUserPage> {
         nickNameCtl.text = widget.initUserInfo.nickName!;
         phoneCtl.text = widget.initUserInfo.phone!;
         emailCtl.text = widget.initUserInfo.email!;
+        rfidCtl.text = widget.initUserInfo.rfid ?? '';
       }
 
       int roleId = widget.initUserInfo.roleId!;
@@ -147,6 +149,7 @@ class AddSysUserPageState extends State<AddSysUserPage> {
     emailCtl.dispose();
     pwd1Ctl.dispose();
     pwd2Ctl.dispose();
+    rfidCtl.dispose();
   }
 
   showPwdName(String itemName, bool isRequired, int passwordIndex) {
@@ -277,6 +280,7 @@ class AddSysUserPageState extends State<AddSysUserPage> {
     tempUser.phone = phoneCtl.text;
     tempUser.email = emailCtl.text;
     tempUser.password = pwd1Ctl.text;
+    tempUser.rfid = rfidCtl.text;
     if (selectedRole == "admin") {
       tempUser.roleId = 2;
       tempUser.pagesId = [];
@@ -315,6 +319,7 @@ class AddSysUserPageState extends State<AddSysUserPage> {
     tempUser.nickName = nickNameCtl.text;
     tempUser.phone = phoneCtl.text;
     tempUser.email = emailCtl.text;
+    tempUser.rfid = rfidCtl.text;
 
     if (tempUser.phone == "") {
       tempUser.phone = " ";
@@ -404,11 +409,19 @@ class AddSysUserPageState extends State<AddSysUserPage> {
                           return;
                         }
 
+                        final String inputRfid = rfidCtl.text.trim();
                         if (widget.type == 1) {
                           for (var item in widget.sysUserList) {
                             if (item.userName == userNameCtl.text) {
                               showTipInfo(
                                   localizedStrings.tipAccountExist, context);
+                              return;
+                            }
+                            if (inputRfid.isNotEmpty &&
+                                item.rfid != null &&
+                                item.rfid!.trim() == inputRfid) {
+                              showTipInfo(
+                                  localizedStrings.tipRfidBoundOther, context);
                               return;
                             }
                           }
@@ -420,6 +433,14 @@ class AddSysUserPageState extends State<AddSysUserPage> {
                                 item.userId != widget.initUserInfo.userId) {
                               showTipInfo(
                                   localizedStrings.tipAccountExist, context);
+                              return;
+                            }
+                            if (inputRfid.isNotEmpty &&
+                                item.rfid != null &&
+                                item.rfid!.trim() == inputRfid &&
+                                item.userId != widget.initUserInfo.userId) {
+                              showTipInfo(
+                                  localizedStrings.tipRfidBoundOther, context);
                               return;
                             }
                           }
@@ -558,6 +579,18 @@ class AddSysUserPageState extends State<AddSysUserPage> {
                             showInputPwdBox(pwd2Ctl, '', seePwdList[1]),
                           ]),
                         ),
+                        SizedBox(
+                          width: largePadding,
+                        ),
+                        SizedBox(
+                          width: inputWidth,
+                          height: 90,
+                          child: Column(children: [
+                            showPwdName(
+                                "RFID" ' ', widget.type == 2 ? true : false, 1),
+                            showInputBox(rfidCtl, ''),
+                          ]),
+                        )
                       ])),
               showTitlePart(localizedStrings.userRole),
               Container(

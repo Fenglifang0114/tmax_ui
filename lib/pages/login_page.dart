@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:t_max/data/company_info.dart';
 import 'package:t_max/data/g_data.dart';
@@ -39,6 +40,55 @@ class LoginPageState extends State<LoginPage> with WindowLifecycleMixin {
   bool firstTime = true; // 第一次点击登录
   bool _checkingUsers = true;
 
+  DateTime _lastKeyTime = DateTime.now();
+  String _rfidBuffer = '';
+  bool _isSwipingCard = false;
+
+  bool _handleKeyEvent(KeyEvent event) {
+    if (event is! KeyDownEvent) return false;
+
+    final now = DateTime.now();
+    final int diff = now.difference(_lastKeyTime).inMilliseconds;
+    _lastKeyTime = now;
+
+    final key = event.logicalKey;
+
+    if (key == LogicalKeyboardKey.enter || key == LogicalKeyboardKey.numpadEnter) {
+      if (_rfidBuffer.isNotEmpty && (_isSwipingCard || _rfidBuffer.length >= 3)) {
+        final String scannedRfid = _rfidBuffer.trim();
+        _rfidBuffer = '';
+        _isSwipingCard = false;
+        if (scannedRfid.isNotEmpty && !_isLoading) {
+          _submitRfidLogin(scannedRfid);
+          return true;
+        }
+      }
+      _rfidBuffer = '';
+      _isSwipingCard = false;
+      return false;
+    }
+
+    final String? char = event.character;
+    if (char != null && char.isNotEmpty && char.codeUnitAt(0) >= 32) {
+      if (diff < 80) {
+        _isSwipingCard = true;
+        _rfidBuffer += char;
+      } else {
+        _isSwipingCard = false;
+        _rfidBuffer = char;
+      }
+    }
+
+    return false;
+  }
+
+  void _submitRfidLogin(String rfid) {
+    setState(() {
+      _isLoading = true;
+    });
+    PublicFunctions.userRfidLogin(rfid);
+  }
+
   Future<void> _submitLogin() async {
     firstTime = false;
 
@@ -55,6 +105,7 @@ class LoginPageState extends State<LoginPage> with WindowLifecycleMixin {
   dynamic _eventbus2;
   dynamic _eventbus3;
   dynamic _eventbus4;
+  dynamic _eventbus5;
 
   @override
   void didChangeDependencies() {
@@ -82,6 +133,7 @@ class LoginPageState extends State<LoginPage> with WindowLifecycleMixin {
     initWindowLifecycle();
     super.initState();
     _checkingUsers = checkingUsers;
+    HardwareKeyboard.instance.addHandler(_handleKeyEvent);
 
     _eventbus1 = eventBus.on<EventRespLogin>().listen((event) {
       if (mounted) {
@@ -158,15 +210,42 @@ class LoginPageState extends State<LoginPage> with WindowLifecycleMixin {
       }
     });
 
+    _eventbus5 = eventBus.on<EventRespRfidLogin>().listen((event) {
+      if (mounted) {
+        setState(() {
+          String dataString = event.obj;
+          if (dataString.startsWith('ok')) {
+            List<String> parts = dataString.split(',');
+            if (parts.length > 1 && parts[1].isNotEmpty) {
+              String userName = parts[1];
+              PublicFunctions.getUserInfo(userName);
+            } else {
+              _isLoading = false;
+              showTipInfo(localizedStrings.tipLoginError, context);
+            }
+          } else {
+            _isLoading = false;
+            if (dataString.contains('user disabled')) {
+              showTipInfo(localizedStrings.tipAccountDisabled, context);
+            } else {
+              showTipInfo(localizedStrings.tipRfidNotFound, context);
+            }
+          }
+        });
+      }
+    });
+
     // 所有初始化完成后设置默认页面
   }
 
   @override
   void dispose() {
+    HardwareKeyboard.instance.removeHandler(_handleKeyEvent);
     _eventbus1.cancel();
     _eventbus2.cancel();
     _eventbus3.cancel();
     _eventbus4.cancel();
+    _eventbus5.cancel();
 
     _usernameController.dispose();
     _passwordController.dispose();

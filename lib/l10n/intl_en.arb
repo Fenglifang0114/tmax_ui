@@ -1816,6 +1816,10 @@
     "@fAddRawMaterialBtn": {
         "description": "Text on the button to add raw material"
     },
+    "fQrCodeRecognition": "QR Code Recognition",
+    "@fQrCodeRecognition": {
+        "description": "Label for QR code recognition"
+    },
     "fInputRawMaterialIdHint": "Please enter the ingredient ID.",
     "@fInputRawMaterialIdHint": {
         "description": "Hint text for raw material ID input field"
@@ -3843,5 +3847,25 @@
                 "type": "int"
             }
         }
+    },
+    "tipRfidBoundOther": "This RFID card is already bound to another account",
+    "@tipRfidBoundOther": {
+        "description": "Tip for RFID card already bound to another account"
+    },
+    "tipRfidNotFound": "This RFID card is not bound to any account",
+    "@tipRfidNotFound": {
+        "description": "Tip for RFID card not found"
+    },
+    "tipAccountDisabled": "This account is disabled",
+    "@tipAccountDisabled": {
+        "description": "Tip for account disabled"
+    },
+    "tipAddUserFailed": "Failed to add user",
+    "@tipAddUserFailed": {
+        "description": "Tip for add user failed"
+    },
+    "tipUpdateUserFailed": "Failed to update user",
+    "@tipUpdateUserFailed": {
+        "description": "Tip for update user failed"
     }
 }

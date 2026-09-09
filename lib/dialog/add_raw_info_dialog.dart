@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:t_max/data/formula_common.dart';
 import 'package:t_max/data/formula_scale_data.dart';
@@ -20,6 +21,18 @@ import 'package:t_max/widget/dialog_head_style.dart';
 ///
 ///
 ///
+String decodeUnicode(String input) {
+  if (input.trim().isEmpty) return input;
+  try {
+    return input.replaceAllMapped(RegExp(r'\\u([0-9a-zA-Z]{4})'), (match) {
+      int code = int.parse(match.group(1)!, radix: 16);
+      return String.fromCharCode(code);
+    });
+  } catch (e) {
+    return input;
+  }
+}
+
 int getRawTypeId(String name) {
   for (var item in rawTypeList) {
     if (item.categoryName == name) {
@@ -43,6 +56,12 @@ class AddRawDialogState extends State<AddRawDialog> {
   TextEditingController scaleNameCtl = TextEditingController();
   TextEditingController checkCodeCtl = TextEditingController();
   TextEditingController outputPortCtl = TextEditingController();
+  TextEditingController qrCodeScanCtl = TextEditingController();
+
+  bool isCategoryValid = true;
+  bool isScaleValid = true;
+  bool isOutputValid = true;
+
   dynamic _eventbus1;
   dynamic _eventbus2;
 
@@ -103,8 +122,79 @@ class AddRawDialogState extends State<AddRawDialog> {
     scaleNameCtl.dispose();
     checkCodeCtl.dispose();
     outputPortCtl.dispose();
+    qrCodeScanCtl.dispose();
 
     super.dispose();
+  }
+
+  void parseAndFillQrData(String val) {
+    if (val.trim().isEmpty) return;
+    try {
+      String decodedVal = decodeUnicode(val.trim());
+      Map<String, dynamic> data = jsonDecode(decodedVal);
+
+      setState(() {
+        // 1. 原料编号 id
+        if (data['id'] != null) {
+          rawCodeCtl.text = decodeUnicode(data['id'].toString());
+        }
+
+        // 2. 原料名称 name
+        if (data['name'] != null) {
+          rawNameCtl.text = decodeUnicode(data['name'].toString());
+        }
+
+        // 3. 验证条码 checkCode
+        if (data['checkCode'] != null) {
+          checkCodeCtl.text = decodeUnicode(data['checkCode'].toString());
+        }
+
+        // 4. 成分说明 ingredient
+        if (data['ingredient'] != null) {
+          rawRemarkCtl.text = decodeUnicode(data['ingredient'].toString());
+        }
+
+        // 5. 原料类别 category
+        if (data['category'] != null) {
+          String catName = decodeUnicode(data['category'].toString());
+          rawTypeCtl.text = catName;
+          isCategoryValid = rawTypeList.any((item) => item.categoryName == catName);
+        }
+
+        // 6. 选择设备 scaleName
+        if (data['scaleName'] != null) {
+          String scaleVal = decodeUnicode(data['scaleName'].toString());
+          Scale? matchedScale;
+          for (var item in myAllScalesList) {
+            if (item.scaleId.toString() == scaleVal || item.scaleName == scaleVal) {
+              matchedScale = item;
+              break;
+            }
+          }
+          if (matchedScale != null) {
+            scaleNameCtl.text = matchedScale.scaleId.toString();
+            isScaleValid = true;
+          } else {
+            scaleNameCtl.text = scaleVal;
+            isScaleValid = false;
+          }
+        }
+
+        // 7. 输出口 outputPort
+        if (data['outputPort'] != null) {
+          String outputVal = decodeUnicode(data['outputPort'].toString());
+          outputPortCtl.text = outputVal;
+          if (outputVal.isEmpty) {
+            isOutputValid = true;
+          } else {
+            final filteredList = outputPortList.where((item) => item != "0").toList();
+            isOutputValid = filteredList.contains(outputVal);
+          }
+        }
+      });
+    } catch (e) {
+      // 容错捕获：解析非 JSON 字符串时不报错、不崩溃
+    }
   }
 
   TextStyle getTextStyle({Color? color}) {
@@ -115,148 +205,158 @@ class AddRawDialogState extends State<AddRawDialog> {
 
   Widget showTypeDropDownButton(
       String hintText, TextEditingController valueCtl) {
+    bool isValid = isCategoryValid;
+    String currentVal = rawTypeCtl.text;
+    bool isMatch = rawTypeList.any((item) => item.categoryName == currentVal);
+
+    String? selectedValue = isMatch ? currentVal : null;
+    bool isCustomInvalid = !isValid && currentVal.isNotEmpty;
+
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem<String>(
+        value: null,
+        child: Text(
+          localizedStrings.fPleaseSelectCategory,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+        ),
+      ),
+      ...rawTypeList.map((CategoryTypeList item) {
+        return DropdownMenuItem<String>(
+          value: item.categoryName,
+          child: Text(item.categoryName,
+              style: Theme.of(context).textTheme.bodySmall!.apply(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  )),
+        );
+      })
+    ];
+
     return Container(
         height: 48,
         padding: const EdgeInsets.only(left: 10, right: 10),
         decoration: BoxDecoration(
           border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant), // 设置边框颜色
-          borderRadius: BorderRadius.circular(0), // 设置圆角
+              color: isValid ? Theme.of(context).colorScheme.outlineVariant : Colors.red,
+              width: isValid ? 1 : 1.5),
+          borderRadius: BorderRadius.circular(0),
         ),
-        child: DropdownButton(
-            underline: SizedBox(),
+        child: DropdownButton<String>(
+            underline: const SizedBox(),
             isExpanded: true,
-            value: rawTypeCtl.text == "" ? null : rawTypeCtl.text,
-            items: rawTypeList.isEmpty
-                ? [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Text(
-                        localizedStrings.fPleaseSelectCategory,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              // 设置提示文本样式
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                            ),
-                      ),
-                    )
-                  ]
-                : [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Text(
-                        localizedStrings.fPleaseSelectCategory,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              // 设置提示文本样式
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                            ),
-                      ),
-                    ),
-                    ...rawTypeList.map((CategoryTypeList item) {
-                      return DropdownMenuItem<String>(
-                        value: item.categoryName,
-                        child: Text(item.categoryName,
-                            style: Theme.of(context).textTheme.bodySmall!.apply(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                )),
-                      );
-                    })
-                  ],
+            value: selectedValue,
+            hint: isCustomInvalid
+                ? Text(
+                    currentVal,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : Text(
+                    localizedStrings.fPleaseSelectCategory,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ),
+                  ),
+            items: menuItems,
             onChanged: (value) {
               if (value == null) {
                 setState(() {
                   rawTypeCtl.text = '';
+                  isCategoryValid = true;
                 });
-
                 return;
               }
 
               setState(() {
                 rawTypeCtl.text = value.toString();
+                isCategoryValid = true;
               });
             },
-            style: Theme.of(context).textTheme.bodySmall!.apply(
-                  color: Theme.of(context).colorScheme.onSurface,
-                )));
+            style: TextStyle(
+              fontSize: 12,
+              color: isValid ? Theme.of(context).colorScheme.onSurface : Colors.red,
+            )));
   }
 
 //选择秤
   Widget showScaleDropDownBtn(String hintText) {
+    bool isValid = isScaleValid;
+    String currentVal = scaleNameCtl.text;
+    bool isMatch = myAllScalesList.any((item) => item.scaleId.toString() == currentVal);
+
+    String? selectedValue = isMatch ? currentVal : null;
+    bool isCustomInvalid = !isValid && currentVal.isNotEmpty;
+
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem<String>(
+        value: null,
+        child: Text(
+          hintText,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+        ),
+      ),
+      ...myAllScalesList.map((Scale item) {
+        return DropdownMenuItem<String>(
+          value: item.scaleId.toString(),
+          child: Text("${item.scaleId}:${item.scaleName}",
+              style: Theme.of(context).textTheme.bodySmall!.apply(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  )),
+        );
+      })
+    ];
+
     return Container(
         height: 48,
         padding: const EdgeInsets.only(left: 10, right: 10),
         decoration: BoxDecoration(
           border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant), // 设置边框颜色
-          borderRadius: BorderRadius.circular(0), // 设置圆角
+              color: isValid ? Theme.of(context).colorScheme.outlineVariant : Colors.red,
+              width: isValid ? 1 : 1.5),
+          borderRadius: BorderRadius.circular(0),
         ),
-        child: DropdownButton(
-            underline: SizedBox(),
+        child: DropdownButton<String>(
+            underline: const SizedBox(),
             isExpanded: true,
-            value: scaleNameCtl.text == "" ? null : scaleNameCtl.text,
-            items: myAllScalesList.isEmpty
-                ? [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Text(
-                        hintText,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              // 设置提示文本样式
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                            ),
-                      ),
-                    )
-                  ]
-                : [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Text(
-                        hintText,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              // 设置提示文本样式
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                            ),
-                      ),
-                    ),
-                    ...myAllScalesList.map((Scale item) {
-                      return DropdownMenuItem<String>(
-                        value: item.scaleId.toString(),
-                        child: Text("${item.scaleId}:${item.scaleName}",
-                            style: Theme.of(context).textTheme.bodySmall!.apply(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                )),
-                      );
-                    })
-                  ],
+            value: selectedValue,
+            hint: isCustomInvalid
+                ? Text(
+                    currentVal,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : Text(
+                    hintText,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ),
+                  ),
+            items: menuItems,
             onChanged: (value) {
               if (value == null) {
                 setState(() {
                   scaleNameCtl.text = '';
+                  isScaleValid = true;
                 });
-
                 return;
               }
 
               setState(() {
                 scaleNameCtl.text = value.toString();
+                isScaleValid = true;
               });
             },
-            style: Theme.of(context).textTheme.bodySmall!.apply(
-                  color: Theme.of(context).colorScheme.onSurface,
-                )));
+            style: TextStyle(
+              fontSize: 12,
+              color: isValid ? Theme.of(context).colorScheme.onSurface : Colors.red,
+            )));
   }
 
   String getOutputPortRemarkString(String port) {
@@ -284,71 +384,82 @@ class AddRawDialogState extends State<AddRawDialog> {
 
   //选择输出端口
   Widget showOutputDropDownBtn(String hintText) {
-    // 过滤掉"0"后的选项列表
     final filteredList = outputPortList.where((item) => item != "0").toList();
 
-    // 检查当前value是否在过滤后的列表中
-    String? currentValue = outputPortCtl.text;
-    if (!filteredList.contains(currentValue)) {
-      // 如果当前值不在过滤后的列表中（比如是"0"），则设置为null
-      currentValue = null;
-    }
+    bool isValid = isOutputValid;
+    String currentVal = outputPortCtl.text;
+    bool isMatch = filteredList.contains(currentVal);
+
+    String? selectedValue = isMatch ? currentVal : null;
+    bool isCustomInvalid = !isValid && currentVal.isNotEmpty;
+
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem<String>(
+        value: null,
+        child: Text(
+          hintText,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+        ),
+      ),
+      ...filteredList.map((String item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text("$item    :    ${getOutputPortRemarkString(item)}",
+              style: Theme.of(context).textTheme.bodySmall!.apply(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  )),
+        );
+      })
+    ];
 
     return Container(
         height: 48,
         padding: const EdgeInsets.only(left: 10, right: 10),
         decoration: BoxDecoration(
           border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant), // 设置边框颜色
-          borderRadius: BorderRadius.circular(0), // 设置圆角
+              color: isValid ? Theme.of(context).colorScheme.outlineVariant : Colors.red,
+              width: isValid ? 1 : 1.5),
+          borderRadius: BorderRadius.circular(0),
         ),
         child: DropdownButton<String>(
-            // 明确指定泛型类型
-            underline: SizedBox(),
+            underline: const SizedBox(),
             isExpanded: true,
-            value: currentValue, // 使用检查后的值
-            items: [
-              // 提示项
-              DropdownMenuItem<String>(
-                value: null,
-                child: Text(
-                  hintText,
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                      ),
-                ),
-              ),
-              // 选项列表（已过滤掉"0"）
-              ...filteredList.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child:
-                      Text("$item    :    ${getOutputPortRemarkString(item)}",
-                          style: Theme.of(context).textTheme.bodySmall!.apply(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              )),
-                );
-              }),
-            ],
+            value: selectedValue,
+            hint: isCustomInvalid
+                ? Text(
+                    currentVal,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : Text(
+                    hintText,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ),
+                  ),
+            items: menuItems,
             onChanged: (String? value) {
-              // 明确参数类型
               if (value == null) {
                 setState(() {
-                  outputPortCtl.text = ''; // 修正：应该是outputPortCtl，不是scaleNameCtl
+                  outputPortCtl.text = '';
+                  isOutputValid = true;
                 });
                 return;
               }
 
               setState(() {
-                outputPortCtl.text =
-                    value; // 修正：应该是outputPortCtl，不是scaleNameCtl
+                outputPortCtl.text = value;
+                isOutputValid = true;
               });
             },
-            style: Theme.of(context).textTheme.bodySmall!.apply(
-                  color: Theme.of(context).colorScheme.onSurface,
-                )));
+            style: TextStyle(
+              fontSize: 12,
+              color: isValid ? Theme.of(context).colorScheme.onSurface : Colors.red,
+            )));
   }
 
   // 显示原料类型管理的对话框
@@ -654,7 +765,63 @@ class AddRawDialogState extends State<AddRawDialog> {
                   SizedBox(
                     width: largePadding,
                   ),
-                  Expanded(flex: 1, child: SizedBox()),
+                  Expanded(
+                      flex: 1,
+                      child: Column(children: [
+                        showItemNameWithStar(
+                            context, localizedStrings.fQrCodeRecognition, false),
+                        SizedBox(
+                          height: 48,
+                          child: Row(children: [
+                            Expanded(
+                              child: Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  alignment: Alignment.centerLeft,
+                                  child: TextField(
+                                    controller: qrCodeScanCtl,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: '',
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                      hintStyle: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                            fontSize: 12,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHighest,
+                                          ),
+                                      suffixIconConstraints:
+                                          BoxConstraints.tight(
+                                              const Size(40, 40)),
+                                    ),
+                                    onChanged: (value) {
+                                      parseAndFillQrData(value);
+                                    },
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  )),
+                            ),
+                          ]),
+                        ),
+                      ])),
                   SizedBox(
                     width: largePadding,
                   ),
@@ -707,7 +874,10 @@ class AddRawDialogState extends State<AddRawDialog> {
                         ),
                       ),
                       onPressed: (rawCodeCtl.text.isEmpty ||
-                              rawNameCtl.text.isEmpty)
+                              rawNameCtl.text.isEmpty ||
+                              !isCategoryValid ||
+                              !isScaleValid ||
+                              !isOutputValid)
                           ? null
                           : () {
                               // 检查原料是否已经存在
@@ -865,6 +1035,11 @@ class EditRawDialogState extends State<EditRawDialog> {
   TextEditingController scaleIdCtl = TextEditingController();
   TextEditingController checkCodeCtl = TextEditingController();
   TextEditingController outputPortCtl = TextEditingController();
+  TextEditingController qrCodeScanCtl = TextEditingController();
+
+  bool isCategoryValid = true;
+  bool isScaleValid = true;
+  bool isOutputValid = true;
 
   dynamic _eventbus1;
 
@@ -938,127 +1113,235 @@ class EditRawDialogState extends State<EditRawDialog> {
     scaleIdCtl.dispose();
     checkCodeCtl.dispose();
     outputPortCtl.dispose();
+    qrCodeScanCtl.dispose();
 
     super.dispose();
   }
 
-  showTypeDropDownButton(String hintText, TextEditingController valueCtl) {
-    return Container(
-        height: 48,
-        padding: const EdgeInsets.only(left: 10, right: 10),
-        decoration: BoxDecoration(
-          border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant), // 设置边框颜色
-          borderRadius: BorderRadius.circular(0), // 设置圆角
-        ),
-        child: DropdownButton(
-          underline: SizedBox(),
-          isExpanded: true,
-          value: rawTypeCtl.text == "" ? null : rawTypeCtl.text,
-          items: rawTypeList.isEmpty
-              ? [
-                  DropdownMenuItem<String>(
-                    value: null,
-                    child: Text(localizedStrings.fPleaseSelectCategory),
-                  )
-                ]
-              : [
-                  DropdownMenuItem<String>(
-                    value: null,
-                    child: Text(localizedStrings.fPleaseSelectCategory),
-                  ),
-                  ...rawTypeList.map((CategoryTypeList item) {
-                    return DropdownMenuItem<String>(
-                      value: item.categoryName,
-                      child: Text(item.categoryName),
-                    );
-                  })
-                ],
-          onChanged: (value) {
-            if (value == null) return;
-            setState(() {
-              rawTypeCtl.text = value.toString();
-            });
-          },
-          style: TextStyle(
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-            fontSize: 14,
-            fontWeight: FontWeight.normal,
-          ),
-        ));
+  void parseAndFillQrData(String val) {
+    if (val.trim().isEmpty) return;
+    try {
+      String decodedVal = decodeUnicode(val.trim());
+      Map<String, dynamic> data = jsonDecode(decodedVal);
+
+      setState(() {
+        // 1. 原料编号 id
+        if (data['id'] != null) {
+          rawCodeCtl.text = decodeUnicode(data['id'].toString());
+        }
+
+        // 2. 原料名称 name
+        if (data['name'] != null) {
+          rawNameCtl.text = decodeUnicode(data['name'].toString());
+        }
+
+        // 3. 验证条码 checkCode
+        if (data['checkCode'] != null) {
+          checkCodeCtl.text = decodeUnicode(data['checkCode'].toString());
+        }
+
+        // 4. 成分说明 ingredient
+        if (data['ingredient'] != null) {
+          rawRemarkCtl.text = decodeUnicode(data['ingredient'].toString());
+        }
+
+        // 5. 原料类别 category
+        if (data['category'] != null) {
+          String catName = decodeUnicode(data['category'].toString());
+          rawTypeCtl.text = catName;
+          isCategoryValid = rawTypeList.any((item) => item.categoryName == catName);
+        }
+
+        // 6. 选择设备 scaleName
+        if (data['scaleName'] != null) {
+          String scaleVal = decodeUnicode(data['scaleName'].toString());
+          Scale? matchedScale;
+          for (var item in myAllScalesList) {
+            if (item.scaleId.toString() == scaleVal || item.scaleName == scaleVal) {
+              matchedScale = item;
+              break;
+            }
+          }
+          if (matchedScale != null) {
+            scaleIdCtl.text = matchedScale.scaleId.toString();
+            isScaleValid = true;
+          } else {
+            scaleIdCtl.text = scaleVal;
+            isScaleValid = false;
+          }
+        }
+
+        // 7. 输出口 outputPort
+        if (data['outputPort'] != null) {
+          String outputVal = decodeUnicode(data['outputPort'].toString());
+          outputPortCtl.text = outputVal;
+          if (outputVal.isEmpty) {
+            isOutputValid = true;
+          } else {
+            final filteredList = outputPortList.where((item) => item != "0").toList();
+            isOutputValid = filteredList.contains(outputVal);
+          }
+        }
+      });
+    } catch (e) {
+      // 容错捕获：解析非 JSON 字符串时不报错、不崩溃
+    }
   }
 
-  //选择秤
-  showScaleDropDownBtn(String hintText) {
+  Widget showTypeDropDownButton(
+      String hintText, TextEditingController valueCtl) {
+    bool isValid = isCategoryValid;
+    String currentVal = rawTypeCtl.text;
+    bool isMatch = rawTypeList.any((item) => item.categoryName == currentVal);
+
+    String? selectedValue = isMatch ? currentVal : null;
+    bool isCustomInvalid = !isValid && currentVal.isNotEmpty;
+
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem<String>(
+        value: null,
+        child: Text(
+          localizedStrings.fPleaseSelectCategory,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+        ),
+      ),
+      ...rawTypeList.map((CategoryTypeList item) {
+        return DropdownMenuItem<String>(
+          value: item.categoryName,
+          child: Text(item.categoryName,
+              style: Theme.of(context).textTheme.bodySmall!.apply(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  )),
+        );
+      })
+    ];
+
     return Container(
         height: 48,
         padding: const EdgeInsets.only(left: 10, right: 10),
         decoration: BoxDecoration(
           border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant), // 设置边框颜色
-          borderRadius: BorderRadius.circular(0), // 设置圆角
+              color: isValid ? Theme.of(context).colorScheme.outlineVariant : Colors.red,
+              width: isValid ? 1 : 1.5),
+          borderRadius: BorderRadius.circular(0),
         ),
-        child: DropdownButton(
-            underline: SizedBox(),
+        child: DropdownButton<String>(
+            underline: const SizedBox(),
             isExpanded: true,
-            value: scaleIdCtl.text == "" ? null : scaleIdCtl.text,
-            items: myAllScalesList.isEmpty
-                ? [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Text(
-                        hintText,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              // 设置提示文本样式
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                            ),
-                      ),
-                    )
-                  ]
-                : [
-                    DropdownMenuItem<String>(
-                      value: null,
-                      child: Text(
-                        hintText,
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                              // 设置提示文本样式
-                              fontSize: 12,
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .surfaceContainerHighest,
-                            ),
-                      ),
-                    ),
-                    ...myAllScalesList.map((Scale item) {
-                      return DropdownMenuItem<String>(
-                        value: item.scaleId.toString(),
-                        child: Text("${item.scaleId}:${item.scaleName}",
-                            style: Theme.of(context).textTheme.bodySmall!.apply(
-                                  color:
-                                      Theme.of(context).colorScheme.onSurface,
-                                )),
-                      );
-                    })
-                  ],
+            value: selectedValue,
+            hint: isCustomInvalid
+                ? Text(
+                    currentVal,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : Text(
+                    localizedStrings.fPleaseSelectCategory,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ),
+                  ),
+            items: menuItems,
+            onChanged: (value) {
+              if (value == null) {
+                setState(() {
+                  rawTypeCtl.text = '';
+                  isCategoryValid = true;
+                });
+                return;
+              }
+
+              setState(() {
+                rawTypeCtl.text = value.toString();
+                isCategoryValid = true;
+              });
+            },
+            style: TextStyle(
+              fontSize: 12,
+              color: isValid ? Theme.of(context).colorScheme.onSurface : Colors.red,
+            )));
+  }
+
+//选择秤
+  Widget showScaleDropDownBtn(String hintText) {
+    bool isValid = isScaleValid;
+    String currentVal = scaleIdCtl.text;
+    bool isMatch = myAllScalesList.any((item) => item.scaleId.toString() == currentVal);
+
+    String? selectedValue = isMatch ? currentVal : null;
+    bool isCustomInvalid = !isValid && currentVal.isNotEmpty;
+
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem<String>(
+        value: null,
+        child: Text(
+          hintText,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+        ),
+      ),
+      ...myAllScalesList.map((Scale item) {
+        return DropdownMenuItem<String>(
+          value: item.scaleId.toString(),
+          child: Text("${item.scaleId}:${item.scaleName}",
+              style: Theme.of(context).textTheme.bodySmall!.apply(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  )),
+        );
+      })
+    ];
+
+    return Container(
+        height: 48,
+        padding: const EdgeInsets.only(left: 10, right: 10),
+        decoration: BoxDecoration(
+          border: Border.all(
+              color: isValid ? Theme.of(context).colorScheme.outlineVariant : Colors.red,
+              width: isValid ? 1 : 1.5),
+          borderRadius: BorderRadius.circular(0),
+        ),
+        child: DropdownButton<String>(
+            underline: const SizedBox(),
+            isExpanded: true,
+            value: selectedValue,
+            hint: isCustomInvalid
+                ? Text(
+                    currentVal,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : Text(
+                    hintText,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ),
+                  ),
+            items: menuItems,
             onChanged: (value) {
               if (value == null) {
                 setState(() {
                   scaleIdCtl.text = '';
+                  isScaleValid = true;
                 });
-
                 return;
               }
 
               setState(() {
                 scaleIdCtl.text = value.toString();
+                isScaleValid = true;
               });
             },
-            style: Theme.of(context).textTheme.bodySmall!.apply(
-                  color: Theme.of(context).colorScheme.onSurface,
-                )));
+            style: TextStyle(
+              fontSize: 12,
+              color: isValid ? Theme.of(context).colorScheme.onSurface : Colors.red,
+            )));
   }
 
   String getOutputPortRemarkString(String port) {
@@ -1086,72 +1369,82 @@ class EditRawDialogState extends State<EditRawDialog> {
 
   //选择输出端口
   Widget showOutputDropDownBtn(String hintText) {
-    // 过滤掉"0"后的选项列表
     final filteredList = outputPortList.where((item) => item != "0").toList();
 
-    // 检查当前value是否在过滤后的列表中
-    String? currentValue = outputPortCtl.text;
-    if (!filteredList.contains(currentValue)) {
-      // 如果当前值不在过滤后的列表中（比如是"0"），则设置为null
-      currentValue = null;
-    }
+    bool isValid = isOutputValid;
+    String currentVal = outputPortCtl.text;
+    bool isMatch = filteredList.contains(currentVal);
+
+    String? selectedValue = isMatch ? currentVal : null;
+    bool isCustomInvalid = !isValid && currentVal.isNotEmpty;
+
+    List<DropdownMenuItem<String>> menuItems = [
+      DropdownMenuItem<String>(
+        value: null,
+        child: Text(
+          hintText,
+          style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                fontSize: 12,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
+              ),
+        ),
+      ),
+      ...filteredList.map((String item) {
+        return DropdownMenuItem<String>(
+          value: item,
+          child: Text("$item    :    ${getOutputPortRemarkString(item)}",
+              style: Theme.of(context).textTheme.bodySmall!.apply(
+                    color: Theme.of(context).colorScheme.onSurface,
+                  )),
+        );
+      })
+    ];
 
     return Container(
         height: 48,
         padding: const EdgeInsets.only(left: 10, right: 10),
         decoration: BoxDecoration(
           border: Border.all(
-              color: Theme.of(context).colorScheme.outlineVariant), // 设置边框颜色
-          borderRadius: BorderRadius.circular(0), // 设置圆角
+              color: isValid ? Theme.of(context).colorScheme.outlineVariant : Colors.red,
+              width: isValid ? 1 : 1.5),
+          borderRadius: BorderRadius.circular(0),
         ),
         child: DropdownButton<String>(
-            // 明确指定泛型类型
-            underline: SizedBox(),
+            underline: const SizedBox(),
             isExpanded: true,
-            value: currentValue, // 使用检查后的值
-            items: [
-              // 提示项
-              DropdownMenuItem<String>(
-                value: null,
-                child: Text(
-                  hintText,
-                  style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        fontSize: 12,
-                        color: Theme.of(context)
-                            .colorScheme
-                            .surfaceContainerHighest,
-                      ),
-                ),
-              ),
-              // 选项列表（已过滤掉"0"）
-              ...filteredList.map((String item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child:
-                      Text("$item    :    ${getOutputPortRemarkString(item)}",
-                          style: Theme.of(context).textTheme.bodySmall!.apply(
-                                color: Theme.of(context).colorScheme.onSurface,
-                              )),
-                );
-              }),
-            ],
+            value: selectedValue,
+            hint: isCustomInvalid
+                ? Text(
+                    currentVal,
+                    style: const TextStyle(fontSize: 12, color: Colors.red),
+                    overflow: TextOverflow.ellipsis,
+                  )
+                : Text(
+                    hintText,
+                    style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          fontSize: 12,
+                          color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                        ),
+                  ),
+            items: menuItems,
             onChanged: (String? value) {
-              // 明确参数类型
               if (value == null) {
                 setState(() {
-                  outputPortCtl.text = ''; // 修正：应该是outputPortCtl，不是scaleNameCtl
+                  outputPortCtl.text = '';
+                  isOutputValid = true;
                 });
                 return;
               }
 
               setState(() {
-                outputPortCtl.text =
-                    value; // 修正：应该是outputPortCtl，不是scaleNameCtl
+                outputPortCtl.text = value;
+                isOutputValid = true;
               });
             },
-            style: Theme.of(context).textTheme.bodySmall!.apply(
-                  color: Theme.of(context).colorScheme.onSurface,
-                )));
+            style: TextStyle(
+              fontSize: 12,
+              color: isValid ? Theme.of(context).colorScheme.onSurface : Colors.red,
+            )));
   }
 
   //// 显示原料类型管理的对话框
@@ -1447,7 +1740,63 @@ class EditRawDialogState extends State<EditRawDialog> {
                   SizedBox(
                     width: largePadding,
                   ),
-                  Expanded(flex: 1, child: SizedBox()),
+                  Expanded(
+                      flex: 1,
+                      child: Column(children: [
+                        showItemNameWithStar(
+                            context, localizedStrings.fQrCodeRecognition, false),
+                        SizedBox(
+                          height: 48,
+                          child: Row(children: [
+                            Expanded(
+                              child: Container(
+                                  padding: const EdgeInsets.only(
+                                      left: 10, right: 10),
+                                  decoration: BoxDecoration(
+                                    border: Border.all(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outline,
+                                      width: 1,
+                                    ),
+                                  ),
+                                  alignment: Alignment.centerLeft,
+                                  child: TextField(
+                                    controller: qrCodeScanCtl,
+                                    decoration: InputDecoration(
+                                      border: InputBorder.none,
+                                      hintText: '',
+                                      contentPadding:
+                                          const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                      hintStyle: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall!
+                                          .copyWith(
+                                            fontSize: 12,
+                                            color: Theme.of(context)
+                                                .colorScheme
+                                                .surfaceContainerHighest,
+                                          ),
+                                      suffixIconConstraints:
+                                          BoxConstraints.tight(
+                                              const Size(40, 40)),
+                                    ),
+                                    onChanged: (value) {
+                                      parseAndFillQrData(value);
+                                    },
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onSurface,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  )),
+                            ),
+                          ]),
+                        ),
+                      ])),
                   SizedBox(
                     width: largePadding,
                   ),
@@ -1533,12 +1882,13 @@ class EditRawDialogState extends State<EditRawDialog> {
                           borderRadius: BorderRadius.zero,
                         ),
                       ),
-                      onPressed:
-                          (rawCodeCtl.text.isEmpty || rawNameCtl.text.isEmpty
-                              // ||   rawTypeCtl.text.isEmpty
-                              )
-                              ? null
-                              : () {
+                      onPressed: (rawCodeCtl.text.isEmpty ||
+                              rawNameCtl.text.isEmpty ||
+                              !isCategoryValid ||
+                              !isScaleValid ||
+                              !isOutputValid)
+                          ? null
+                          : () {
                                   int typeId = getRawTypeId(rawTypeCtl.text);
                                   if (typeId == -1) {
                                     return;

@@ -1816,6 +1816,10 @@
     "@fAddRawMaterialBtn": {
         "description": "Text on the button to add raw material"
     },
+    "fQrCodeRecognition": "二维码识别",
+    "@fQrCodeRecognition": {
+        "description": "Label for QR code recognition"
+    },
     "fInputRawMaterialIdHint": "请输入原料编号",
     "@fInputRawMaterialIdHint": {
         "description": "Hint text for raw material ID input field"
@@ -3843,5 +3847,25 @@
                 "type": "int"
             }
         }
+    },
+    "tipRfidBoundOther": "该RFID卡已被其他账号绑定",
+    "@tipRfidBoundOther": {
+        "description": "Tip for RFID card already bound to another account"
+    },
+    "tipRfidNotFound": "该RFID卡未绑定账号",
+    "@tipRfidNotFound": {
+        "description": "Tip for RFID card not found"
+    },
+    "tipAccountDisabled": "该账号已被禁用",
+    "@tipAccountDisabled": {
+        "description": "Tip for account disabled"
+    },
+    "tipAddUserFailed": "新增用户失败",
+    "@tipAddUserFailed": {
+        "description": "Tip for add user failed"
+    },
+    "tipUpdateUserFailed": "修改用户失败",
+    "@tipUpdateUserFailed": {
+        "description": "Tip for update user failed"
     }
 }

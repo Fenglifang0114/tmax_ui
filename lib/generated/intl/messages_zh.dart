@@ -300,6 +300,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "fPluExist": MessageLookupByLibrary.simpleMessage("PLU已存在"),
     "fPrintFmaBtn": MessageLookupByLibrary.simpleMessage("打印配方"),
     "fPublic": MessageLookupByLibrary.simpleMessage("公开"),
+    "fQrCodeRecognition": MessageLookupByLibrary.simpleMessage("二维码识别"),
     "fQualificationStatus": MessageLookupByLibrary.simpleMessage("是否达标"),
     "fQualified": MessageLookupByLibrary.simpleMessage("√"),
     "fRawCategoryManagement": MessageLookupByLibrary.simpleMessage("类别管理"),
@@ -1187,7 +1188,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "superAdmin": MessageLookupByLibrary.simpleMessage("超级管理员"),
     "systemOperation": MessageLookupByLibrary.simpleMessage("系统操作"),
     "systemRecords": MessageLookupByLibrary.simpleMessage("系统记录"),
+    "tipAccountDisabled": MessageLookupByLibrary.simpleMessage("该账号已被禁用"),
     "tipAccountExist": MessageLookupByLibrary.simpleMessage("账号已存在"),
+    "tipAddUserFailed": MessageLookupByLibrary.simpleMessage("新增用户失败"),
     "tipBluetoothDisconnect": MessageLookupByLibrary.simpleMessage(
       "提示：此功能需要将蓝牙与其他设备断开连接!",
     ),
@@ -1215,11 +1218,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "tipPageSequnce": MessageLookupByLibrary.simpleMessage("第"),
     "tipPageTotal": MessageLookupByLibrary.simpleMessage("共"),
     "tipPasswordNotSame": MessageLookupByLibrary.simpleMessage("密码不一致"),
+    "tipRfidBoundOther": MessageLookupByLibrary.simpleMessage("该RFID卡已被其他账号绑定"),
+    "tipRfidNotFound": MessageLookupByLibrary.simpleMessage("该RFID卡未绑定账号"),
     "tipRow": MessageLookupByLibrary.simpleMessage("行"),
     "tipSameScale": MessageLookupByLibrary.simpleMessage("同一台秤不能同时连接"),
     "tipTemporarySaveFormulaRecord": MessageLookupByLibrary.simpleMessage(
       "暂存记录",
     ),
+    "tipUpdateUserFailed": MessageLookupByLibrary.simpleMessage("修改用户失败"),
     "tipValidating": MessageLookupByLibrary.simpleMessage("正在验证数据..."),
     "titleChangePassword": MessageLookupByLibrary.simpleMessage("修改密码"),
     "titleConfidentialWeighingMode": MessageLookupByLibrary.simpleMessage(

@@ -107,6 +107,7 @@ class RespSysMsgType {
   static const String respDisableSysUser = 'resp_disable_sys_user';
   static const String respChangePassword = 'resp_change_password';
   static const String respLogin = 'resp_login';
+  static const String respRfidLogin = 'resp_rfid_login';
   static const String respGetAllUsers = 'resp_get_all_users';
   static const String respGetUserDetail = 'resp_get_user_detail';
   static const String respPluAdd = 'resp_product_add';
@@ -249,6 +250,7 @@ class RespSysMsgType {
     RespSysMsgType.respDisableSysUser: handleDisableSysUser,
     RespSysMsgType.respChangePassword: handleChangePassword,
     RespSysMsgType.respLogin: handleLogin,
+    RespSysMsgType.respRfidLogin: handleRfidLogin,
     RespSysMsgType.respGetAllUsers: handleGetAllUsers,
     RespSysMsgType.respGetUserDetail: handleGetUserDetail,
     RespSysMsgType.respPluAdd: handleRespPluAdd,
@@ -939,6 +941,11 @@ class RespSysMsgType {
   static void handleLogin(dynamic jsonData) {
     String dataString = jsonData['MsgBody'];
     eventBus.fire(EventRespLogin(dataString));
+  }
+
+  static void handleRfidLogin(dynamic jsonData) {
+    String dataString = jsonData['MsgBody'];
+    eventBus.fire(EventRespRfidLogin(dataString));
   }
 
   static void handleGetAllUsers(dynamic jsonData) {

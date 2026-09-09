@@ -711,7 +711,6 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
-
   //根据配方ID获取配方称重记录
   static void getOneFmaRecsById(String fmaId) {
     myScaleCmd.cmdMode = "get_fma_rec_by_id";
@@ -801,8 +800,6 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
-
-
   //创建暂存的称重记录
   static void createDraftRecord(String jsonStr) {
     myScaleCmd.cmdMode = "create_draft_fma_wgt_rec";
@@ -880,6 +877,14 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
+  //RFID 刷卡登录
+  static void userRfidLogin(String rfid) {
+    ReqRfidLogin req = ReqRfidLogin(rfid: rfid);
+    myScaleCmd.cmdMode = "rfid_login";
+    myScaleCmd.cmdData = reqRfidLoginToJson(req);
+    sendMsgChan0(jsonEncode(myScaleCmd));
+  }
+
   //登出
   static void logout() {
     myScaleCmd.cmdMode = "logout";
@@ -896,7 +901,8 @@ class PublicFunctions {
     sendMsgChan0(jsonEncode(myScaleCmd));
   }
 
-  static void pt10WriteParams(String port, int baudRate, Map<String, String> cmdParams) {
+  static void pt10WriteParams(
+      String port, int baudRate, Map<String, String> cmdParams) {
     myScaleCmd.cmdMode = "pt10_write_param";
     myScaleCmd.cmdData = jsonEncode({
       "Port": port,
@@ -1598,6 +1604,7 @@ class PublicFunctions {
     myScaleCmd.cmdData = '';
     sendMsg(scaleId, jsonEncode(myScaleCmd));
   }
+
   static void getAutoScan() {
     myScaleCmd.cmdMode = "get_auto_scan";
     myScaleCmd.cmdData = '';
