@@ -18,6 +18,9 @@ class DesktopScrollBehavior extends MaterialScrollBehavior {
 
 // 检查服务是否安装
 Future<bool> checkServiceInstalled(String serviceName) async {
+  if (!Platform.isWindows) {
+    return true;
+  }
   try {
     ProcessResult result = await Process.run(
         'sc',
@@ -39,6 +42,9 @@ Future<bool> checkServiceInstalled(String serviceName) async {
 
 // 检查服务是否正在运行
 Future<bool> checkServiceRunning(String serviceName) async {
+  if (!Platform.isWindows) {
+    return true;
+  }
   try {
     ProcessResult result = await Process.run(
         'sc',
@@ -57,6 +63,9 @@ Future<bool> checkServiceRunning(String serviceName) async {
 }
 
 Future<bool> startServiceWithAdmin(String serviceName) async {
+  if (!Platform.isWindows) {
+    return true;
+  }
   try {
     // 检查当前是否具有管理员权限
     bool isAdmin = await _checkAdminPrivileges();

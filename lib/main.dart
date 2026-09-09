@@ -32,12 +32,16 @@ Future<void> main() async {
       bool isInstalled = await checkServiceInstalled(serviceName);
       if (!isInstalled) {
         // 弹框提示服务未安装
-        MessageBox(
-          HWND_DESKTOP,
-          TEXT("Service $serviceName uninstalled"),
-          TEXT("Error"),
-          MB_ICONERROR | MB_OK,
-        );
+        if (Platform.isWindows) {
+          MessageBox(
+            HWND_DESKTOP,
+            TEXT("Service $serviceName uninstalled"),
+            TEXT("Error"),
+            MB_ICONERROR | MB_OK,
+          );
+        } else {
+          debugPrint("Service $serviceName uninstalled");
+        }
         // exit(0); // Temporarily disabled
       }
 
@@ -49,22 +53,30 @@ Future<void> main() async {
         if (startSuccess) {
           sleep(Duration(seconds: 2));
         } else {
-          MessageBox(
-            HWND_DESKTOP,
-            TEXT("Service $serviceName start failed"),
-            TEXT("Error"),
-            MB_ICONERROR | MB_OK,
-          );
+          if (Platform.isWindows) {
+            MessageBox(
+              HWND_DESKTOP,
+              TEXT("Service $serviceName start failed"),
+              TEXT("Error"),
+              MB_ICONERROR | MB_OK,
+            );
+          } else {
+            debugPrint("Service $serviceName start failed");
+          }
           // exit(0); // Temporarily disabled
         }
       }
     } catch (e) {
-      MessageBox(
-        HWND_DESKTOP,
-        TEXT("Error: $e"),
-        TEXT("Error"),
-        MB_ICONERROR | MB_OK,
-      );
+      if (Platform.isWindows) {
+        MessageBox(
+          HWND_DESKTOP,
+          TEXT("Error: $e"),
+          TEXT("Error"),
+          MB_ICONERROR | MB_OK,
+        );
+      } else {
+        debugPrint("Error: $e");
+      }
       // exit(0); // Temporarily disabled
     }
   }

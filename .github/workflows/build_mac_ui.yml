@@ -1,0 +1,47 @@
+name: Build Flutter UI for macOS
+
+on:
+  push:
+    branches:
+      - macOs
+  workflow_dispatch:
+
+jobs:
+  build-macos-ui:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'stable'
+          cache: true
+
+      - name: Enable macOS Desktop Support
+        run: flutter config --enable-macos-desktop
+
+      - name: Install Dependencies
+        run: flutter pub get
+
+      - name: Build macOS App Bundle
+        run: flutter build macos --release
+
+      - name: Package App Bundle into ZIP
+        run: |
+          cd build/macos/Build/Products/Release/
+          zip -r TMaxPcServiceUI-macOS.zip TMaxPcServiceUI.app
+
+      - name: Upload macOS App Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TMaxPcServiceUI-macOS-App
+          path: build/macos/Build/Products/Release/TMaxPcServiceUI-macOS.zip
