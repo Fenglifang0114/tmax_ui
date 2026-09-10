@@ -29,10 +29,8 @@ jobs:
       - name: Enable macOS Desktop Support
         run: flutter config --enable-macos-desktop
 
-      - name: Install Dependencies & CocoaPods
-        run: |
-          flutter pub get
-          cd macos && pod install
+      - name: Install Dependencies
+        run: flutter pub get
 
       - name: Build macOS App Bundle
         run: flutter build macos --release
