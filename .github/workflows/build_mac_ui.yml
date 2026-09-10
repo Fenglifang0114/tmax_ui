@@ -33,7 +33,7 @@ jobs:
         run: flutter pub get
 
       - name: Build macOS App Bundle
-        run: flutter build macos --release
+        run: flutter build macos --release -v
 
       - name: Package App Bundle into ZIP
         run: |
