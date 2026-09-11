@@ -36,6 +36,11 @@ jobs:
       - name: Build macOS App Bundle
         run: flutter build macos --release -v
 
+      - name: Sign macOS App Bundle (Ad-Hoc)
+        run: |
+          cd build/macos/Build/Products/Release/
+          codesign --force --options runtime --deep --sign - *.app
+
       - name: Package App Bundle into ZIP
         run: |
           cd build/macos/Build/Products/Release/
