@@ -11,7 +11,7 @@ jobs:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout Code
+      - name: Checkout UI Code
         uses: actions/checkout@v4
 
       - name: Set up Java
@@ -27,6 +27,33 @@ jobs:
           channel: 'stable'
           cache: true
 
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.22'
+
+      - name: Checkout Backend Code
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/tmaxBack
+          path: tmaxBack
+          ref: macOs
+        continue-on-error: true
+
+      - name: Build macOS Backend Binary
+        run: |
+          if [ -d "tmaxBack/Backend" ]; then
+            cd tmaxBack/Backend
+            CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64" CGO_LDFLAGS="-arch arm64" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
+            CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64" CGO_LDFLAGS="-arch x86_64" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
+            if [ -f tmaxsrv_amd64 ]; then
+              lipo -create -output tmaxsrv_mac tmaxsrv_amd64 tmaxsrv_arm64
+            else
+              mv tmaxsrv_arm64 tmaxsrv_mac
+            fi
+            chmod +x tmaxsrv_mac
+          fi
+
       - name: Enable macOS Desktop Support
         run: flutter config --enable-macos-desktop
 
@@ -36,18 +63,45 @@ jobs:
       - name: Build macOS App Bundle
         run: flutter build macos --release -v
 
+      - name: Embed Backend Binary into App Resources
+        run: |
+          APP_PATH="build/macos/Build/Products/Release/TMaxPcServiceUI.app"
+          RESOURCES_PATH="$APP_PATH/Contents/Resources"
+          mkdir -p "$RESOURCES_PATH"
+          if [ -f "tmaxBack/Backend/tmaxsrv_mac" ]; then
+            cp tmaxBack/Backend/tmaxsrv_mac "$RESOURCES_PATH/tmaxsrv_mac"
+            chmod +x "$RESOURCES_PATH/tmaxsrv_mac"
+            echo "Successfully embedded tmaxsrv_mac into $RESOURCES_PATH"
+          else
+            echo "Warning: tmaxsrv_mac not found, skipping embedding"
+          fi
+
       - name: Sign macOS App Bundle (Ad-Hoc)
         run: |
           cd build/macos/Build/Products/Release/
           codesign --force --options runtime --deep --sign - *.app
 
-      - name: Package App Bundle into ZIP
+      - name: Package App Bundle & Launcher Script into ZIP
         run: |
           cd build/macos/Build/Products/Release/
-          zip -r TMaxPcServiceUI-macOS.zip *.app
+          
+          # 创建一键解除隔离属性的启动脚本
+          cat << 'EOF' > 启动应用.command
+          #!/bin/bash
+          DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+          echo "正在解除 macOS 安全隔离属性..."
+          xattr -cr "$DIR/TMaxPcServiceUI.app" 2>/dev/null
+          echo "正在启动 TMaxPcService..."
+          open "$DIR/TMaxPcServiceUI.app"
+          EOF
+          chmod +x 启动应用.command
+
+          # 打包包含 App 和一键启动脚本的 ZIP
+          zip -r TMaxPcServiceUI-macOS.zip TMaxPcServiceUI.app 启动应用.command
 
       - name: Upload macOS App Artifact
         uses: actions/upload-artifact@v4
         with:
           name: TMaxPcServiceUI-macOS-App
           path: build/macos/Build/Products/Release/TMaxPcServiceUI-macOS.zip
+

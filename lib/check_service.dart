@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
 
 // 自定义滚动行为，支持触摸和鼠标设备
 class DesktopScrollBehavior extends MaterialScrollBehavior {
@@ -9,15 +10,38 @@ class DesktopScrollBehavior extends MaterialScrollBehavior {
   Set<PointerDeviceKind> get dragDevices => {
         PointerDeviceKind.touch, // 支持触摸设备
         PointerDeviceKind.mouse, // 支持鼠标设备
-        // 可以根据需要添加其他设备类型
-        // PointerDeviceKind.stylus,
-        // PointerDeviceKind.invertedStylus,
-        // PointerDeviceKind.trackpad,
       };
 }
 
-// 检查服务是否安装
+/// 获取 macOS 下 Go 后端可执行文件的路径
+String getBackendPathMacOS() {
+  String exePath = Platform.resolvedExecutable;
+  // 如果运行在 .app 包内: .../TMaxPcServiceUI.app/Contents/MacOS/TMaxPcServiceUI
+  // 查找 Contents/Resources/tmaxsrv_mac
+  String contentsDir = p.dirname(p.dirname(exePath));
+  String bundlePath = p.join(contentsDir, 'Resources', 'tmaxsrv_mac');
+  if (File(bundlePath).existsSync()) {
+    return bundlePath;
+  }
+  // 备用：同级目录
+  String sameDirPath = p.join(p.dirname(exePath), 'tmaxsrv_mac');
+  if (File(sameDirPath).existsSync()) {
+    return sameDirPath;
+  }
+  // 备用：当前工作目录
+  String cwdPath = p.join(Directory.current.path, 'tmaxsrv_mac');
+  if (File(cwdPath).existsSync()) {
+    return cwdPath;
+  }
+  return bundlePath;
+}
+
+// 检查服务是否安装 / macOS 下检查 backend 可执行文件是否存在
 Future<bool> checkServiceInstalled(String serviceName) async {
+  if (Platform.isMacOS) {
+    String backendPath = getBackendPathMacOS();
+    return File(backendPath).existsSync();
+  }
   if (!Platform.isWindows) {
     return true;
   }
@@ -40,8 +64,16 @@ Future<bool> checkServiceInstalled(String serviceName) async {
   }
 }
 
-// 检查服务是否正在运行
+// 检查服务是否正在运行 / macOS 下检查后台进程是否存在
 Future<bool> checkServiceRunning(String serviceName) async {
+  if (Platform.isMacOS) {
+    try {
+      ProcessResult result = await Process.run('pgrep', ['-f', 'tmaxsrv_mac']);
+      return result.exitCode == 0;
+    } catch (e) {
+      return false;
+    }
+  }
   if (!Platform.isWindows) {
     return true;
   }
@@ -63,6 +95,29 @@ Future<bool> checkServiceRunning(String serviceName) async {
 }
 
 Future<bool> startServiceWithAdmin(String serviceName) async {
+  if (Platform.isMacOS) {
+    try {
+      String backendPath = getBackendPathMacOS();
+      if (!File(backendPath).existsSync()) {
+        debugPrint("macOS Backend file not found: $backendPath");
+        return false;
+      }
+      // 1. 静默移除 macOS 下载隔离标记，避免 Gatekeeper 拦截 backend
+      await Process.run('xattr', ['-d', 'com.apple.quarantine', backendPath]);
+      // 2. 赋予可执行权限
+      await Process.run('chmod', ['+x', backendPath]);
+      // 3. 后台分离模式启动 Go 后端进程
+      await Process.start(
+        backendPath,
+        [],
+        mode: ProcessStartMode.detached,
+      );
+      return true;
+    } catch (e) {
+      debugPrint("macOS start backend error: $e");
+      return false;
+    }
+  }
   if (!Platform.isWindows) {
     return true;
   }
@@ -121,3 +176,4 @@ Future<bool> _startService(String serviceName) async {
     return false;
   }
 }
+
