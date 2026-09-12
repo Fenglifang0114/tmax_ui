@@ -35,15 +35,14 @@ jobs:
       - name: Checkout Backend Code
         uses: actions/checkout@v4
         with:
-          repository: ${{ github.repository_owner }}/tmaxBack
-          path: tmaxBack
+          repository: ${{ github.repository_owner }}/tmax_back
+          path: tmax_back
           ref: macOs
-        continue-on-error: true
 
       - name: Build macOS Backend Binary
         run: |
-          if [ -d "tmaxBack/Backend" ]; then
-            cd tmaxBack/Backend
+          if [ -d "tmax_back/Backend" ]; then
+            cd tmax_back/Backend
             CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64" CGO_LDFLAGS="-arch arm64" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
             CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64" CGO_LDFLAGS="-arch x86_64" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
             if [ -f tmaxsrv_amd64 ]; then
@@ -52,6 +51,9 @@ jobs:
               mv tmaxsrv_arm64 tmaxsrv_mac
             fi
             chmod +x tmaxsrv_mac
+          else
+            echo "Error: tmax_back/Backend directory not found!"
+            exit 1
           fi
 
       - name: Enable macOS Desktop Support
@@ -69,13 +71,15 @@ jobs:
           echo "Target App Bundle Path: $APP_PATH"
           RESOURCES_PATH="$APP_PATH/Contents/Resources"
           mkdir -p "$RESOURCES_PATH"
-          if [ -f "tmaxBack/Backend/tmaxsrv_mac" ]; then
-            cp tmaxBack/Backend/tmaxsrv_mac "$RESOURCES_PATH/tmaxsrv_mac"
+          if [ -f "tmax_back/Backend/tmaxsrv_mac" ]; then
+            cp tmax_back/Backend/tmaxsrv_mac "$RESOURCES_PATH/tmaxsrv_mac"
             chmod +x "$RESOURCES_PATH/tmaxsrv_mac"
             echo "Successfully embedded tmaxsrv_mac into $RESOURCES_PATH"
           else
-            echo "Warning: tmaxsrv_mac not found, skipping embedding"
+            echo "Error: tmaxsrv_mac not found at tmax_back/Backend/tmaxsrv_mac!"
+            exit 1
           fi
+
 
       - name: Sign macOS App Bundle (Ad-Hoc)
         run: |
