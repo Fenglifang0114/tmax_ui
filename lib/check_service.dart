@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as p;
+import 'package:t_max/data/manager_scale_channel.dart';
 
 // 自定义滚动行为，支持触摸和鼠标设备
 class DesktopScrollBehavior extends MaterialScrollBehavior {
@@ -97,31 +98,49 @@ Future<bool> checkServiceRunning(String serviceName) async {
 Future<bool> startServiceWithAdmin(String serviceName) async {
   if (Platform.isMacOS) {
     try {
-      if (await checkServiceRunning(serviceName)) {
-        return true;
-      }
       String backendPath = getBackendPathMacOS();
       if (!File(backendPath).existsSync()) {
         debugPrint("macOS Backend file not found: $backendPath");
         return false;
       }
-      // 1. 静默移除 macOS 下载隔离标记，避免 Gatekeeper 拦截 backend
+      // 1. 递归清除整个 .app 应用包及内部二进制的隔离标记
       try {
+        String exePath = Platform.resolvedExecutable;
+        String contentsDir = p.dirname(p.dirname(exePath));
+        String appBundlePath = p.dirname(contentsDir);
+        if (appBundlePath.endsWith('.app')) {
+          await Process.run('xattr', ['-cr', appBundlePath]);
+        }
         await Process.run('xattr', ['-d', 'com.apple.quarantine', backendPath]);
       } catch (_) {}
       // 2. 赋予可执行权限
       try {
         await Process.run('chmod', ['+x', backendPath]);
       } catch (_) {}
-      // 3. 后台分离模式启动 Go 后端进程，指定工作目录
-      String workDir = p.dirname(backendPath);
-      await Process.start(
-        backendPath,
-        [],
-        mode: ProcessStartMode.detached,
-        workingDirectory: workDir,
-      );
-      return true;
+      // 3. 后台分离模式启动 Go 后端进程（若未运行）
+      bool isRunning = await checkServiceRunning(serviceName);
+      if (!isRunning) {
+        String workDir = p.dirname(backendPath);
+        await Process.start(
+          backendPath,
+          [],
+          mode: ProcessStartMode.detached,
+          workingDirectory: workDir,
+        );
+      }
+      // 4. 轮询检测后端 TCP 端口（webPort = 7878）是否就绪，解决启动时差问题
+      for (int i = 0; i < 20; i++) {
+        try {
+          var socket = await Socket.connect('127.0.0.1', webPort, timeout: const Duration(milliseconds: 500));
+          socket.destroy();
+          debugPrint("macOS Backend port $webPort is ready!");
+          return true;
+        } catch (_) {
+          await Future.delayed(const Duration(milliseconds: 500));
+        }
+      }
+      debugPrint("macOS Backend port $webPort polling timeout");
+      return false;
     } catch (e) {
       debugPrint("macOS start backend error: $e");
       return false;
