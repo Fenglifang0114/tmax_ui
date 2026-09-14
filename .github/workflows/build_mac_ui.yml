@@ -45,8 +45,8 @@ jobs:
         run: |
           if [ -d "tmax_back/Backend" ]; then
             cd tmax_back/Backend
-            CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64" CGO_LDFLAGS="-arch arm64" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
-            CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64" CGO_LDFLAGS="-arch x86_64" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
+            CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
+            CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
             if [ -f tmaxsrv_amd64 ]; then
               lipo -create -output tmaxsrv_mac tmaxsrv_amd64 tmaxsrv_arm64
             else
@@ -86,7 +86,7 @@ jobs:
       - name: Sign macOS App Bundle (Ad-Hoc)
         run: |
           cd build/macos/Build/Products/Release/
-          codesign --force --options runtime --deep --sign - *.app
+          codesign --force --deep --sign - *.app
 
       - name: Package App Bundle & Launcher Script into ZIP
         run: |
@@ -94,14 +94,15 @@ jobs:
           APP_NAME=$(basename *.app)
           echo "Packaging App Bundle: $APP_NAME"
           
-          # 创建一键解除隔离属性的动态启动脚本
+          # 创建一键解除隔离属性与签名限制的动态启动脚本
           cat << 'EOF' > 启动应用.command
           #!/bin/bash
           DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-          echo "正在解除 macOS 安全隔离属性..."
           TARGET_APP=$(ls -d "$DIR"/*.app 2>/dev/null | head -n 1)
           if [ -n "$TARGET_APP" ]; then
+            echo "正在解除 macOS 安全隔离属性与签名限制..."
             xattr -cr "$TARGET_APP" 2>/dev/null
+            codesign --force --deep --sign - "$TARGET_APP" 2>/dev/null
             echo "正在启动应用..."
             open "$TARGET_APP"
           else
