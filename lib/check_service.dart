@@ -97,20 +97,29 @@ Future<bool> checkServiceRunning(String serviceName) async {
 Future<bool> startServiceWithAdmin(String serviceName) async {
   if (Platform.isMacOS) {
     try {
+      if (await checkServiceRunning(serviceName)) {
+        return true;
+      }
       String backendPath = getBackendPathMacOS();
       if (!File(backendPath).existsSync()) {
         debugPrint("macOS Backend file not found: $backendPath");
         return false;
       }
       // 1. 静默移除 macOS 下载隔离标记，避免 Gatekeeper 拦截 backend
-      await Process.run('xattr', ['-d', 'com.apple.quarantine', backendPath]);
+      try {
+        await Process.run('xattr', ['-d', 'com.apple.quarantine', backendPath]);
+      } catch (_) {}
       // 2. 赋予可执行权限
-      await Process.run('chmod', ['+x', backendPath]);
-      // 3. 后台分离模式启动 Go 后端进程
+      try {
+        await Process.run('chmod', ['+x', backendPath]);
+      } catch (_) {}
+      // 3. 后台分离模式启动 Go 后端进程，指定工作目录
+      String workDir = p.dirname(backendPath);
       await Process.start(
         backendPath,
         [],
         mode: ProcessStartMode.detached,
+        workingDirectory: workDir,
       );
       return true;
     } catch (e) {
