@@ -89,31 +89,12 @@ jobs:
           cd build/macos/Build/Products/Release/
           codesign --force --deep --sign - *.app
 
-      - name: Package App Bundle & Launcher Script into ZIP
+      - name: Package App Bundle into ZIP
         run: |
           cd build/macos/Build/Products/Release/
           APP_NAME=$(basename *.app)
           echo "Packaging App Bundle: $APP_NAME"
-          
-          # 创建一键解除隔离属性与签名限制的动态启动脚本
-          cat << 'EOF' > 启动应用.command
-          #!/bin/bash
-          DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
-          TARGET_APP=$(ls -d "$DIR"/*.app 2>/dev/null | head -n 1)
-          if [ -n "$TARGET_APP" ]; then
-            echo "正在解除 macOS 安全隔离属性与签名限制..."
-            xattr -cr "$TARGET_APP" 2>/dev/null
-            codesign --force --deep --sign - "$TARGET_APP" 2>/dev/null
-            echo "正在启动应用..."
-            open "$TARGET_APP"
-          else
-            echo "错误: 未找到 .app 应用包"
-          fi
-          EOF
-          chmod +x 启动应用.command
-
-          # 打包包含 App 和一键启动脚本的 ZIP
-          zip -r TMaxPcServiceUI-macOS.zip "$APP_NAME" 启动应用.command
+          zip -r TMaxPcServiceUI-macOS.zip "$APP_NAME"
 
       - name: Upload macOS App Artifact
         uses: actions/upload-artifact@v4
