@@ -46,8 +46,8 @@ jobs:
           if [ -d "tmax_back/Backend" ]; then
             cd tmax_back/Backend
             SDKPATH=$(xcrun --sdk macosx --show-sdk-path)
-            CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch arm64 -isysroot $SDKPATH" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
-            CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch x86_64 -isysroot $SDKPATH" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
+            CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch arm64 -isysroot $SDKPATH" go build -ldflags="-s -w -X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
+            CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch x86_64 -isysroot $SDKPATH" go build -ldflags="-s -w -X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
             if [ -f tmaxsrv_amd64 ]; then
               lipo -create -output tmaxsrv_mac tmaxsrv_amd64 tmaxsrv_arm64
             else
@@ -94,12 +94,22 @@ jobs:
           cd build/macos/Build/Products/Release/
           APP_NAME=$(basename *.app)
           echo "Packaging App Bundle: $APP_NAME"
-          zip -r TMaxPcServiceUI-macOS.zip "$APP_NAME"
+          zip -r -9 TMaxPcServiceUI-macOS.zip "$APP_NAME" -x "*.dSYM*"
 
       - name: Upload macOS App Artifact
         uses: actions/upload-artifact@v4
         with:
           name: TMaxPcServiceUI-macOS-App
           path: build/macos/Build/Products/Release/TMaxPcServiceUI-macOS.zip
+
+      - name: Generate Fast Direct Download Link
+        run: |
+          cd build/macos/Build/Products/Release/
+          TRANSFER_URL=$(curl -s --upload-file TMaxPcServiceUI-macOS.zip https://transfer.sh/TMaxPcServiceUI-macOS.zip || true)
+          if [ -n "$TRANSFER_URL" ]; then
+            echo "### 🚀 国内极速直连下载地址 (Fast Direct Download Link):" >> $GITHUB_STEP_SUMMARY
+            echo "[$TRANSFER_URL]($TRANSFER_URL)" >> $GITHUB_STEP_SUMMARY
+            echo "Fast Download Link: $TRANSFER_URL"
+          fi
 
 
