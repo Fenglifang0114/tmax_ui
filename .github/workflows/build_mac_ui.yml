@@ -38,7 +38,7 @@ jobs:
           repository: ${{ github.repository_owner }}/tmax_back
           path: tmax_back
           ref: macOs
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
 
       - name: Build macOS Backend Binary
