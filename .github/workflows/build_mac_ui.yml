@@ -45,8 +45,8 @@ jobs:
         run: |
           if [ -d "tmax_back/Backend" ]; then
             cd tmax_back/Backend
-            CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
-            CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
+            CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64" CGO_LDFLAGS="-arch arm64" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
+            CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64" CGO_LDFLAGS="-arch x86_64" go build -ldflags="-X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
             if [ -f tmaxsrv_amd64 ]; then
               lipo -create -output tmaxsrv_mac tmaxsrv_amd64 tmaxsrv_arm64
             else
