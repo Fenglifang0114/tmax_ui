@@ -69,10 +69,15 @@ Future<bool> checkServiceInstalled(String serviceName) async {
 Future<bool> checkServiceRunning(String serviceName) async {
   if (Platform.isMacOS) {
     try {
-      ProcessResult result = await Process.run('pgrep', ['-f', 'tmaxsrv_mac']);
+      ProcessResult result = await Process.run('/usr/bin/pgrep', ['-f', 'tmaxsrv_mac']);
       return result.exitCode == 0;
     } catch (e) {
-      return false;
+      try {
+        ProcessResult result = await Process.run('pgrep', ['-f', 'tmaxsrv_mac']);
+        return result.exitCode == 0;
+      } catch (_) {
+        return false;
+      }
     }
   }
   if (!Platform.isWindows) {
@@ -109,24 +114,27 @@ Future<bool> startServiceWithAdmin(String serviceName) async {
         String contentsDir = p.dirname(p.dirname(exePath));
         String appBundlePath = p.dirname(contentsDir);
         if (appBundlePath.endsWith('.app')) {
-          await Process.run('xattr', ['-cr', appBundlePath]);
+          await Process.run('/usr/bin/xattr', ['-cr', appBundlePath]);
         }
-        await Process.run('xattr', ['-d', 'com.apple.quarantine', backendPath]);
+        await Process.run('/usr/bin/xattr', ['-d', 'com.apple.quarantine', backendPath]);
       } catch (_) {}
       // 2. 赋予可执行权限
       try {
-        await Process.run('chmod', ['+x', backendPath]);
+        await Process.run('/bin/chmod', ['+x', backendPath]);
       } catch (_) {}
-      // 3. 后台分离模式启动 Go 后端进程（若未运行）
+      // 3. 启动 Go 后端进程（若未运行）
+      // 注意：必须使用 ProcessStartMode.detachedWithStdio 并消费输出流，避免 fd 1/2 被关闭导致 Go 向 stdout/stderr 写入时触发 EBADF/EPIPE 崩溃
       bool isRunning = await checkServiceRunning(serviceName);
       if (!isRunning) {
         String workDir = p.dirname(backendPath);
-        await Process.start(
+        Process process = await Process.start(
           backendPath,
           [],
-          mode: ProcessStartMode.detached,
+          mode: ProcessStartMode.detachedWithStdio,
           workingDirectory: workDir,
         );
+        process.stdout.listen((_) {});
+        process.stderr.listen((_) {});
       }
       // 4. 轮询检测后端 TCP 端口（webPort = 7878）是否就绪，解决启动时差问题
       for (int i = 0; i < 20; i++) {
