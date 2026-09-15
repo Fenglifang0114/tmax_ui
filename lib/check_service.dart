@@ -18,24 +18,33 @@ class DesktopScrollBehavior extends MaterialScrollBehavior {
 /// 获取 macOS 下 Go 后端可执行文件的路径
 String getBackendPathMacOS() {
   String exePath = Platform.resolvedExecutable;
-  // 如果运行在 .app 包内: .../TMaxPcServiceUI.app/Contents/MacOS/TMaxPcServiceUI
-  // 查找 Contents/Resources/tmaxsrv_mac
   String contentsDir = p.dirname(p.dirname(exePath));
-  String bundlePath = p.join(contentsDir, 'Resources', 'tmaxsrv_mac');
-  if (File(bundlePath).existsSync()) {
-    return bundlePath;
+  
+  // 1. 优先查 Contents/Resources/tmaxsrv_mac
+  String resourcePath = p.join(contentsDir, 'Resources', 'tmaxsrv_mac');
+  if (File(resourcePath).existsSync()) {
+    return resourcePath;
   }
-  // 备用：同级目录
-  String sameDirPath = p.join(p.dirname(exePath), 'tmaxsrv_mac');
-  if (File(sameDirPath).existsSync()) {
-    return sameDirPath;
+  
+  // 2. 查 Contents/MacOS/tmaxsrv_mac
+  String macOsPath = p.join(p.dirname(exePath), 'tmaxsrv_mac');
+  if (File(macOsPath).existsSync()) {
+    return macOsPath;
   }
-  // 备用：当前工作目录
+  
+  // 3. 查 Contents/Frameworks/tmaxsrv_mac
+  String frameworkPath = p.join(contentsDir, 'Frameworks', 'tmaxsrv_mac');
+  if (File(frameworkPath).existsSync()) {
+    return frameworkPath;
+  }
+  
+  // 4. 当前工作目录及备用目录
   String cwdPath = p.join(Directory.current.path, 'tmaxsrv_mac');
   if (File(cwdPath).existsSync()) {
     return cwdPath;
   }
-  return bundlePath;
+  
+  return resourcePath;
 }
 
 // 检查服务是否安装 / macOS 下检查 backend 可执行文件是否存在
