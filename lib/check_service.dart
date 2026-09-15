@@ -156,7 +156,56 @@ Future<bool> startBackendDylibMacOS() async {
 Future<bool> startServiceWithAdmin(String serviceName) async {
   if (Platform.isMacOS) {
     try {
-      // 1. 优先尝试通过 FFI 动态库 (.dylib) 在主进程内拉起 Go 服务（终极解决 macOS 沙箱/进程拉起限制）
+      // 检查端口 7878 是否已有 Backend 正在运行
+      try {
+        var socket = await Socket.connect('127.0.0.1', webPort, timeout: const Duration(milliseconds: 500));
+        socket.destroy();
+        debugPrint("macOS Backend is already running on port $webPort!");
+        return true;
+      } catch (_) {}
+
+      // 1. 优先尝试可执行文件 (tmaxsrv_mac) 独立进程模式 (更安全，具备进程隔离)
+      String backendPath = getBackendPathMacOS();
+      if (File(backendPath).existsSync()) {
+        try {
+          String exePath = Platform.resolvedExecutable;
+          String contentsDir = p.dirname(p.dirname(exePath));
+          String appBundlePath = p.dirname(contentsDir);
+          if (appBundlePath.endsWith('.app')) {
+            await Process.run('/usr/bin/xattr', ['-cr', appBundlePath]);
+          }
+          await Process.run('/usr/bin/xattr', ['-d', 'com.apple.quarantine', backendPath]);
+        } catch (_) {}
+        try {
+          await Process.run('/bin/chmod', ['+x', backendPath]);
+        } catch (_) {}
+
+        bool isRunning = await checkServiceRunning(serviceName);
+        if (!isRunning) {
+          String workDir = p.dirname(backendPath);
+          Process process = await Process.start(
+            backendPath,
+            [],
+            mode: ProcessStartMode.detachedWithStdio,
+            workingDirectory: workDir,
+          );
+          process.stdout.listen((_) {});
+          process.stderr.listen((_) {});
+        }
+
+        for (int i = 0; i < 20; i++) {
+          try {
+            var socket = await Socket.connect('127.0.0.1', webPort, timeout: const Duration(milliseconds: 500));
+            socket.destroy();
+            debugPrint("macOS Backend process port $webPort is ready!");
+            return true;
+          } catch (_) {
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+        }
+      }
+
+      // 2. 备用降级方案：若未挂载可执行文件，尝试通过 FFI 动态库 (.dylib)
       bool dylibStarted = await startBackendDylibMacOS();
       if (dylibStarted) {
         for (int i = 0; i < 20; i++) {
@@ -171,47 +220,6 @@ Future<bool> startServiceWithAdmin(String serviceName) async {
         }
       }
 
-      // 2. 备用降级方案：若未挂载 .dylib，退回为可执行文件拉起模式
-      String backendPath = getBackendPathMacOS();
-      if (!File(backendPath).existsSync()) {
-        debugPrint("macOS Backend file not found: $backendPath");
-        return false;
-      }
-      // 递归清除隔离标记
-      try {
-        String exePath = Platform.resolvedExecutable;
-        String contentsDir = p.dirname(p.dirname(exePath));
-        String appBundlePath = p.dirname(contentsDir);
-        if (appBundlePath.endsWith('.app')) {
-          await Process.run('/usr/bin/xattr', ['-cr', appBundlePath]);
-        }
-        await Process.run('/usr/bin/xattr', ['-d', 'com.apple.quarantine', backendPath]);
-      } catch (_) {}
-      try {
-        await Process.run('/bin/chmod', ['+x', backendPath]);
-      } catch (_) {}
-      bool isRunning = await checkServiceRunning(serviceName);
-      if (!isRunning) {
-        String workDir = p.dirname(backendPath);
-        Process process = await Process.start(
-          backendPath,
-          [],
-          mode: ProcessStartMode.detachedWithStdio,
-          workingDirectory: workDir,
-        );
-        process.stdout.listen((_) {});
-        process.stderr.listen((_) {});
-      }
-      for (int i = 0; i < 20; i++) {
-        try {
-          var socket = await Socket.connect('127.0.0.1', webPort, timeout: const Duration(milliseconds: 500));
-          socket.destroy();
-          debugPrint("macOS Backend port $webPort is ready!");
-          return true;
-        } catch (_) {
-          await Future.delayed(const Duration(milliseconds: 500));
-        }
-      }
       debugPrint("macOS Backend port $webPort polling timeout");
       return false;
     } catch (e) {
