@@ -28,5 +28,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>应用需要使用蓝牙连接电子秤及相关设备。</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>应用需要使用蓝牙连接电子秤及相关设备。</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>应用需要访问本地网络以与通信服务交互。</string>
 </dict>
 </plist>
