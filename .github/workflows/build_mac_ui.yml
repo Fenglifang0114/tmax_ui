@@ -43,12 +43,13 @@ jobs:
 
       - name: Build macOS Backend Binary & Dynamic Library
         run: |
+          set -e
           if [ -d "tmax_back/Backend" ]; then
             cd tmax_back/Backend
             SDKPATH=$(xcrun --sdk macosx --show-sdk-path)
-            # 1. 编译可执行二进制文件
-            CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch arm64 -isysroot $SDKPATH" go build -ldflags="-s -w -X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
-            CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch x86_64 -isysroot $SDKPATH" go build -ldflags="-s -w -X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
+            # 1. 编译可执行二进制文件 (使用 . 编译完整包)
+            CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch arm64 -isysroot $SDKPATH" go build -ldflags="-s -w -X 'main.Version=v1.82'" -o tmaxsrv_arm64 .
+            CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch x86_64 -isysroot $SDKPATH" go build -ldflags="-s -w -X 'main.Version=v1.82'" -o tmaxsrv_amd64 . || true
             if [ -f tmaxsrv_amd64 ]; then
               lipo -create -output tmaxsrv_mac tmaxsrv_amd64 tmaxsrv_arm64
             else
@@ -90,6 +91,9 @@ jobs:
             cp tmax_back/Backend/tmaxsrv_mac "$RESOURCES_PATH/tmaxsrv_mac"
             chmod +x "$RESOURCES_PATH/tmaxsrv_mac"
             echo "Successfully embedded tmaxsrv_mac into $RESOURCES_PATH"
+          else
+            echo "Error: tmaxsrv_mac binary not found!"
+            exit 1
           fi
           if [ -f "tmax_back/Backend/libtmaxsrv.dylib" ]; then
             cp tmax_back/Backend/libtmaxsrv.dylib "$FRAMEWORKS_PATH/libtmaxsrv.dylib"
