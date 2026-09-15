@@ -41,11 +41,12 @@ jobs:
           token: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN }}
 
 
-      - name: Build macOS Backend Binary
+      - name: Build macOS Backend Binary & Dynamic Library
         run: |
           if [ -d "tmax_back/Backend" ]; then
             cd tmax_back/Backend
             SDKPATH=$(xcrun --sdk macosx --show-sdk-path)
+            # 1. 编译可执行二进制文件
             CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch arm64 -isysroot $SDKPATH" go build -ldflags="-s -w -X 'main.Version=v1.82'" -o tmaxsrv_arm64 main.go
             CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch x86_64 -isysroot $SDKPATH" go build -ldflags="-s -w -X 'main.Version=v1.82'" -o tmaxsrv_amd64 main.go || true
             if [ -f tmaxsrv_amd64 ]; then
@@ -54,6 +55,15 @@ jobs:
               mv tmaxsrv_arm64 tmaxsrv_mac
             fi
             chmod +x tmaxsrv_mac
+
+            # 2. 编译 C-Shared 动态链接库 (.dylib)
+            CGO_ENABLED=1 GOOS=darwin GOARCH=arm64 CGO_CFLAGS="-arch arm64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch arm64 -isysroot $SDKPATH" go build -buildmode=c-shared -ldflags="-s -w -X 'main.Version=v1.82'" -o libtmaxsrv_arm64.dylib .
+            CGO_ENABLED=1 GOOS=darwin GOARCH=amd64 CGO_CFLAGS="-arch x86_64 -isysroot $SDKPATH" CGO_LDFLAGS="-arch x86_64 -isysroot $SDKPATH" go build -buildmode=c-shared -ldflags="-s -w -X 'main.Version=v1.82'" -o libtmaxsrv_amd64.dylib . || true
+            if [ -f libtmaxsrv_amd64.dylib ]; then
+              lipo -create -output libtmaxsrv.dylib libtmaxsrv_amd64.dylib libtmaxsrv_arm64.dylib
+            else
+              mv libtmaxsrv_arm64.dylib libtmaxsrv.dylib
+            fi
           else
             echo "Error: tmax_back/Backend directory not found!"
             exit 1
@@ -68,18 +78,25 @@ jobs:
       - name: Build macOS App Bundle
         run: flutter build macos --release -v
 
-      - name: Embed Backend Binary into App Resources
+      - name: Embed Backend Binary & Dynamic Library into App Bundle
         run: |
           APP_PATH=$(ls -d build/macos/Build/Products/Release/*.app | head -n 1)
           echo "Target App Bundle Path: $APP_PATH"
           RESOURCES_PATH="$APP_PATH/Contents/Resources"
+          FRAMEWORKS_PATH="$APP_PATH/Contents/Frameworks"
           mkdir -p "$RESOURCES_PATH"
+          mkdir -p "$FRAMEWORKS_PATH"
           if [ -f "tmax_back/Backend/tmaxsrv_mac" ]; then
             cp tmax_back/Backend/tmaxsrv_mac "$RESOURCES_PATH/tmaxsrv_mac"
             chmod +x "$RESOURCES_PATH/tmaxsrv_mac"
             echo "Successfully embedded tmaxsrv_mac into $RESOURCES_PATH"
+          fi
+          if [ -f "tmax_back/Backend/libtmaxsrv.dylib" ]; then
+            cp tmax_back/Backend/libtmaxsrv.dylib "$FRAMEWORKS_PATH/libtmaxsrv.dylib"
+            cp tmax_back/Backend/libtmaxsrv.dylib "$RESOURCES_PATH/libtmaxsrv.dylib"
+            echo "Successfully embedded libtmaxsrv.dylib into $FRAMEWORKS_PATH and $RESOURCES_PATH"
           else
-            echo "Error: tmaxsrv_mac not found at tmax_back/Backend/tmaxsrv_mac!"
+            echo "Error: libtmaxsrv.dylib not found at tmax_back/Backend/libtmaxsrv.dylib!"
             exit 1
           fi
 

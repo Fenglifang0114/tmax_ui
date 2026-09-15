@@ -100,15 +100,83 @@ Future<bool> checkServiceRunning(String serviceName) async {
   }
 }
 
+/// 获取 macOS 下 Go 后端动态库 (.dylib) 的路径
+String getBackendDylibPathMacOS() {
+  String exePath = Platform.resolvedExecutable;
+  // 如果运行在 .app 包内: .../TMaxPcServiceUI.app/Contents/MacOS/TMaxPcServiceUI
+  // 查找 Contents/Frameworks/libtmaxsrv.dylib
+  String contentsDir = p.dirname(p.dirname(exePath));
+  String frameworkPath = p.join(contentsDir, 'Frameworks', 'libtmaxsrv.dylib');
+  if (File(frameworkPath).existsSync()) {
+    return frameworkPath;
+  }
+  // 备用：Contents/Resources/libtmaxsrv.dylib
+  String resourcePath = p.join(contentsDir, 'Resources', 'libtmaxsrv.dylib');
+  if (File(resourcePath).existsSync()) {
+    return resourcePath;
+  }
+  // 备用：同级目录
+  String sameDirPath = p.join(p.dirname(exePath), 'libtmaxsrv.dylib');
+  if (File(sameDirPath).existsSync()) {
+    return sameDirPath;
+  }
+  // 备用：当前工作目录
+  String cwdPath = p.join(Directory.current.path, 'libtmaxsrv.dylib');
+  if (File(cwdPath).existsSync()) {
+    return cwdPath;
+  }
+  return frameworkPath;
+}
+
+typedef StartGoServerC = ffi.Void Function();
+typedef StartGoServerDart = void Function();
+
+Future<bool> startBackendDylibMacOS() async {
+  try {
+    String dylibPath = getBackendDylibPathMacOS();
+    if (!File(dylibPath).existsSync()) {
+      debugPrint("macOS Backend dylib not found at: $dylibPath");
+      return false;
+    }
+    debugPrint("Opening macOS Backend dylib: $dylibPath");
+    final dylib = ffi.DynamicLibrary.open(dylibPath);
+    final StartGoServerDart startServer = dylib
+        .lookup<ffi.NativeFunction<StartGoServerC>>('StartGoServer')
+        .asFunction();
+    startServer();
+    debugPrint("macOS Go backend dylib started successfully via FFI!");
+    return true;
+  } catch (e) {
+    debugPrint("macOS start backend dylib error: $e");
+    return false;
+  }
+}
+
 Future<bool> startServiceWithAdmin(String serviceName) async {
   if (Platform.isMacOS) {
     try {
+      // 1. 优先尝试通过 FFI 动态库 (.dylib) 在主进程内拉起 Go 服务（终极解决 macOS 沙箱/进程拉起限制）
+      bool dylibStarted = await startBackendDylibMacOS();
+      if (dylibStarted) {
+        for (int i = 0; i < 20; i++) {
+          try {
+            var socket = await Socket.connect('127.0.0.1', webPort, timeout: const Duration(milliseconds: 500));
+            socket.destroy();
+            debugPrint("macOS Backend dylib port $webPort is ready!");
+            return true;
+          } catch (_) {
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
+        }
+      }
+
+      // 2. 备用降级方案：若未挂载 .dylib，退回为可执行文件拉起模式
       String backendPath = getBackendPathMacOS();
       if (!File(backendPath).existsSync()) {
         debugPrint("macOS Backend file not found: $backendPath");
         return false;
       }
-      // 1. 递归清除整个 .app 应用包及内部二进制的隔离标记
+      // 递归清除隔离标记
       try {
         String exePath = Platform.resolvedExecutable;
         String contentsDir = p.dirname(p.dirname(exePath));
@@ -118,12 +186,9 @@ Future<bool> startServiceWithAdmin(String serviceName) async {
         }
         await Process.run('/usr/bin/xattr', ['-d', 'com.apple.quarantine', backendPath]);
       } catch (_) {}
-      // 2. 赋予可执行权限
       try {
         await Process.run('/bin/chmod', ['+x', backendPath]);
       } catch (_) {}
-      // 3. 启动 Go 后端进程（若未运行）
-      // 注意：必须使用 ProcessStartMode.detachedWithStdio 并消费输出流，避免 fd 1/2 被关闭导致 Go 向 stdout/stderr 写入时触发 EBADF/EPIPE 崩溃
       bool isRunning = await checkServiceRunning(serviceName);
       if (!isRunning) {
         String workDir = p.dirname(backendPath);
@@ -136,7 +201,6 @@ Future<bool> startServiceWithAdmin(String serviceName) async {
         process.stdout.listen((_) {});
         process.stderr.listen((_) {});
       }
-      // 4. 轮询检测后端 TCP 端口（webPort = 7878）是否就绪，解决启动时差问题
       for (int i = 0; i < 20; i++) {
         try {
           var socket = await Socket.connect('127.0.0.1', webPort, timeout: const Duration(milliseconds: 500));
