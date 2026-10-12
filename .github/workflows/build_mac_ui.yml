@@ -30,7 +30,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.22'
+          go-version: '1.23'
 
       - name: Checkout Backend Code
         uses: actions/checkout@v4
@@ -79,7 +79,7 @@ jobs:
       - name: Build macOS App Bundle
         run: flutter build macos --release -v
 
-      - name: Embed Backend Binary & Dynamic Library into App Bundle
+      - name: Embed Backend Binary, Dynamic Library & Static Resources into App Bundle
         run: |
           APP_PATH=$(ls -d build/macos/Build/Products/Release/*.app | head -n 1)
           echo "Target App Bundle Path: $APP_PATH"
@@ -87,6 +87,8 @@ jobs:
           FRAMEWORKS_PATH="$APP_PATH/Contents/Frameworks"
           mkdir -p "$RESOURCES_PATH"
           mkdir -p "$FRAMEWORKS_PATH"
+          
+          # 1. 注入可执行二进制
           if [ -f "tmax_back/Backend/tmaxsrv_mac" ]; then
             cp tmax_back/Backend/tmaxsrv_mac "$RESOURCES_PATH/tmaxsrv_mac"
             chmod +x "$RESOURCES_PATH/tmaxsrv_mac"
@@ -95,6 +97,8 @@ jobs:
             echo "Error: tmaxsrv_mac binary not found!"
             exit 1
           fi
+          
+          # 2. 注入动态库
           if [ -f "tmax_back/Backend/libtmaxsrv.dylib" ]; then
             cp tmax_back/Backend/libtmaxsrv.dylib "$FRAMEWORKS_PATH/libtmaxsrv.dylib"
             cp tmax_back/Backend/libtmaxsrv.dylib "$RESOURCES_PATH/libtmaxsrv.dylib"
@@ -104,9 +108,28 @@ jobs:
             exit 1
           fi
 
+          # 3. 注入后端运行必需的配置文件与静态数据资源
+          if [ -f "tmax_back/Backend/config.yaml" ]; then
+            cp "tmax_back/Backend/config.yaml" "$RESOURCES_PATH/config.yaml"
+            echo "Successfully embedded config.yaml into $RESOURCES_PATH"
+          fi
+          if [ -f "tmax_back/Backend/tmaxlic.txt" ]; then
+            cp "tmax_back/Backend/tmaxlic.txt" "$RESOURCES_PATH/tmaxlic.txt"
+            echo "Successfully embedded tmaxlic.txt into $RESOURCES_PATH"
+          fi
+          if [ -f "tmax_back/Backend/barcodedata.json" ]; then
+            cp "tmax_back/Backend/barcodedata.json" "$RESOURCES_PATH/barcodedata.json"
+            echo "Successfully embedded barcodedata.json into $RESOURCES_PATH"
+          fi
+          if [ -d "tmax_back/Backend/srvdata" ]; then
+            cp -R "tmax_back/Backend/srvdata" "$RESOURCES_PATH/srvdata"
+            echo "Successfully embedded srvdata directory into $RESOURCES_PATH"
+          fi
+
       - name: Sign macOS App Bundle (Ad-Hoc)
         run: |
           cd build/macos/Build/Products/Release/
+          xattr -cr *.app 2>/dev/null || true
           codesign --force --deep --sign - *.app
 
       - name: Package App Bundle with 7z Ultra Compression
