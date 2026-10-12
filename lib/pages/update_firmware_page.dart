@@ -279,7 +279,7 @@ class _UpdateFirmwarePageState extends State<UpdateFirmwarePage> {
   }
 
   void useSerialPortUpdate(String force, int scaleId) {
-    PublicFunctions.sendFormatToScale("${zipFileCtl.text},$force", scaleId);
+    PublicFunctions.sendFormatToScale("${zipFileCtl.text.trim()},$force", scaleId);
     setState(() {
       _errMsgSerial = localizedStrings.gTipWait;
       isSetting = true;
@@ -1246,7 +1246,7 @@ class SelectScalesPageNewState extends State<SelectScalesPageNew> {
       if (tempScale.tMedia == comScaleType) {
         useSerialPortUpdate('0', scaleId);
       } else {
-        PublicFunctions.updateFirmWareOnline(widget.sendMsgStr, scaleId);
+        PublicFunctions.updateFirmWareOnline(widget.sendMsgStr.trim(), scaleId);
       }
     } else if (widget.funcNo == comScaleSerialSend) {
       PublicFunctions.sendOutputFmtToScale(widget.jsonList!, scaleId);
@@ -1254,7 +1254,7 @@ class SelectScalesPageNewState extends State<SelectScalesPageNew> {
   }
 
   void useSerialPortUpdate(String force, int scaleId) {
-    PublicFunctions.sendFormatToScale("${widget.sendMsgStr} ,$force", scaleId);
+    PublicFunctions.sendFormatToScale("${widget.sendMsgStr.trim()},$force", scaleId);
     setState(() {
       scaleResMap[scaleId]!.res = localizedStrings.gTipRebootForUpdate;
       isDownloading = true;

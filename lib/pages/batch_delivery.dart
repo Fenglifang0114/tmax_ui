@@ -1886,7 +1886,7 @@ class _BatchDeliveryPageState extends State<BatchDeliveryPage> {
 
   void sendFormatToScale(String firmwarePathStr) {
     myScaleCmd.cmdMode = "update_firmware";
-    myScaleCmd.cmdData = firmwarePathStr;
+    myScaleCmd.cmdData = "${firmwarePathStr.trim()},0";
     PublicFunctions.sendMsg(myDefScaleInfo.defScaleId!, jsonEncode(myScaleCmd));
     writelog(jsonEncode(myScaleCmd));
     setState(() {
