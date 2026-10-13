@@ -725,6 +725,8 @@ class DraggableTitleBar extends StatelessWidget {
         color: Color(0xFFF0F0F0), // 标题栏背景色
         child: Row(
           children: [
+            // macOS 使用系统自带的红绿灯按钮（位于左上角），预留位置避免遮挡
+            if (Platform.isMacOS) SizedBox(width: 72),
             if (leading != null) leading!,
             SizedBox(width: 8), // 左侧图标和标题之间的间距
             Image.asset(appIconPath, width: 20, height: 20), // 左侧图标
@@ -741,8 +743,8 @@ class DraggableTitleBar extends StatelessWidget {
               ),
             ),
 
-            // 窗口控制按钮
-            if (showButtons) WindowButtons(),
+            // 窗口控制按钮：仅 Windows/Linux 显示自绘按钮，macOS 使用系统原生按钮
+            if (showButtons && !Platform.isMacOS) WindowButtons(),
           ],
         ),
       ),

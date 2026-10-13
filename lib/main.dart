@@ -169,6 +169,10 @@ Future<void> setWindowOptions() async {
     await windowManager.focus();
     windowManager.setMinimizable(true);
     windowManager.setResizable(true);
+    if (Platform.isMacOS) {
+      // macOS 使用系统红绿灯按钮：拦截红色关闭按钮，交由 WindowLifecycleMixin.onWindowClose 弹出退出确认框
+      await windowManager.setPreventClose(true);
+    }
   });
 }
 

@@ -66,6 +66,7 @@ class RetailReportPageState extends State<RetailReportPage> {
 
   // 开始定时器
   void startTimer() {
+    if (Platform.isMacOS) return;
     if (_statusTimer == null || !_statusTimer!.isActive) {
       _statusTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
         getServiceStatus();
@@ -82,12 +83,20 @@ class RetailReportPageState extends State<RetailReportPage> {
   @override
   void initState() {
     initScaleList();
-    srvStatusMsg = localizedStrings.gTipWait;
+    if (Platform.isMacOS) {
+      srvStatus = srvStarted;
+      srvStatusMsg = localizedStrings.gTipServiceStarted;
+      PublicFunctions.getDetailListSrv1();
+    } else {
+      srvStatusMsg = localizedStrings.gTipWait;
+    }
     PublicFunctions.getScaleSrvList(999999999);
     netScaleOpenBill();
     // PublicFunctions.getDetailList();
     isRefresh = true;
-    startTimer();
+    if (!Platform.isMacOS) {
+      startTimer();
+    }
     eventBus1 = eventBus.on<EventRespDetailInfo>().listen((event) {
       if (mounted) {
         isRefresh = true;
@@ -424,7 +433,11 @@ class RetailReportPageState extends State<RetailReportPage> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 myHeadInfo(context, localizedStrings.menuRetailReport,
-                    localizedStrings.gTipRetailDetailPageHelp),
+                    Platform.isMacOS
+                        ? (Localizations.localeOf(context).languageCode == 'zh'
+                            ? "1. 此功能界面可以显示每次结账打印后的数据；\n2. 结账打印后，每笔订单的数据都将显示在此界面上，点击【刷新列表】可以获取最新的订单记录；\n3. 点击【导出】，可以将报表下载至本地。\n\n注：\nmacOS 下零售报表服务已随软件内置运行，无需手动安装服务；\n此功能可以通过网口/Wi-Fi连接使用，不能通过串口使用。"
+                            : "1. This interface displays the data printed after each checkout;\n2. After checkout printing, each order record will be displayed here. Click [Refresh List] to retrieve the latest records;\n3. Click [Export] to download the report locally.\n\nNote:\nOn macOS, the retail report service is built-in and runs automatically without manual installation.\nThis function works via Ethernet / Wi-Fi, and cannot be used via serial port.")
+                        : localizedStrings.gTipRetailDetailPageHelp),
                 Container(
                   height: regularPadding,
                   color: colorScheme.surfaceDim,
@@ -569,6 +582,10 @@ class RetailReportPageState extends State<RetailReportPage> {
   }
 
   Widget showInstallRow() {
+    // macOS 上零售服务内置在后台进程中，不需要安装/启动/停止/卸载
+    if (Platform.isMacOS) {
+      return const SizedBox.shrink();
+    }
     return Row(
       children: [
         SizedBox(
@@ -625,6 +642,7 @@ class RetailReportPageState extends State<RetailReportPage> {
   }
 
   void _performActionForOption(String option) {
+    if (Platform.isMacOS) return;
     switch (option) {
       case 'Install':
         if (srvStatus.contains(srvUninstalled)) {
@@ -678,6 +696,7 @@ class RetailReportPageState extends State<RetailReportPage> {
   }
 
   void getServiceStatus() {
+    if (Platform.isMacOS) return;
     ServiceAction mySrvAct =
         ServiceAction(action: "Status", serviceId: serviceId);
     PublicFunctions.sendServiceAction(serviceActionToJson(mySrvAct));
